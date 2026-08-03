@@ -5433,6 +5433,29 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.recorder-ui').forEach(el => el.style.display = 'none');
       document.querySelectorAll('.admin-submissions').forEach(el => el.style.display = 'block');
       document.querySelectorAll('.admin-hide-btn').forEach(el => el.style.display = 'inline-block');
+        
+        const exportBtn = document.createElement('button');
+        exportBtn.textContent = '📥 Export CSV';
+        exportBtn.style.cssText = 'background:#10B981; color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold; margin-bottom:12px;';
+        exportBtn.onclick = async () => {
+            exportBtn.textContent = 'Loading...';
+            const { data } = await sb.from('qrasm_recordings').select('*').eq('assignment_id', document.querySelector('.recorder-ui').getAttribute('data-assignment'));
+            if (data) {
+                let csv = 'Student,Instance,Grade,Date
+';
+                data.filter(r => !r.student_name.startsWith('ADMIN_')).forEach(r => {
+                    csv += `"${r.student_name}",${r.instance_number},"${r.grade || 'Pending'}","${new Date(r.created_at).toLocaleString()}"
+`;
+                });
+                const blob = new Blob([csv], {type: 'text/csv'});
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `qrasm_grades_${Date.now()}.csv`;
+                a.click();
+            }
+            exportBtn.textContent = '📥 Export CSV';
+        };
+        document.querySelector('.admin-submissions').prepend(exportBtn);
       
       const firstUi = document.querySelector('.recorder-ui');
       if (firstUi) {
