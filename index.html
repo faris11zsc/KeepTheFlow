@@ -5333,6 +5333,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const isAdmin = urlParams.get('admin') === 'true' || currentUser === '89FarisAuraKnight89';
 
+  function recalcItemNumbers() {
+      let count = 1;
+      document.querySelectorAll('.item').forEach(el => {
+          if (el.style.display !== 'none' && !el.classList.contains('admin-hidden-item')) {
+              const numEl = el.querySelector('.item-number');
+              if (numEl) numEl.textContent = '#' + count;
+              count++;
+          }
+      });
+  }
+
   function fetchStudentProgress(assignmentId, studentName) {
       if (!sb || !studentName) return;
       sb.from('qrasm_recordings').select('instance_number, grade, created_at')
@@ -5392,6 +5403,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const ui = document.querySelector(`.item[data-instance="${r.instance_number}"]`);
                         if (ui) ui.style.display = 'none';
                     });
+                    recalcItemNumbers();
                 }
             });
       }
@@ -5426,19 +5438,63 @@ document.addEventListener('DOMContentLoaded', () => {
       if (firstUi) {
           const assignmentId = firstUi.getAttribute('data-assignment');
           
+          // Fetch and mark hidden items for admin
+          sb.from('qrasm_recordings').select('instance_number')
+            .eq('assignment_id', assignmentId)
+            .eq('student_name', 'ADMIN_HIDDEN')
+            .then(({data})=>{
+                if (data) {
+                    data.forEach(r => {
+                        const ui = document.querySelector(`.item[data-instance="${r.instance_number}"]`);
+                        if (ui) {
+                            ui.classList.add('admin-hidden-item');
+                            ui.style.opacity = '0.4';
+                            const btn = ui.querySelector('.admin-hide-btn');
+                            if (btn) {
+                                btn.textContent = '👁 Restore';
+                                btn.style.background = '#10B981';
+                            }
+                        }
+                    });
+                    recalcItemNumbers();
+                }
+            });
+
           document.querySelectorAll('.admin-hide-btn').forEach(btn => {
               btn.addEventListener('click', async () => {
                   const instId = btn.getAttribute('data-instance');
-                  const { error } = await sb.from('qrasm_recordings').insert({
-                      assignment_id: assignmentId,
-                      instance_number: parseInt(instId),
-                      student_name: 'ADMIN_HIDDEN',
-                      audio_url: 'none'
-                  });
-                  if(error) alert('Failed to hide: ' + error.message);
-                  else {
-                      const ui = document.querySelector(`.item[data-instance="${instId}"]`);
-                      if (ui) ui.style.display = 'none';
+                  const itemUi = document.querySelector(`.item[data-instance="${instId}"]`);
+                  
+                  if (itemUi.classList.contains('admin-hidden-item')) {
+                      // Restore
+                      const { error } = await sb.from('qrasm_recordings').delete()
+                          .eq('assignment_id', assignmentId)
+                          .eq('instance_number', parseInt(instId))
+                          .eq('student_name', 'ADMIN_HIDDEN');
+                      if (error) alert('Failed to restore: ' + error.message);
+                      else {
+                          itemUi.classList.remove('admin-hidden-item');
+                          itemUi.style.opacity = '1';
+                          btn.textContent = '🚫 Hide';
+                          btn.style.background = '#E11D48';
+                          recalcItemNumbers();
+                      }
+                  } else {
+                      // Hide
+                      const { error } = await sb.from('qrasm_recordings').insert({
+                          assignment_id: assignmentId,
+                          instance_number: parseInt(instId),
+                          student_name: 'ADMIN_HIDDEN',
+                          audio_url: 'none'
+                      });
+                      if (error) alert('Failed to hide: ' + error.message);
+                      else {
+                          itemUi.classList.add('admin-hidden-item');
+                          itemUi.style.opacity = '0.4';
+                          btn.textContent = '👁 Restore';
+                          btn.style.background = '#10B981';
+                          recalcItemNumbers();
+                      }
                   }
               });
           });
