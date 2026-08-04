@@ -222,6 +222,9 @@
 <title>Quranic Practice</title>
 <link rel="preconnect" href="https://verses.quran.foundation" crossorigin>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 <style>
 @font-face {
     font-family: 'QCFV2P24';
@@ -784,38 +787,79 @@
     font-display: swap;
 }
 :root {
-    --bg: #FFFDF2;
-    --text: #163A8C;
-    --ref: #E76F00;
-    --num: #6CA6C1;
-    --line: #F2C94C;
+    --bg: #0F1A30;
+    --text: #E8E6E3;
+    --ref: #C5A44E;
+    --num: #8A95A8;
+    --line: #2A3352;
     --shine: #FFD84D;
 }
 * { box-sizing: border-box; }
 body {
-    background: radial-gradient(circle at top, color-mix(in srgb, var(--bg) 90%, white 10%), var(--bg));
+    background: var(--bg);
     color: var(--text);
-    font-family: Arial, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    position: relative;
+}
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse 80% 60% at 50% 0%, color-mix(in srgb, var(--ref) 8%, transparent) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 100%, color-mix(in srgb, var(--bg) 50%, #2a3a5e) 0%, transparent 60%),
+        linear-gradient(180deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 85%, #1a2744) 50%, var(--bg) 100%);
+}
+main {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 1040px);
+    margin: 0 auto;
     padding: 42px 18px 70px;
 }
-main { width: min(100%, 1040px); margin: 0 auto; }
 .rule-header {
     direction: ltr;
     text-align: center;
-    margin: 0 auto 26px;
-    padding: 18px 14px 22px;
+    margin: 0 auto 32px;
+    padding: 24px 16px 28px;
     border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--bg) 70%, rgba(42,58,94,0.3));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 16px;
+    border: 1px solid color-mix(in srgb, var(--ref) 10%, transparent);
 }
-.rule-kicker { color: var(--num); font-size: 12px; letter-spacing: .16em; text-transform: uppercase; margin-bottom: 8px; }
-.rule-header h1 { color: var(--ref); font-size: clamp(20px, 3vw, 30px); margin: 0; font-weight: 700; }
+.rule-kicker { color: var(--num); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; margin-bottom: 10px; font-weight: 600; }
+.rule-header h1 {
+    color: var(--ref);
+    font-size: clamp(22px, 3.5vw, 34px);
+    margin: 0;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--ref), var(--shine));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
 .item {
-    background: color-mix(in srgb, var(--bg) 96%, white 4%);
-    border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--bg) 60%, rgba(42,58,94,0.4));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid color-mix(in srgb, var(--ref) 8%, transparent);
+    border-radius: 16px;
     padding: 32px 20px 28px;
     margin: 0 auto 18px;
     text-align: center;
     overflow: visible;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.item:hover {
+    border-color: color-mix(in srgb, var(--ref) 25%, transparent);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
 }
 .item-number { direction: ltr; color: var(--num); font-size: 13px; margin-bottom: 10px; }
 .phrase {
@@ -953,32 +997,35 @@ main { width: min(100%, 1040px); margin: 0 auto; }
 .admin-fb-btn:hover { filter: brightness(1.15); }
 .student-feedback-box {
     margin-top: 10px;
-    background: #FEF3C7;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #F59E0B;
+    background: color-mix(in srgb, var(--bg) 80%, rgba(197,164,78,0.15));
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid color-mix(in srgb, var(--ref) 25%, transparent);
     text-align: left;
-    animation: fb-slide-in 0.3s ease;
+    animation: fb-slide-in 0.4s cubic-bezier(0.4,0,0.2,1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 @keyframes fb-slide-in {
     from { opacity: 0; transform: translateY(-6px); }
     to { opacity: 1; transform: translateY(0); }
 }
 .view-feedback-btn {
-    background: #F59E0B;
-    color: white;
+    background: linear-gradient(135deg, var(--ref), color-mix(in srgb, var(--ref) 80%, #d4b86a));
+    color: var(--bg);
     border: none;
-    border-radius: 99px;
-    padding: 8px 14px;
+    border-radius: 12px;
+    padding: 10px 18px;
     font-size: 13px;
     font-weight: 700;
     cursor: pointer;
     margin-top: 8px;
-    transition: all 0.2s;
+    transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
     min-height: 40px;
     animation: fb-pulse 2s ease-in-out 3;
+    font-family: 'Inter', inherit;
 }
-.view-feedback-btn:hover { filter: brightness(1.1); transform: scale(1.02); }
+.view-feedback-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px color-mix(in srgb, var(--ref) 40%, transparent); }
 @keyframes fb-pulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.4); }
     50% { box-shadow: 0 0 0 8px rgba(245,158,11,0); }
@@ -989,12 +1036,18 @@ main { width: min(100%, 1040px); margin: 0 auto; }
     align-items: center;
     gap: 8px;
     margin-bottom: 8px;
-    padding: 8px;
-    border-radius: 8px;
-    background: color-mix(in srgb, var(--bg) 95%, var(--text) 5%);
-    transition: background 0.2s;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--bg) 70%, rgba(42,58,94,0.3));
+    border: 1px solid color-mix(in srgb, var(--ref) 6%, transparent);
+    transition: all 0.25s;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
-.student-record-wrap:hover { background: color-mix(in srgb, var(--bg) 88%, var(--text) 12%); }
+.student-record-wrap:hover {
+    background: color-mix(in srgb, var(--bg) 55%, rgba(42,58,94,0.5));
+    border-color: color-mix(in srgb, var(--ref) 20%, transparent);
+}
 .admin-loading {
     text-align: center;
     padding: 16px;
@@ -1015,102 +1068,134 @@ main { width: min(100%, 1040px); margin: 0 auto; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .play-segment-btn, .pause-btn, .stop-btn, .play-record-btn, .rerecord-btn, .save-btn {
-    background: color-mix(in srgb, var(--bg) 90%, var(--text) 10%);
+    background: color-mix(in srgb, var(--bg) 70%, rgba(42,58,94,0.5));
     color: var(--ref);
-    border: 1px solid color-mix(in srgb, var(--line) 50%, transparent);
-    padding: 8px 16px;
-    border-radius: 99px;
+    border: 1px solid color-mix(in srgb, var(--ref) 15%, transparent);
+    padding: 10px 20px;
+    border-radius: 12px;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    font-family: inherit;
-    transition: all 0.2s;
+    font-family: 'Inter', inherit;
+    transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
     -webkit-tap-highlight-color: transparent;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
-.play-segment-btn:hover, .pause-btn:hover, .stop-btn:hover, .play-record-btn:hover, .rerecord-btn:hover, .save-btn:hover { background: color-mix(in srgb, var(--bg) 80%, var(--text) 20%); }
+.play-segment-btn:hover, .pause-btn:hover, .stop-btn:hover, .play-record-btn:hover, .rerecord-btn:hover, .save-btn:hover {
+    background: color-mix(in srgb, var(--bg) 50%, rgba(42,58,94,0.7));
+    border-color: color-mix(in srgb, var(--ref) 35%, transparent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+}
 .play-segment-btn:active, .record-btn:active, .save-btn:active { transform: scale(0.97); }
 .record-btn {
-    background: color-mix(in srgb, var(--bg) 70%, var(--shine) 30%);
-    color: var(--text);
-    border: 1px solid var(--shine);
-    padding: 8px 16px;
-    border-radius: 99px;
-    font-size: 14px;
-    font-weight: 600;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--shine) 25%, var(--bg)), color-mix(in srgb, var(--shine) 40%, var(--bg)));
+    color: var(--shine);
+    border: 1px solid color-mix(in srgb, var(--shine) 40%, transparent);
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
     cursor: pointer;
-    font-family: inherit;
-    transition: all 0.2s;
-    box-shadow: 0 2px 8px color-mix(in srgb, var(--shine) 40%, transparent);
+    font-family: 'Inter', inherit;
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 4px 20px color-mix(in srgb, var(--shine) 30%, transparent);
     -webkit-tap-highlight-color: transparent;
+    position: relative;
+    overflow: hidden;
 }
+.record-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent, color-mix(in srgb, var(--shine) 15%, transparent), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.record-btn:hover::before { opacity: 1; }
 .record-btn:hover {
-    background: var(--shine);
+    background: linear-gradient(135deg, var(--shine), color-mix(in srgb, var(--shine) 80%, #d4b86a));
     color: var(--bg);
-    transform: scale(1.03);
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--shine) 60%, transparent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px color-mix(in srgb, var(--shine) 45%, transparent);
 }
-.save-btn { background: var(--ref); color: var(--bg); border-color: var(--ref); }
-.save-btn:hover { background: color-mix(in srgb, var(--ref) 80%, black 20%); color:var(--bg); }
+.save-btn {
+    background: linear-gradient(135deg, var(--ref), color-mix(in srgb, var(--ref) 80%, #d4b86a));
+    color: var(--bg);
+    border-color: transparent;
+    font-weight: 700;
+}
+.save-btn:hover {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--ref) 85%, black), var(--ref));
+    color: var(--bg);
+    box-shadow: 0 6px 24px color-mix(in srgb, var(--ref) 40%, transparent);
+}
 .recorder-ui, .upload-controls {
     flex-wrap: wrap;
     max-width: 100%;
     box-sizing: border-box;
 }
 .student-badge {
-    background: var(--ref);
+    background: linear-gradient(135deg, var(--ref), color-mix(in srgb, var(--ref) 80%, #d4b86a));
     color: var(--bg);
     border: none;
-    border-radius: 99px;
-    padding: 6px 12px;
+    border-radius: 10px;
+    padding: 8px 14px;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    font-family: inherit;
-    transition: all 0.25s;
+    font-family: 'Inter', inherit;
+    transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    min-height: 36px;
+    min-height: 38px;
     -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--ref) 25%, transparent);
 }
-.student-badge:hover { filter: brightness(1.2); }
-.student-badge:active { transform: scale(0.96); }
+.student-badge:hover { transform: translateY(-1px); box-shadow: 0 4px 16px color-mix(in srgb, var(--ref) 35%, transparent); }
+.student-badge:active { transform: scale(0.97); }
 .grade-panel {
     display: inline-flex;
     gap: 4px;
     align-items: center;
 }
 .grade-btn {
-    padding: 4px 8px;
-    font-size: 12px;
-    font-weight: 600;
-    border-radius: 99px;
+    padding: 6px 10px;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 10px;
     cursor: pointer;
     border: none;
-    transition: all 0.2s;
+    transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
     -webkit-tap-highlight-color: transparent;
+    font-family: 'Inter', inherit;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
-.grade-perfect { background: #3B82F6; color: white; }
-.grade-good { background: #10B981; color: white; }
-.grade-retry { background: #E11D48; color: white; }
-.grade-btn:hover { filter: brightness(1.2); transform: scale(1.1); }
+.grade-perfect { background: linear-gradient(135deg, #3B82F6, #60A5FA); color: white; }
+.grade-good { background: linear-gradient(135deg, #10B981, #34D399); color: white; }
+.grade-retry { background: linear-gradient(135deg, #E11D48, #F43F5E); color: white; }
+.grade-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 .grade-btn:active { transform: scale(0.95); }
 .qword { transition: color 0.2s; -webkit-tap-highlight-color: transparent; }
 .qword:hover { filter: drop-shadow(0 0 2px var(--shine)); cursor: pointer; }
 /* Admin Dashboard */
 .admin-dashboard {
-    background: color-mix(in srgb, var(--bg) 85%, var(--ref) 15%);
-    border: 1px solid color-mix(in srgb, var(--ref) 30%, transparent);
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin-bottom: 20px;
+    background: color-mix(in srgb, var(--bg) 60%, rgba(42,58,94,0.4));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid color-mix(in srgb, var(--ref) 15%, transparent);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 14px;
     align-items: center;
     justify-content: center;
-    font-family: inherit;
+    font-family: 'Inter', inherit;
 }
 .dash-stat {
     text-align: center;
@@ -1168,13 +1253,16 @@ main { width: min(100%, 1040px); margin: 0 auto; }
 @keyframes queue-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
 /* Student Progress Bar */
 .student-progress {
-    background: color-mix(in srgb, var(--bg) 85%, var(--ref) 15%);
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin: 0 auto 20px;
+    background: color-mix(in srgb, var(--bg) 60%, rgba(42,58,94,0.4));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid color-mix(in srgb, var(--ref) 12%, transparent);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin: 0 auto 24px;
     max-width: 600px;
     text-align: center;
-    font-family: inherit;
+    font-family: 'Inter', inherit;
 }
 .progress-track {
     height: 8px;
