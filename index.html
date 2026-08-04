@@ -5441,11 +5441,9 @@ document.addEventListener('DOMContentLoaded', () => {
             exportBtn.textContent = 'Loading...';
             const { data } = await sb.from('qrasm_recordings').select('*').eq('assignment_id', document.querySelector('.recorder-ui').getAttribute('data-assignment'));
             if (data) {
-                let csv = 'Student,Instance,Grade,Date
-';
+                let csv = 'Student,Instance,Grade,Date\n';
                 data.filter(r => !r.student_name.startsWith('ADMIN_')).forEach(r => {
-                    csv += `"${r.student_name}",${r.instance_number},"${r.grade || 'Pending'}","${new Date(r.created_at).toLocaleString()}"
-`;
+                    csv += `"${r.student_name}",${r.instance_number},"${r.grade || 'Pending'}","${new Date(r.created_at).toLocaleString()}"\n`;
                 });
                 const blob = new Blob([csv], {type: 'text/csv'});
                 const a = document.createElement('a');
