@@ -1098,6 +1098,110 @@ main { width: min(100%, 1040px); margin: 0 auto; }
 .grade-btn:active { transform: scale(0.95); }
 .qword { transition: color 0.2s; -webkit-tap-highlight-color: transparent; }
 .qword:hover { filter: drop-shadow(0 0 2px var(--shine)); cursor: pointer; }
+/* Admin Dashboard */
+.admin-dashboard {
+    background: color-mix(in srgb, var(--bg) 85%, var(--ref) 15%);
+    border: 1px solid color-mix(in srgb, var(--ref) 30%, transparent);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+}
+.dash-stat {
+    text-align: center;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: var(--bg);
+    min-width: 80px;
+}
+.dash-stat .dash-num {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--ref);
+    display: block;
+}
+.dash-stat .dash-label {
+    font-size: 11px;
+    color: var(--num);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.dash-stat.dash-pending .dash-num { color: #F59E0B; }
+.dash-stat.dash-graded .dash-num { color: #10B981; }
+/* Admin Search */
+.admin-search {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px 16px;
+    border-radius: 99px;
+    border: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.admin-search:focus { border-color: var(--ref); }
+.admin-search::placeholder { color: var(--num); }
+/* Admin Queue Button */
+.admin-queue-btn {
+    background: #8B5CF6;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 13px;
+    transition: all 0.2s;
+    min-height: 38px;
+}
+.admin-queue-btn:hover { filter: brightness(1.15); }
+.admin-queue-btn:active { transform: scale(0.97); }
+.admin-queue-btn.queue-active { background: #EF4444; animation: queue-pulse 1.5s ease-in-out infinite; }
+@keyframes queue-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
+/* Student Progress Bar */
+.student-progress {
+    background: color-mix(in srgb, var(--bg) 85%, var(--ref) 15%);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin: 0 auto 20px;
+    max-width: 600px;
+    text-align: center;
+    font-family: inherit;
+}
+.progress-track {
+    height: 8px;
+    background: color-mix(in srgb, var(--line) 40%, transparent);
+    border-radius: 99px;
+    overflow: hidden;
+    margin: 10px 0 8px;
+}
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--ref), var(--shine));
+    border-radius: 99px;
+    transition: width 0.6s ease;
+}
+.progress-text {
+    font-size: 13px;
+    color: var(--num);
+}
+.progress-text strong { color: var(--ref); }
+/* Keyboard hint */
+.kb-hint {
+    font-size: 11px;
+    color: var(--num);
+    text-align: center;
+    margin-top: 4px;
+    opacity: 0.7;
+}
 </style>
 </head>
 <body>
@@ -5523,10 +5627,16 @@ document.addEventListener('DOMContentLoaded', () => {
                           btn.style.background = '#10B981';
                           btn.style.color = 'white';
                       } else if (r.grade === 'retry') {
-                          btn.textContent = '🔴 Needs Practice - Try Again';
+                          btn.textContent = '🔴 Try Again';
                           btn.disabled = false;
                           btn.style.background = '#E11D48';
                           btn.style.color = 'white';
+                          // Re-record: reset the recorder UI so student can submit again
+                          const cRec = ui.querySelector('.record-controls');
+                          const cUp = ui.querySelector('.upload-controls');
+                          if (cRec) cRec.style.display = 'none';
+                          if (cUp) cUp.style.display = 'none';
+                          btn.style.display = 'inline-block';
                       } else {
                           btn.textContent = '⏳ Pending Review';
                           btn.disabled = true;
@@ -5587,6 +5697,30 @@ document.addEventListener('DOMContentLoaded', () => {
                       }
                   }
               });
+
+              // Student Progress Bar
+              const totalItems = document.querySelectorAll('.item').length;
+              const hiddenItems = document.querySelectorAll('.item[style*="display: none"]').length;
+              const visibleTotal = totalItems - hiddenItems;
+              const recorded = processed.size;
+              const graded = data.filter(r => r.student_name !== 'ADMIN_FEEDBACK_' + studentName && r.grade && r.grade !== '').length;
+              const progWrap = document.createElement('div');
+              progWrap.className = 'student-progress';
+              const pct = visibleTotal > 0 ? Math.round((recorded / visibleTotal) * 100) : 0;
+              progWrap.innerHTML = `<div style="font-size:15px; font-weight:700; color:var(--ref);">Your Progress</div><div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div><div class="progress-text"><strong>${recorded}</strong> / ${visibleTotal} recorded &middot; <strong>${graded}</strong> graded</div>`;
+              const mainEl = document.querySelector('main');
+              const ruleHeader = mainEl.querySelector('.rule-header');
+              if (ruleHeader) ruleHeader.after(progWrap);
+              else mainEl.prepend(progWrap);
+
+              // Auto-scroll to new feedback
+              const feedbackBtns = document.querySelectorAll('.view-feedback-btn');
+              if (feedbackBtns.length > 0) {
+                  const firstFb = feedbackBtns[0];
+                  setTimeout(() => {
+                      firstFb.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }, 600);
+              }
           }
       });
   }
@@ -5632,13 +5766,40 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (sb && isAdmin) {
-      document.querySelectorAll('.recorder-ui').forEach(el => el.style.display = 'none');
-      document.querySelectorAll('.admin-submissions').forEach(el => el.style.display = 'block');
-      document.querySelectorAll('.admin-hide-btn').forEach(el => el.style.display = 'inline-block');
-        
+       document.querySelectorAll('.recorder-ui').forEach(el => el.style.display = 'none');
+       document.querySelectorAll('.admin-submissions').forEach(el => el.style.display = 'block');
+       document.querySelectorAll('.admin-hide-btn').forEach(el => el.style.display = 'inline-block');
+
+        // Admin Dashboard
+        const dashDiv = document.createElement('div');
+        dashDiv.className = 'admin-dashboard';
+        dashDiv.id = 'adminDash';
+        dashDiv.innerHTML = '<div class="dash-stat"><span class="dash-num" id="dashStudents">-</span><span class="dash-label">Students</span></div><div class="dash-stat dash-pending"><span class="dash-num" id="dashPending">-</span><span class="dash-label">Pending</span></div><div class="dash-stat dash-graded"><span class="dash-num" id="dashGraded">-</span><span class="dash-label">Graded</span></div><div class="dash-stat"><span class="dash-num" id="dashTotal">-</span><span class="dash-label">Total</span></div>';
+        const mainEl = document.querySelector('main');
+        const ruleHeader = mainEl.querySelector('.rule-header');
+        if (ruleHeader) ruleHeader.after(dashDiv); else mainEl.prepend(dashDiv);
+
+        // Admin Search Bar
+        const searchInput = document.createElement('input');
+        searchInput.className = 'admin-search';
+        searchInput.placeholder = '🔍 Search student by name...';
+        searchInput.type = 'text';
+        searchInput.oninput = () => {
+            const q = searchInput.value.toLowerCase().trim();
+            document.querySelectorAll('.student-record-wrap').forEach(w => {
+                const name = (w.querySelector('.student-badge') || {}).textContent || '';
+                w.style.display = (!q || name.toLowerCase().includes(q)) ? 'flex' : 'none';
+            });
+        };
+        dashDiv.after(searchInput);
+
+        // Admin Toolbar: Export + Queue
+        const toolbarDiv = document.createElement('div');
+        toolbarDiv.style.cssText = 'display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:12px 0;';
+
         const exportBtn = document.createElement('button');
         exportBtn.textContent = '📥 Export CSV';
-        exportBtn.style.cssText = 'background:#10B981; color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold; margin-bottom:12px;';
+        exportBtn.style.cssText = 'background:#10B981; color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold;';
         exportBtn.onclick = async () => {
             exportBtn.textContent = 'Loading...';
             const { data } = await sb.from('qrasm_recordings').select('*').eq('assignment_id', document.querySelector('.recorder-ui').getAttribute('data-assignment'));
@@ -5655,7 +5816,81 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             exportBtn.textContent = '📥 Export CSV';
         };
-        document.querySelector('.admin-submissions').prepend(exportBtn);
+        toolbarDiv.appendChild(exportBtn);
+
+        // Smart Audio Queue
+        let queueActive = false;
+        let queueIndex = 0;
+        let pendingQueue = [];
+        const queueBtn = document.createElement('button');
+        queueBtn.className = 'admin-queue-btn';
+        queueBtn.textContent = '▶ Play All Pending';
+        queueBtn.onclick = () => {
+            if (queueActive) {
+                queueActive = false;
+                queueBtn.textContent = '▶ Play All Pending';
+                queueBtn.classList.remove('queue-active');
+                return;
+            }
+            pendingQueue = [...document.querySelectorAll('.student-badge')].filter(b => {
+                const bg = b.style.background;
+                return !bg.includes('#3B82F6') && !bg.includes('#10B981') && !bg.includes('#E11D48');
+            });
+            if (pendingQueue.length === 0) { alert('No pending recordings!'); return; }
+            queueActive = true;
+            queueIndex = 0;
+            queueBtn.textContent = `⏹ Stop Queue (${pendingQueue.length} left)`;
+            queueBtn.classList.add('queue-active');
+            playNextInQueue();
+        };
+        toolbarDiv.appendChild(queueBtn);
+        searchInput.after(toolbarDiv);
+
+        function playNextInQueue() {
+            if (!queueActive || queueIndex >= pendingQueue.length) {
+                queueActive = false;
+                queueBtn.textContent = '▶ Play All Pending';
+                queueBtn.classList.remove('queue-active');
+                return;
+            }
+            const badge = pendingQueue[queueIndex];
+            badge.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            badge.style.outline = '3px solid #8B5CF6';
+            setTimeout(() => badge.click(), 400);
+            // Set activeGradingBadge for keyboard shortcuts
+            window._activeGradingBadge = badge;
+            window._activeGradingWrap = badge.closest('.student-record-wrap');
+            const checkEnd = setInterval(() => {
+                const text = badge.textContent;
+                if (text.includes('👤') || !queueActive) {
+                    clearInterval(checkEnd);
+                    badge.style.outline = 'none';
+                    queueIndex++;
+                    queueBtn.textContent = `⏹ Stop Queue (${pendingQueue.length - queueIndex} left)`;
+                    if (queueActive) setTimeout(playNextInQueue, 800);
+                }
+            }, 500);
+        }
+
+        // Keyboard Shortcuts for Grading
+        window._activeGradingBadge = null;
+        window._activeGradingWrap = null;
+        document.addEventListener('keydown', (e) => {
+            if (!isAdmin) return;
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            const wrap = window._activeGradingWrap;
+            if (!wrap) return;
+            const btns = wrap.querySelectorAll('.grade-btn');
+            if (e.key === '1' && btns[0]) { btns[0].click(); e.preventDefault(); }
+            if (e.key === '2' && btns[1]) { btns[1].click(); e.preventDefault(); }
+            if (e.key === '3' && btns[2]) { btns[2].click(); e.preventDefault(); }
+        });
+
+        // Show keyboard hint
+        const kbHint = document.createElement('div');
+        kbHint.className = 'kb-hint';
+        kbHint.textContent = '⌨ Keyboard: 1 = Perfect · 2 = Good · 3 = Retry (while audio playing)';
+        toolbarDiv.after(kbHint);
       
       const firstUi = document.querySelector('.recorder-ui');
       if (firstUi) {
@@ -5729,7 +5964,30 @@ document.addEventListener('DOMContentLoaded', () => {
                   if(grade === 'perfect') badgeEl.style.background = '#3B82F6';
                   if(grade === 'good') badgeEl.style.background = '#10B981';
                   if(grade === 'retry') badgeEl.style.background = '#E11D48';
+                  // Update dashboard stats
+                  updateDashboard();
               }
+          }
+
+          function updateDashboard() {
+              const allBadges = document.querySelectorAll('.student-badge');
+              const students = new Set();
+              let pending = 0, graded = 0;
+              allBadges.forEach(b => {
+                  const name = b.textContent.replace(/^[^\w]*/, '').trim();
+                  students.add(name);
+                  const bg = b.style.background;
+                  if (bg.includes('#3B82F6') || bg.includes('#10B981') || bg.includes('#E11D48')) graded++;
+                  else pending++;
+              });
+              const ds = document.getElementById('dashStudents');
+              const dp = document.getElementById('dashPending');
+              const dg = document.getElementById('dashGraded');
+              const dt = document.getElementById('dashTotal');
+              if(ds) ds.textContent = students.size;
+              if(dp) dp.textContent = pending;
+              if(dg) dg.textContent = graded;
+              if(dt) dt.textContent = allBadges.length;
           }
 
           document.querySelectorAll('.submissions-list').forEach(el => { el.innerHTML = '<div class="admin-loading">Loading</div>'; });
@@ -5776,6 +6034,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                   currentAudio.play();
                                   badge.textContent = `🔊 ${record.student_name}`;
                                   currentAudio.onended = () => badge.textContent = `👤 ${record.student_name}`;
+                                  // Set active for keyboard shortcuts
+                                  window._activeGradingBadge = badge;
+                                  window._activeGradingWrap = wrap;
                               });
                               wrap.appendChild(badge);
                               
@@ -5915,6 +6176,8 @@ document.addEventListener('DOMContentLoaded', () => {
                   if (overlay) overlay.style.display = 'none';
               }
           });
+          // Initial dashboard update
+          setTimeout(updateDashboard, 500);
       }
   }
 
