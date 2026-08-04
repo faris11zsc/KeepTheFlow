@@ -415,6 +415,49 @@ body {{
     .user-bar {{ flex-direction: column; text-align: center; padding: 14px; }}
     .login-card {{ padding: 36px 24px; }}
 }}
+/* ── Elite Hero Artwork & Ribbon ───────────────── */
+.hero-art {{
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    background-image: url('https://dummyimage.com/1920x1080/0f1a30/c5a44e&text=LightKnight+Hero+Artwork+(Pending)');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.15;
+    pointer-events: none;
+    mix-blend-mode: screen;
+}}
+.hero-ribbon {{
+    position: fixed;
+    top: 50%;
+    left: -10%;
+    width: 120%;
+    height: 150px;
+    z-index: 2;
+    background: linear-gradient(90deg, transparent, rgba(197,164,78,0.2), rgba(212,184,106,0.5), rgba(197,164,78,0.2), transparent);
+    filter: blur(8px);
+    transform: rotate(-15deg);
+    pointer-events: none;
+    animation: flow-ribbon 10s linear infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}}
+.hero-motto {{
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--gold-light);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    filter: drop-shadow(0 0 10px var(--gold));
+    opacity: 0.8;
+    white-space: nowrap;
+}}
+@keyframes flow-ribbon {{
+    0% {{ background-position: -200% 0; }}
+    100% {{ background-position: 200% 0; }}
+}}
 </style>
 </head>
 <body>
@@ -422,6 +465,12 @@ body {{
 <!-- Animated Background -->
 <div class="bg-grid"></div>
 <div class="bg-particles" id="particles"></div>
+
+<!-- Elite Hero Artwork -->
+<div class="hero-art"></div>
+<div class="hero-ribbon">
+    <div class="hero-motto">YOU BETTER KEEP THE FLOW PAL</div>
+</div>
 
 <!-- Login Overlay -->
 <div class="login-overlay" id="loginOverlay" style="display:none;">
