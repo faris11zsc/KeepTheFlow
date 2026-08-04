@@ -5416,7 +5416,7 @@ document.addEventListener('DOMContentLoaded', () => {
                               audioHtml = `<audio controls src="${fb.audio_url}" style="width:100%; height:30px; margin-top:8px;"></audio>`;
                           }
                           
-                          fbBox.innerHTML = `<strong style="color: #B45309; font-size: 14px;">🎓 Teacher's Feedback:</strong><p style="margin: 6px 0; font-size: 14px; color: #333;">\${fb.grade}</p>\${audioHtml}`;
+                          fbBox.innerHTML = `<strong style="color: #B45309; font-size: 14px;">🎓 Teacher's Feedback:</strong><p style="margin: 6px 0; font-size: 14px; color: #333;">${fb.grade}</p>${audioHtml}`;
                           ui.appendChild(fbBox);
                           
                           const toggleBtn = document.createElement('button');
