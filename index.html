@@ -5557,6 +5557,7 @@ document.addEventListener('DOMContentLoaded', () => {
                               wrap.style.gap = '8px';
                               wrap.style.marginBottom = '6px';
                               
+                              let currentAudio = null;
                               const badge = document.createElement('button');
                               badge.className = 'student-badge';
                               if(record.grade === 'perfect') badge.style.background = '#3B82F6';
@@ -5567,10 +5568,13 @@ document.addEventListener('DOMContentLoaded', () => {
                               badge.style.color = 'white';
                               badge.textContent = `▶ ${record.student_name}`;
                               badge.addEventListener('click', () => {
-                                  const audio = new Audio(record.audio_url);
-                                  audio.play();
+                                  if (currentAudio) currentAudio.pause();
+                                  currentAudio = new Audio(record.audio_url);
+                                  const speedSel = wrap.querySelector('.admin-speed-select');
+                                  if (speedSel) currentAudio.playbackRate = parseFloat(speedSel.value);
+                                  currentAudio.play();
                                   badge.textContent = `🔊 ${record.student_name}`;
-                                  audio.onended = () => badge.textContent = `▶ ${record.student_name}`;
+                                  currentAudio.onended = () => badge.textContent = `👤 ${record.student_name}`;
                               });
                               wrap.appendChild(badge);
                               
@@ -5599,6 +5603,105 @@ document.addEventListener('DOMContentLoaded', () => {
                               gradePanel.appendChild(btnGood);
                               gradePanel.appendChild(btnRetry);
                               wrap.appendChild(gradePanel);
+                              
+                              const speedSelect = document.createElement('select');
+                              speedSelect.className = 'admin-speed-select';
+                              speedSelect.innerHTML = '<option value="0.5">0.5x</option><option value="1" selected>1x</option><option value="1.5">1.5x</option>';
+                              speedSelect.style.fontSize = '11px';
+                              speedSelect.style.padding = '2px';
+                              speedSelect.style.marginLeft = '8px';
+                              speedSelect.onchange = () => { if (currentAudio) currentAudio.playbackRate = parseFloat(speedSelect.value); };
+                              wrap.appendChild(speedSelect);
+                              
+                              const openFbBtn = document.createElement('button');
+                              openFbBtn.textContent = '💬 Reply';
+                              openFbBtn.style.cssText = 'background:#6B7280; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; cursor:pointer; margin-left: 8px;';
+                              wrap.appendChild(openFbBtn);
+                              
+                              const fbWrapper = document.createElement('div');
+                              fbWrapper.style.width = '100%';
+                              fbWrapper.style.display = 'none';
+                              fbWrapper.style.background = '#F3F4F6';
+                              fbWrapper.style.padding = '8px';
+                              fbWrapper.style.borderRadius = '6px';
+                              fbWrapper.style.marginTop = '4px';
+                              
+                              const fbText = document.createElement('textarea');
+                              fbText.placeholder = 'Type feedback here...';
+                              fbText.style.width = '100%';
+                              fbText.style.height = '40px';
+                              fbText.style.marginBottom = '6px';
+                              
+                              const fbRecordBtn = document.createElement('button');
+                              fbRecordBtn.textContent = '🎤 Voice';
+                              fbRecordBtn.style.cssText = 'background:#3B82F6; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; cursor:pointer; margin-right:6px;';
+                              
+                              let fbAudioBlob = null;
+                              let fbRecorder = null;
+                              let fbChunks = [];
+                              
+                              fbRecordBtn.onclick = async () => {
+                                  if(fbRecorder && fbRecorder.state === 'recording') {
+                                      fbRecorder.stop();
+                                      fbRecordBtn.textContent = '🎤 Voice';
+                                      fbRecordBtn.style.background = '#3B82F6';
+                                  } else {
+                                      const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+                                      fbRecorder = new MediaRecorder(stream);
+                                      fbChunks = [];
+                                      fbRecorder.ondataavailable = e => fbChunks.push(e.data);
+                                      fbRecorder.onstop = () => {
+                                          fbAudioBlob = new Blob(fbChunks, {type: fbRecorder.mimeType});
+                                          fbRecordBtn.textContent = '✅ Recorded (Click to reset)';
+                                          fbRecordBtn.style.background = '#10B981';
+                                          stream.getTracks().forEach(t=>t.stop());
+                                      };
+                                      fbRecorder.start();
+                                      fbRecordBtn.textContent = '⏹ Stop';
+                                      fbRecordBtn.style.background = '#EF4444';
+                                  }
+                              };
+                              
+                              const fbSendBtn = document.createElement('button');
+                              fbSendBtn.textContent = '📤 Send Feedback';
+                              fbSendBtn.style.cssText = 'background:#8B5CF6; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; cursor:pointer;';
+                              fbSendBtn.onclick = async () => {
+                                  fbSendBtn.disabled = true;
+                                  fbSendBtn.textContent = 'Sending...';
+                                  
+                                  let audioUrl = 'none';
+                                  if(fbAudioBlob) {
+                                      const ext = fbAudioBlob.type.includes('mp4') ? 'mp4' : (fbAudioBlob.type.includes('ogg') ? 'ogg' : 'webm');
+                                      const fname = `feedback_${assignmentId}_${inst}_${record.student_name}_${Date.now()}.${ext}`;
+                                      const {error: upErr} = await sb.storage.from('student_audio').upload(fname, fbAudioBlob, { contentType: fbAudioBlob.type });
+                                      if(!upErr) {
+                                          audioUrl = sb.storage.from('student_audio').getPublicUrl(fname).data.publicUrl;
+                                      }
+                                  }
+                                  
+                                  await sb.from('qrasm_recordings').delete().match({assignment_id: assignmentId, instance_number: parseInt(inst), student_name: 'ADMIN_FEEDBACK_' + record.student_name});
+                                  
+                                  const {error} = await sb.from('qrasm_recordings').insert({
+                                      assignment_id: assignmentId,
+                                      instance_number: parseInt(inst),
+                                      student_name: 'ADMIN_FEEDBACK_' + record.student_name,
+                                      grade: fbText.value || 'Please review the audio feedback.',
+                                      audio_url: audioUrl
+                                  });
+                                  
+                                  if(error) alert('Error: '+error.message);
+                                  else {
+                                      fbSendBtn.textContent = '✅ Sent!';
+                                      setTimeout(()=>fbWrapper.style.display='none', 1500);
+                                  }
+                              };
+                              
+                              fbWrapper.appendChild(fbText);
+                              fbWrapper.appendChild(fbRecordBtn);
+                              fbWrapper.appendChild(fbSendBtn);
+                              wrap.appendChild(fbWrapper);
+                              
+                              openFbBtn.onclick = () => { fbWrapper.style.display = fbWrapper.style.display === 'none' ? 'block' : 'none'; };
                               
                               listEl.appendChild(wrap);
                           });
