@@ -878,6 +878,142 @@ main { width: min(100%, 1040px); margin: 0 auto; }
     body { padding: 24px 8px 54px; }
     .item { padding-inline: 6px; }
 }
+@media (max-width: 480px) {
+    .item { padding: 18px 8px 16px; margin-bottom: 10px; }
+    .phrase { padding: 16px 0 12px; margin: 8px auto 12px; }
+    .play-segment-btn, .record-btn { font-size: 13px; padding: 10px 14px; min-height: 44px; }
+    .pause-btn, .stop-btn, .rerecord-btn { min-width: 44px; min-height: 44px; font-size: 16px; }
+    .grade-btn { padding: 8px 12px; font-size: 14px; min-height: 44px; min-width: 44px; }
+    .grade-panel { gap: 8px; }
+    .student-badge { font-size: 12px; padding: 8px 12px; min-height: 40px; display: flex; align-items: center; }
+    .admin-submissions { padding: 8px !important; }
+    .submissions-list { flex-direction: column !important; align-items: stretch !important; }
+}
+@media (max-width: 380px) {
+    .play-segment-btn { font-size: 12px; padding: 8px 10px; }
+}
+/* Dynamic element classes */
+.admin-speed-select {
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+    background: var(--bg);
+    color: var(--text);
+    cursor: pointer;
+    min-height: 34px;
+    font-family: inherit;
+}
+.admin-reply-btn {
+    background: #6B7280;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 34px;
+}
+.admin-reply-btn:hover { filter: brightness(1.15); }
+.admin-fb-wrapper {
+    width: 100%;
+    display: none;
+    background: color-mix(in srgb, var(--bg) 92%, var(--text) 8%);
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 6px;
+    border: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
+}
+.admin-fb-textarea {
+    width: 100%;
+    height: 50px;
+    margin-bottom: 8px;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid color-mix(in srgb, var(--line) 50%, transparent);
+    font-family: inherit;
+    font-size: 13px;
+    resize: vertical;
+    background: var(--bg);
+    color: var(--text);
+}
+.admin-fb-btn {
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: white;
+    min-height: 34px;
+}
+.admin-fb-btn:hover { filter: brightness(1.15); }
+.student-feedback-box {
+    margin-top: 10px;
+    background: #FEF3C7;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #F59E0B;
+    text-align: left;
+    animation: fb-slide-in 0.3s ease;
+}
+@keyframes fb-slide-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.view-feedback-btn {
+    background: #F59E0B;
+    color: white;
+    border: none;
+    border-radius: 99px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+    min-height: 40px;
+    animation: fb-pulse 2s ease-in-out 3;
+}
+.view-feedback-btn:hover { filter: brightness(1.1); transform: scale(1.02); }
+@keyframes fb-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(245,158,11,0); }
+}
+.student-record-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding: 8px;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--bg) 95%, var(--text) 5%);
+    transition: background 0.2s;
+}
+.student-record-wrap:hover { background: color-mix(in srgb, var(--bg) 88%, var(--text) 12%); }
+.admin-loading {
+    text-align: center;
+    padding: 16px;
+    color: var(--num);
+    font-size: 14px;
+}
+.admin-loading::after {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--ref);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 .play-segment-btn, .pause-btn, .stop-btn, .play-record-btn, .rerecord-btn, .save-btn {
     background: color-mix(in srgb, var(--bg) 90%, var(--text) 10%);
     color: var(--ref);
@@ -889,8 +1025,10 @@ main { width: min(100%, 1040px); margin: 0 auto; }
     cursor: pointer;
     font-family: inherit;
     transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
 }
 .play-segment-btn:hover, .pause-btn:hover, .stop-btn:hover, .play-record-btn:hover, .rerecord-btn:hover, .save-btn:hover { background: color-mix(in srgb, var(--bg) 80%, var(--text) 20%); }
+.play-segment-btn:active, .record-btn:active, .save-btn:active { transform: scale(0.97); }
 .record-btn {
     background: color-mix(in srgb, var(--bg) 70%, var(--shine) 30%);
     color: var(--text);
@@ -903,6 +1041,7 @@ main { width: min(100%, 1040px); margin: 0 auto; }
     font-family: inherit;
     transition: all 0.2s;
     box-shadow: 0 2px 8px color-mix(in srgb, var(--shine) 40%, transparent);
+    -webkit-tap-highlight-color: transparent;
 }
 .record-btn:hover {
     background: var(--shine);
@@ -927,13 +1066,16 @@ main { width: min(100%, 1040px); margin: 0 auto; }
     font-weight: 600;
     cursor: pointer;
     font-family: inherit;
-    transition: all 0.2s;
+    transition: all 0.25s;
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    min-height: 36px;
+    -webkit-tap-highlight-color: transparent;
 }
 .student-badge:hover { filter: brightness(1.2); }
+.student-badge:active { transform: scale(0.96); }
 .grade-panel {
     display: inline-flex;
     gap: 4px;
@@ -947,12 +1089,14 @@ main { width: min(100%, 1040px); margin: 0 auto; }
     cursor: pointer;
     border: none;
     transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
 }
 .grade-perfect { background: #3B82F6; color: white; }
 .grade-good { background: #10B981; color: white; }
 .grade-retry { background: #E11D48; color: white; }
 .grade-btn:hover { filter: brightness(1.2); transform: scale(1.1); }
-.qword { transition: color 0.2s; }
+.grade-btn:active { transform: scale(0.95); }
+.qword { transition: color 0.2s; -webkit-tap-highlight-color: transparent; }
 .qword:hover { filter: drop-shadow(0 0 2px var(--shine)); cursor: pointer; }
 </style>
 </head>
@@ -5393,34 +5537,7 @@ document.addEventListener('DOMContentLoaded', () => {
                       btn.style.boxShadow = 'none';
                       btn.style.transform = 'none';
 
-                      // Restore My Record button from DB
-                      const oldMyPlay = ui.querySelector('.play-record-btn');
-                      if (oldMyPlay) oldMyPlay.remove();
-                      if (r.audio_url && r.audio_url !== 'none') {
-                           const myPlay = document.createElement('button');
-                           myPlay.className = 'play-record-btn';
-                           myPlay.textContent = '🎧 My Record';
-                           myPlay.style.marginLeft = '8px';
-                           myPlay.style.background = '#6B7280';
-                           myPlay.style.color = 'white';
-                           myPlay.style.border = 'none';
-                           myPlay.style.borderRadius = '99px';
-                           myPlay.style.padding = '6px 12px';
-                           myPlay.style.fontSize = '12px';
-                           myPlay.style.fontWeight = 'bold';
-                           myPlay.style.cursor = 'pointer';
-                           myPlay.style.marginTop = '6px';
-                           myPlay.onclick = () => {
-                               const a = new Audio(r.audio_url);
-                               const og = myPlay.textContent;
-                               myPlay.textContent = '⏳ Playing...';
-                               a.onended = () => myPlay.textContent = og;
-                               a.play().catch(e => { alert('Failed: ' + e.message); myPlay.textContent = og; });
-                           };
-                           ui.appendChild(myPlay);
-                      }
-
-                      // Feedback Inject
+                      // Feedback Inject (BEFORE My Record — most important first)
                       const fb = feedbackMap[r.instance_number];
                       const oldFb = ui.querySelector('.student-feedback-box');
                       if (oldFb) oldFb.remove();
@@ -5430,38 +5547,43 @@ document.addEventListener('DOMContentLoaded', () => {
                       if (fb) {
                           const fbBox = document.createElement('div');
                           fbBox.className = 'student-feedback-box';
-                          fbBox.style.marginTop = '10px';
-                          fbBox.style.background = '#FEF3C7';
-                          fbBox.style.padding = '12px';
-                          fbBox.style.borderRadius = '8px';
-                          fbBox.style.border = '1px solid #F59E0B';
-                          fbBox.style.textAlign = 'left';
                           fbBox.style.display = 'none';
                           
                           let audioHtml = '';
                           if (fb.audio_url && fb.audio_url !== 'none') {
-                              audioHtml = `<audio controls src="${fb.audio_url}" style="width:100%; height:30px; margin-top:8px;"></audio>`;
+                              audioHtml = `<audio controls src="${fb.audio_url}" style="width:100%; height:36px; margin-top:8px;"></audio>`;
                           }
                           
-                          fbBox.innerHTML = `<strong style="color: #B45309; font-size: 14px;">🎓 Teacher's Feedback:</strong><p style="margin: 6px 0; font-size: 14px; color: #333;">${fb.grade}</p>${audioHtml}`;
+                          fbBox.innerHTML = `<strong style="color: #B45309; font-size: 14px;">🎓 Teacher Feedback:</strong><p style="margin: 6px 0; font-size: 14px; color: #333; line-height:1.5;">${fb.grade}</p>${audioHtml}`;
                           ui.appendChild(fbBox);
                           
                           const toggleBtn = document.createElement('button');
                           toggleBtn.className = 'view-feedback-btn';
                           toggleBtn.innerHTML = '📬 View Feedback';
-                          toggleBtn.style.background = '#F59E0B';
-                          toggleBtn.style.color = 'white';
-                          toggleBtn.style.border = 'none';
-                          toggleBtn.style.borderRadius = '99px';
-                          toggleBtn.style.padding = '6px 12px';
-                          toggleBtn.style.fontSize = '12px';
-                          toggleBtn.style.fontWeight = 'bold';
-                          toggleBtn.style.cursor = 'pointer';
-                          toggleBtn.style.marginTop = '8px';
                           toggleBtn.onclick = () => {
-                              fbBox.style.display = fbBox.style.display === 'none' ? 'block' : 'none';
+                              const showing = fbBox.style.display === 'none';
+                              fbBox.style.display = showing ? 'block' : 'none';
+                              toggleBtn.innerHTML = showing ? '🔽 Hide Feedback' : '📬 View Feedback';
                           };
                           ui.appendChild(toggleBtn);
+                      }
+
+                      // Restore My Record button from DB
+                      const oldMyPlay = ui.querySelector('.play-record-btn');
+                      if (oldMyPlay) oldMyPlay.remove();
+                      if (r.audio_url && r.audio_url !== 'none') {
+                           const myPlay = document.createElement('button');
+                           myPlay.className = 'play-record-btn';
+                           myPlay.textContent = '🎧 My Record';
+                           myPlay.style.marginTop = '6px';
+                           myPlay.onclick = () => {
+                               const a = new Audio(r.audio_url);
+                               const og = myPlay.textContent;
+                               myPlay.textContent = '⏳ Playing...';
+                               a.onended = () => myPlay.textContent = og;
+                               a.play().catch(e => { alert('Failed: ' + e.message); myPlay.textContent = og; });
+                           };
+                           ui.appendChild(myPlay);
                       }
                   }
               });
@@ -5610,7 +5732,9 @@ document.addEventListener('DOMContentLoaded', () => {
               }
           }
 
+          document.querySelectorAll('.submissions-list').forEach(el => { el.innerHTML = '<div class="admin-loading">Loading</div>'; });
           sb.from('qrasm_recordings').select('*').eq('assignment_id', assignmentId).then(({data, error}) => {
+              document.querySelectorAll('.admin-loading').forEach(el => el.remove());
               if (data) {
                   const grouped = {};
                   data.forEach(r => {
@@ -5632,11 +5756,7 @@ document.addEventListener('DOMContentLoaded', () => {
                           });
                           Object.values(latestByStudent).forEach(record => {
                               const wrap = document.createElement('div');
-                              wrap.style.display = 'flex';
-                              wrap.style.flexWrap = 'wrap';
-                              wrap.style.alignItems = 'center';
-                              wrap.style.gap = '8px';
-                              wrap.style.marginBottom = '6px';
+                              wrap.className = 'student-record-wrap';
                               
                               let currentAudio = null;
                               const badge = document.createElement('button');
@@ -5687,35 +5807,27 @@ document.addEventListener('DOMContentLoaded', () => {
                               
                               const speedSelect = document.createElement('select');
                               speedSelect.className = 'admin-speed-select';
-                              speedSelect.innerHTML = '<option value="0.5">0.5x</option><option value="1" selected>1x</option><option value="1.5">1.5x</option>';
-                              speedSelect.style.fontSize = '11px';
-                              speedSelect.style.padding = '2px';
-                              speedSelect.style.marginLeft = '8px';
+                              speedSelect.innerHTML = '<option value="0.5">0.5x</option><option value="0.75">0.75x</option><option value="1" selected>1x</option><option value="1.25">1.25x</option><option value="1.5">1.5x</option>';
                               speedSelect.onchange = () => { if (currentAudio) currentAudio.playbackRate = parseFloat(speedSelect.value); };
                               wrap.appendChild(speedSelect);
                               
                               const openFbBtn = document.createElement('button');
                               openFbBtn.textContent = '💬 Reply';
-                              openFbBtn.style.cssText = 'background:#6B7280; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; cursor:pointer; margin-left: 8px;';
+                              openFbBtn.className = 'admin-reply-btn';
                               wrap.appendChild(openFbBtn);
                               
                               const fbWrapper = document.createElement('div');
-                              fbWrapper.style.width = '100%';
-                              fbWrapper.style.display = 'none';
-                              fbWrapper.style.background = '#F3F4F6';
-                              fbWrapper.style.padding = '8px';
-                              fbWrapper.style.borderRadius = '6px';
-                              fbWrapper.style.marginTop = '4px';
+                              fbWrapper.className = 'admin-fb-wrapper';
                               
                               const fbText = document.createElement('textarea');
+                              fbText.className = 'admin-fb-textarea';
                               fbText.placeholder = 'Type feedback here...';
-                              fbText.style.width = '100%';
-                              fbText.style.height = '40px';
-                              fbText.style.marginBottom = '6px';
                               
                               const fbRecordBtn = document.createElement('button');
                               fbRecordBtn.textContent = '🎤 Voice';
-                              fbRecordBtn.style.cssText = 'background:#3B82F6; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; cursor:pointer; margin-right:6px;';
+                              fbRecordBtn.className = 'admin-fb-btn';
+                              fbRecordBtn.style.background = '#3B82F6';
+                              fbRecordBtn.style.marginRight = '6px';
                               
                               let fbAudioBlob = null;
                               let fbRecorder = null;
@@ -5727,25 +5839,33 @@ document.addEventListener('DOMContentLoaded', () => {
                                       fbRecordBtn.textContent = '🎤 Voice';
                                       fbRecordBtn.style.background = '#3B82F6';
                                   } else {
-                                      const stream = await navigator.mediaDevices.getUserMedia({audio:true});
-                                      fbRecorder = new MediaRecorder(stream);
-                                      fbChunks = [];
-                                      fbRecorder.ondataavailable = e => fbChunks.push(e.data);
-                                      fbRecorder.onstop = () => {
-                                          fbAudioBlob = new Blob(fbChunks, {type: fbRecorder.mimeType});
-                                          fbRecordBtn.textContent = '✅ Recorded (Click to reset)';
-                                          fbRecordBtn.style.background = '#10B981';
-                                          stream.getTracks().forEach(t=>t.stop());
-                                      };
-                                      fbRecorder.start();
-                                      fbRecordBtn.textContent = '⏹ Stop';
-                                      fbRecordBtn.style.background = '#EF4444';
+                                      try {
+                                          const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+                                          const mimeTypes = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus'];
+                                          const supportedMime = mimeTypes.find(m => MediaRecorder.isTypeSupported(m));
+                                          const opts = supportedMime ? { mimeType: supportedMime } : {};
+                                          fbRecorder = new MediaRecorder(stream, opts);
+                                          fbChunks = [];
+                                          fbRecorder.ondataavailable = e => fbChunks.push(e.data);
+                                          fbRecorder.onstop = () => {
+                                              fbAudioBlob = new Blob(fbChunks, {type: fbRecorder.mimeType});
+                                              fbRecordBtn.textContent = '✅ Recorded';
+                                              fbRecordBtn.style.background = '#10B981';
+                                              stream.getTracks().forEach(t=>t.stop());
+                                          };
+                                          fbRecorder.start();
+                                          fbRecordBtn.textContent = '⏹ Stop';
+                                          fbRecordBtn.style.background = '#EF4444';
+                                      } catch(micErr) {
+                                          alert('Microphone access denied: ' + micErr.message);
+                                      }
                                   }
                               };
                               
                               const fbSendBtn = document.createElement('button');
-                              fbSendBtn.textContent = '📤 Send Feedback';
-                              fbSendBtn.style.cssText = 'background:#8B5CF6; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; cursor:pointer;';
+                              fbSendBtn.textContent = '📤 Send';
+                              fbSendBtn.className = 'admin-fb-btn';
+                              fbSendBtn.style.background = '#8B5CF6';
                               fbSendBtn.onclick = async () => {
                                   fbSendBtn.disabled = true;
                                   fbSendBtn.textContent = 'Sending...';
@@ -5834,7 +5954,10 @@ document.addEventListener('DOMContentLoaded', () => {
           
           try {
               stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-              mediaRecorder = new MediaRecorder(stream);
+              const mimeTypes = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus'];
+              const supportedMime = mimeTypes.find(m => MediaRecorder.isTypeSupported(m));
+              const recOpts = supportedMime ? { mimeType: supportedMime } : {};
+              mediaRecorder = new MediaRecorder(stream, recOpts);
               activeChunks = [];
               
               mediaRecorder.ondataavailable = e => activeChunks.push(e.data);
