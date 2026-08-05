@@ -10,17 +10,5 @@
     "assignmentId": "idgham_yw_lesson",
     "dateAdded": "2026-08-04",
     "color": "#c5a44e"
-  },
-  {
-    "id": "idgham-yw-5-12-dark",
-    "title": "Idgham · Dark Mode",
-    "titleAr": "إدغام النون والتنوين · الوضع الداكن",
-    "rule": "Idgham of Noon and Tanween in Yaa or Waw",
-    "syllables": "5-12",
-    "instances": 143,
-    "path": "lessons/idgham-yw-5-12-dark/",
-    "assignmentId": "idgham_yw_lesson",
-    "dateAdded": "2026-08-04",
-    "color": "#1a2744"
   }
 ]

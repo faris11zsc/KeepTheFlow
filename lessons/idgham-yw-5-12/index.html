@@ -788,10 +788,18 @@
 }
 :root {
     --bg: #FFFDF2;
-    --text: #1A2744;
-    --ref: #C5A44E;
-    --num: #8A95A8;
-    --line: #E8DFC5;
+    --text: #1a2744;
+    --ref: #c5a44e;
+    --num: #8a95a8;
+    --line: #e8dfc5;
+    --shine: #FFD84D;
+}
+[data-theme="dark"] {
+    --bg: #0f1a30;
+    --text: #e8e6e3;
+    --ref: #c5a44e;
+    --num: #8a95a8;
+    --line: #2a3352;
     --shine: #FFD84D;
 }
 * { box-sizing: border-box; }
@@ -803,6 +811,7 @@ body {
     padding: 0;
     min-height: 100vh;
     position: relative;
+    transition: background-color 0.4s ease, color 0.4s ease;
 }
 body::before {
     content: '';
@@ -820,12 +829,12 @@ main {
     z-index: 1;
     width: min(100%, 1040px);
     margin: 0 auto;
-    padding: 20px 18px 70px;
+    padding: 8px 18px 70px;
 }
 .rule-header {
     direction: ltr;
     text-align: center;
-    margin: 0 auto 32px;
+    margin: 0 auto 16px;
     padding: 24px 16px 28px;
     border-bottom: 1px solid var(--line);
     background: color-mix(in srgb, var(--bg) 90%, var(--line) 10%);
@@ -1289,6 +1298,53 @@ main {
     text-align: center;
     margin-top: 4px;
     opacity: 0.7;
+}
+/* Theme Toggle */
+.theme-toggle {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    z-index: 998;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: color-mix(in srgb, var(--bg) 80%, var(--line) 20%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid color-mix(in srgb, var(--ref) 12%, transparent);
+    border-radius: 99px;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+.theme-toggle:hover { border-color: color-mix(in srgb, var(--ref) 30%, transparent); }
+.theme-toggle .toggle-track {
+    width: 40px;
+    height: 22px;
+    background: color-mix(in srgb, var(--line) 60%, var(--bg));
+    border-radius: 99px;
+    position: relative;
+    transition: background 0.3s ease;
+}
+.theme-toggle .toggle-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--ref);
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+[data-theme="dark"] .toggle-thumb { transform: translateX(18px); }
+.theme-toggle .toggle-icon {
+    font-size: 14px;
+    line-height: 1;
+}
+.item, .rule-header, .admin-dashboard, .student-progress, .student-record-wrap {
+    transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease;
 }
 </style>
 </head>
@@ -5484,10 +5540,17 @@ main {
     <h2 style="margin-top:0; color:var(--ref); font-size:20px;">Welcome, Student</h2>
     <p style="color:var(--num); font-size:13px; margin-bottom:20px;">Enter your details to begin practicing</p>
     <input type="text" id="usernameInput" placeholder="Your full name" autocomplete="name" style="padding:14px 18px; font-size:15px; border:1px solid var(--line); border-radius:12px; margin-bottom:12px; width:100%; box-sizing:border-box; background:var(--bg); color:var(--text); font-family:inherit;">
-    <input type="email" id="emailInput" placeholder="Your email address" autocomplete="email" style="padding:14px 18px; font-size:15px; border:1px solid var(--line); border-radius:12px; margin-bottom:20px; width:100%; box-sizing:border-box; background:var(--bg); color:var(--text); font-family:inherit;">
+    <input type="email" id="emailInput" placeholder="Your email (recommended)" autocomplete="email" style="padding:14px 18px; font-size:15px; border:1px solid var(--line); border-radius:12px; margin-bottom:4px; width:100%; box-sizing:border-box; background:var(--bg); color:var(--text); font-family:inherit;">
+    <div style="font-size:11px; color:var(--num); margin-bottom:16px; text-align:left; padding-left:4px;">📧 Recommended — receive feedback notifications</div>
     <button id="loginBtn" class="save-btn" style="width:100%; font-size:16px; padding:14px; border-radius:12px;">Start Practicing</button>
   </div>
 </div>
+<!-- Theme Toggle -->
+<div class="theme-toggle" id="themeToggle" title="Switch dark/light mode">
+    <span class="toggle-icon" id="themeIcon">☀️</span>
+    <div class="toggle-track"><div class="toggle-thumb"></div></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
 const AudioEngine = (() => {
   let ctx = null;
@@ -6431,6 +6494,22 @@ document.addEventListener('DOMContentLoaded', () => {
                   a.play().catch(e => { alert('Failed: ' + e.message); myPlay.textContent = og; });
               };
               ui.appendChild(myPlay);
+
+              // Email notification counter
+              const cKey = 'qrasm_submit_count_' + assignmentId;
+              let cnt = parseInt(localStorage.getItem(cKey) || '0') + 1;
+              localStorage.setItem(cKey, cnt.toString());
+              if (cnt % 5 === 0 && typeof emailjs !== 'undefined') {
+                  try {
+                      emailjs.send('service_keepflow', 'template_admin_notify', {
+                          admin_email: 'lightknightf1@gmail.com',
+                          student_name: currentUser,
+                          count: cnt,
+                          lesson: assignmentId,
+                          message: `Student "${currentUser}" has submitted ${cnt} recordings for lesson "${assignmentId}".`
+                      }).catch(e => console.log('Email skipped:', e));
+                  } catch(e) { console.log('EmailJS not configured:', e); }
+              }
           }
           
           btnSave.innerHTML = originalText;
@@ -6438,6 +6517,33 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   });
 });
+</script>
+<script>
+// Theme Toggle
+(function(){
+    const toggle = document.getElementById('themeToggle');
+    const icon = document.getElementById('themeIcon');
+    const html = document.documentElement;
+    const saved = localStorage.getItem('qrasm_theme');
+    if (saved === 'dark') {
+        html.setAttribute('data-theme', 'dark');
+        icon.textContent = '🌙';
+    }
+    toggle.addEventListener('click', () => {
+        const isDark = html.getAttribute('data-theme') === 'dark';
+        if (isDark) {
+            html.removeAttribute('data-theme');
+            icon.textContent = '☀️';
+            localStorage.setItem('qrasm_theme', 'light');
+        } else {
+            html.setAttribute('data-theme', 'dark');
+            icon.textContent = '🌙';
+            localStorage.setItem('qrasm_theme', 'dark');
+        }
+    });
+})();
+// EmailJS init
+try { emailjs.init({ publicKey: 'YOUR_EMAILJS_PUBLIC_KEY' }); } catch(e) {}
 </script>
 </body>
 </html>
