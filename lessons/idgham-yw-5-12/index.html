@@ -5553,7 +5553,6 @@ main {
     <span class="toggle-icon" id="themeIcon">☀️</span>
     <div class="toggle-track"><div class="toggle-thumb"></div></div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
 const AudioEngine = (() => {
   let ctx = null;
@@ -5669,8 +5668,8 @@ document.addEventListener('DOMContentLoaded', () => {
           toast.style.bottom = '20px';
           toast.style.left = '50%';
           toast.style.transform = 'translateX(-50%)';
-          toast.style.background = 'var(--line)';
-          toast.style.color = 'var(--text)';
+          toast.style.background = '#333';
+          toast.style.color = 'white';
           toast.style.padding = '12px 20px';
           toast.style.borderRadius = '99px';
           toast.style.fontSize = '14px';
@@ -5823,7 +5822,7 @@ document.addEventListener('DOMContentLoaded', () => {
                               audioHtml = `<audio controls src="${fb.audio_url}" style="width:100%; height:36px; margin-top:8px;"></audio>`;
                           }
                           
-                          fbBox.innerHTML = `<strong style="color: var(--ref); font-size: 14px;">🎓 Teacher Feedback:</strong><p style="margin: 6px 0; font-size: 14px; color: var(--text); line-height:1.5;">${fb.grade}</p>${audioHtml}`;
+                          fbBox.innerHTML = `<strong style="color: #B45309; font-size: 14px;">🎓 Teacher Feedback:</strong><p style="margin: 6px 0; font-size: 14px; color: #333; line-height:1.5;">${fb.grade}</p>${audioHtml}`;
                           ui.appendChild(fbBox);
                           
                           const toggleBtn = document.createElement('button');
@@ -6501,22 +6500,6 @@ document.addEventListener('DOMContentLoaded', () => {
                   a.play().catch(e => { alert('Failed: ' + e.message); myPlay.textContent = og; });
               };
               ui.appendChild(myPlay);
-
-              // Email notification counter
-              const cKey = 'qrasm_submit_count_' + assignmentId;
-              let cnt = parseInt(localStorage.getItem(cKey) || '0') + 1;
-              localStorage.setItem(cKey, cnt.toString());
-              if (cnt % 5 === 0 && typeof emailjs !== 'undefined') {
-                  try {
-                      emailjs.send('service_keepflow', 'template_admin_notify', {
-                          admin_email: 'lightknightf1@gmail.com',
-                          student_name: currentUser,
-                          count: cnt,
-                          lesson: assignmentId,
-                          message: `Student "${currentUser}" has submitted ${cnt} recordings for lesson "${assignmentId}".`
-                      }).catch(e => console.log('Email skipped:', e));
-                  } catch(e) { console.log('EmailJS not configured:', e); }
-              }
           }
           
           btnSave.innerHTML = originalText;
@@ -6549,8 +6532,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 })();
-// EmailJS init
-try { emailjs.init({ publicKey: 'YOUR_EMAILJS_PUBLIC_KEY' }); } catch(e) {}
 </script>
 </body>
 </html>
