@@ -926,6 +926,9 @@ main {
 .qword.target-highlight.target-y-tanween::after { width: .54em; height: .84em; top: .05em; right: -0.16em; }
 .qword.target-highlight.target-m-end::after { width: .55em; height: 1.2em; top: -0.2em; left: -0.05em; right: auto; }
 .qword.target-highlight.target-m-mid::after { width: .55em; height: 1.2em; top: -0.2em; left: 0; right: 0; margin: 0 auto; }
+.qword.target-highlight.target-ikhfa-cause::after { width: .3em; height: 1em; top: -0.1em; left: -0.05em; right: auto; }
+.qword.target-highlight.target-ikhfa-effect::after { width: .4em; height: 1.1em; top: -0.1em; right: -0.05em; left: auto; }
+.qword.target-highlight.target-ikhfa-internal::after { width: .6em; height: 1.1em; top: -0.1em; left: 0; right: 0; margin: 0 auto; }
 .reference { direction: ltr; color: var(--ref); font-weight: 700; font-size: 15px; }
 @media (max-width: 720px) {
     body { padding: 24px 8px 54px; }
@@ -5605,7 +5608,6 @@ const AudioEngine = (() => {
         currentSource = src;
       } catch (e){ console.warn('Audio failed', e); }
     },
-    
     async playSegment(chapter, verse, startWordIndex, endWordIndex){
       if (window.checkIOSWarning) window.checkIOSWarning();
       try {
@@ -5613,21 +5615,26 @@ const AudioEngine = (() => {
         const res = await fetch(url);
         const data = await res.json();
         const verseAudio = data.verse.audio;
-        
         const segments = verseAudio.segments;
-        let startMs = null;
-        let endMs = null;
+        
+        let allStarts = [];
+        let allEnds = [];
         
         for (let seg of segments) {
           let wordPos, start, end;
           if (seg.length === 3) { wordPos = seg[0]; start = seg[1]; end = seg[2]; }
           else if (seg.length === 4) { wordPos = seg[1]; start = seg[2]; end = seg[3]; }
           
-          if (wordPos == startWordIndex) startMs = start;
-          if (wordPos == endWordIndex) endMs = end;
+          if (wordPos >= startWordIndex && wordPos <= endWordIndex) {
+            allStarts.push(start);
+            allEnds.push(end);
+          }
         }
         
-        if (startMs !== null && endMs !== null) {
+        if (allStarts.length > 0) {
+          let startMs = Math.min(...allStarts);
+          let endMs = Math.max(...allEnds);
+          
           let audioUrl = verseAudio.url.startsWith('//') ? 'https:' + verseAudio.url : verseAudio.url;
           
           const buf = await loadBuffer(audioUrl);
@@ -5662,8 +5669,8 @@ document.addEventListener('DOMContentLoaded', () => {
           toast.style.bottom = '20px';
           toast.style.left = '50%';
           toast.style.transform = 'translateX(-50%)';
-          toast.style.background = '#333';
-          toast.style.color = 'white';
+          toast.style.background = 'var(--line)';
+          toast.style.color = 'var(--text)';
           toast.style.padding = '12px 20px';
           toast.style.borderRadius = '99px';
           toast.style.fontSize = '14px';
@@ -5816,7 +5823,7 @@ document.addEventListener('DOMContentLoaded', () => {
                               audioHtml = `<audio controls src="${fb.audio_url}" style="width:100%; height:36px; margin-top:8px;"></audio>`;
                           }
                           
-                          fbBox.innerHTML = `<strong style="color: #B45309; font-size: 14px;">🎓 Teacher Feedback:</strong><p style="margin: 6px 0; font-size: 14px; color: #333; line-height:1.5;">${fb.grade}</p>${audioHtml}`;
+                          fbBox.innerHTML = `<strong style="color: var(--ref); font-size: 14px;">🎓 Teacher Feedback:</strong><p style="margin: 6px 0; font-size: 14px; color: var(--text); line-height:1.5;">${fb.grade}</p>${audioHtml}`;
                           ui.appendChild(fbBox);
                           
                           const toggleBtn = document.createElement('button');
