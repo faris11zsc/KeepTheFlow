@@ -5936,7 +5936,16 @@ document.addEventListener('DOMContentLoaded', () => {
               const email = (document.getElementById('emailInput') || {}).value || '';
               if (name) {
                   localStorage.setItem('qrasm_student_name', name);
-                  if (email.trim()) localStorage.setItem('qrasm_student_email', email.trim());
+                  if (email.trim()) {
+                      localStorage.setItem('qrasm_student_email', email.trim());
+                      // Persist email to Supabase so the backend notifier can reach this student
+                      if (sb) {
+                          sb.from('qrasm_student_emails').upsert(
+                              { student_name: name, email: email.trim() },
+                              { onConflict: 'student_name' }
+                          ).then(() => {}).catch(() => {});
+                      }
+                  }
                   currentUser = name;
                   overlay.style.display = 'none';
                   if (currentUser === '89FarisAuraKnight89') {
@@ -6557,6 +6566,22 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('qrasm_theme', 'dark');
         }
     });
+})();
+// ScrollTo support: auto-scroll to a specific instance from email deep links
+(function(){
+    const params = new URLSearchParams(window.location.search);
+    const scrollTarget = params.get('scrollTo');
+    if (scrollTarget) {
+        setTimeout(() => {
+            const el = document.querySelector(`.item[data-instance="${scrollTarget}"]`);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.style.outline = '2px solid var(--ref)';
+                el.style.outlineOffset = '4px';
+                setTimeout(() => { el.style.outline = 'none'; }, 4000);
+            }
+        }, 1500);
+    }
 })();
 </script>
 </body>
