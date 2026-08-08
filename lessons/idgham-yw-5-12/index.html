@@ -6040,14 +6040,20 @@ document.addEventListener('DOMContentLoaded', () => {
               if (ruleHeader) ruleHeader.after(progWrap);
               else mainEl.prepend(progWrap);
 
-              // Auto-scroll to new feedback
-              const feedbackBtns = document.querySelectorAll('.view-feedback-btn');
-              if (feedbackBtns.length > 0) {
-                  const firstFb = feedbackBtns[0];
-                  setTimeout(() => {
-                      firstFb.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  }, 600);
+              // Auto-scroll to new feedback (skip if deep link scrollTo is active)
+              const _scrollToParam = new URLSearchParams(window.location.search).get('scrollTo');
+              if (!_scrollToParam) {
+                  const feedbackBtns = document.querySelectorAll('.view-feedback-btn');
+                  if (feedbackBtns.length > 0) {
+                      const firstFb = feedbackBtns[0];
+                      setTimeout(() => {
+                          firstFb.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }, 600);
+                  }
               }
+              // Signal that fetchStudentProgress is done (for scrollTo)
+              window.__fetchDone = true;
+              if (window.__pendingScrollTo) window.__pendingScrollTo();
           }
       });
   }
@@ -6707,7 +6713,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const icon = document.getElementById('themeIcon');
     const html = document.documentElement;
     const saved = localStorage.getItem('qrasm_theme');
-    if (saved === 'dark') {
+    // Deep links always open in light mode; otherwise respect saved preference
+    const hasScrollTo = new URLSearchParams(window.location.search).has('scrollTo');
+    if (hasScrollTo) {
+        html.removeAttribute('data-theme');
+        icon.textContent = '☀️';
+    } else if (saved === 'dark') {
         html.setAttribute('data-theme', 'dark');
         icon.textContent = '🌙';
     }
@@ -6725,19 +6736,33 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 })();
 // ScrollTo support: auto-scroll to a specific instance from email deep links
+// Waits for fetchStudentProgress to finish before scrolling to avoid scroll-jank
 (function(){
     const params = new URLSearchParams(window.location.search);
     const scrollTarget = params.get('scrollTo');
     if (scrollTarget) {
-        setTimeout(() => {
-            const el = document.querySelector(`.item[data-instance="${scrollTarget}"]`);
-            if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                el.style.outline = '2px solid var(--ref)';
-                el.style.outlineOffset = '4px';
-                setTimeout(() => { el.style.outline = 'none'; }, 4000);
-            }
-        }, 1500);
+        function doScroll() {
+            requestAnimationFrame(() => {
+                const el = document.querySelector(`.item[data-instance="${scrollTarget}"]`);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    el.style.outline = '3px solid var(--ref)';
+                    el.style.outlineOffset = '6px';
+                    el.style.transition = 'outline 0.5s ease';
+                    setTimeout(() => { el.style.outline = 'none'; }, 5000);
+                }
+            });
+        }
+        // If fetchStudentProgress already completed, scroll now; otherwise wait for it
+        if (window.__fetchDone) {
+            setTimeout(doScroll, 300);
+        } else {
+            window.__pendingScrollTo = () => setTimeout(doScroll, 300);
+            // Safety fallback: if fetch never fires (e.g. admin mode), scroll after 3s
+            setTimeout(() => {
+                if (!window.__fetchDone) doScroll();
+            }, 3000);
+        }
     }
 })();
 </script>
