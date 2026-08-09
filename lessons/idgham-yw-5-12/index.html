@@ -6253,6 +6253,139 @@ document.addEventListener('DOMContentLoaded', () => {
         kbHint.className = 'kb-hint';
         kbHint.textContent = '⌨ Keyboard: 1 = Perfect · 2 = Good · 3 = Retry (while audio playing)';
         toolbarDiv.after(kbHint);
+
+        // ═══════════════════════════════════════════════════════════
+        //  ADMIN POWER CONTROLS — Advanced Management
+        // ═══════════════════════════════════════════════════════════
+        const powerDiv = document.createElement('div');
+        powerDiv.style.cssText = 'display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:8px 0 16px; padding:12px; border-radius:12px; background:color-mix(in srgb, var(--bg) 85%, rgba(239,68,68,0.1)); border:1px solid color-mix(in srgb, var(--ref) 10%, transparent);';
+
+        // ── Reset All Grades ──
+        const resetGradesBtn = document.createElement('button');
+        resetGradesBtn.textContent = '🔄 Reset Grades';
+        resetGradesBtn.title = 'Clear all grades (keeps recordings)';
+        resetGradesBtn.style.cssText = 'background:#F59E0B; color:white; border:none; padding:8px 14px; border-radius:8px; cursor:pointer; font-weight:600; font-size:13px; transition:all 0.2s;';
+        resetGradesBtn.onmouseenter = () => resetGradesBtn.style.filter = 'brightness(1.15)';
+        resetGradesBtn.onmouseleave = () => resetGradesBtn.style.filter = 'none';
+        resetGradesBtn.onclick = async () => {
+            const aid = document.querySelector('.recorder-ui')?.getAttribute('data-assignment');
+            if (!confirm('Reset ALL grades for this lesson? Recordings will be kept.')) return;
+            if (!confirm('Are you sure? This cannot be undone.')) return;
+            resetGradesBtn.textContent = '⏳ Resetting...';
+            const { data } = await sb.from('qrasm_recordings').select('id').eq('assignment_id', aid).not('student_name', 'like', 'ADMIN_%').not('grade', 'is', null);
+            if (data) {
+                for (const r of data) {
+                    await sb.from('qrasm_recordings').update({ grade: null }).eq('id', r.id);
+                }
+            }
+            resetGradesBtn.textContent = '✅ Grades Reset';
+            setTimeout(() => { resetGradesBtn.textContent = '🔄 Reset Grades'; window.location.reload(); }, 1500);
+        };
+        powerDiv.appendChild(resetGradesBtn);
+
+        // ── Delete Student Data ──
+        const delStudentBtn = document.createElement('button');
+        delStudentBtn.textContent = '🧹 Delete Student';
+        delStudentBtn.title = 'Delete ALL recordings from a specific student';
+        delStudentBtn.style.cssText = 'background:#E11D48; color:white; border:none; padding:8px 14px; border-radius:8px; cursor:pointer; font-weight:600; font-size:13px; transition:all 0.2s;';
+        delStudentBtn.onmouseenter = () => delStudentBtn.style.filter = 'brightness(1.15)';
+        delStudentBtn.onmouseleave = () => delStudentBtn.style.filter = 'none';
+        delStudentBtn.onclick = async () => {
+            const aid = document.querySelector('.recorder-ui')?.getAttribute('data-assignment');
+            const studentName = prompt('Enter the EXACT student name to delete:');
+            if (!studentName || !studentName.trim()) return;
+            if (!confirm(`Delete ALL recordings and feedback for "${studentName.trim()}"?`)) return;
+            if (!confirm(`FINAL WARNING: This permanently removes all of ${studentName.trim()}'s work. Continue?`)) return;
+            delStudentBtn.textContent = '⏳ Deleting...';
+            await sb.from('qrasm_recordings').delete().eq('assignment_id', aid).eq('student_name', studentName.trim());
+            await sb.from('qrasm_recordings').delete().eq('assignment_id', aid).eq('student_name', 'ADMIN_FEEDBACK_' + studentName.trim());
+            await sb.from('qrasm_student_emails').delete().eq('student_name', studentName.trim());
+            delStudentBtn.textContent = '✅ Student Removed';
+            setTimeout(() => { delStudentBtn.textContent = '🧹 Delete Student'; window.location.reload(); }, 1500);
+        };
+        powerDiv.appendChild(delStudentBtn);
+
+        // ── Hide All Instances (Bulk Hide) ──
+        const bulkHideBtn = document.createElement('button');
+        bulkHideBtn.textContent = '🚫 Hide All';
+        bulkHideBtn.title = 'Hide all instances at once';
+        bulkHideBtn.style.cssText = 'background:#6B7280; color:white; border:none; padding:8px 14px; border-radius:8px; cursor:pointer; font-weight:600; font-size:13px; transition:all 0.2s;';
+        bulkHideBtn.onmouseenter = () => bulkHideBtn.style.filter = 'brightness(1.15)';
+        bulkHideBtn.onmouseleave = () => bulkHideBtn.style.filter = 'none';
+        bulkHideBtn.onclick = async () => {
+            if (!confirm('Hide ALL instances? Students won\'t see any content.')) return;
+            const aid = document.querySelector('.recorder-ui')?.getAttribute('data-assignment');
+            const items = document.querySelectorAll('.item:not(.admin-hidden-item)');
+            bulkHideBtn.textContent = `⏳ Hiding ${items.length}...`;
+            for (const item of items) {
+                const instId = item.getAttribute('data-instance');
+                await sb.from('qrasm_recordings').insert({
+                    assignment_id: aid, instance_number: parseInt(instId),
+                    student_name: 'ADMIN_HIDDEN', audio_url: 'none'
+                });
+                item.classList.add('admin-hidden-item');
+                item.style.opacity = '0.4';
+                const btn = item.querySelector('.admin-hide-btn');
+                if (btn) { btn.textContent = '👁 Restore'; btn.style.background = '#10B981'; }
+            }
+            recalcItemNumbers();
+            bulkHideBtn.textContent = '✅ All Hidden';
+            setTimeout(() => bulkHideBtn.textContent = '🚫 Hide All', 2000);
+        };
+        powerDiv.appendChild(bulkHideBtn);
+
+        // ── Restore All (Bulk Restore) ──
+        const bulkRestoreBtn = document.createElement('button');
+        bulkRestoreBtn.textContent = '👁 Restore All';
+        bulkRestoreBtn.title = 'Restore all hidden instances';
+        bulkRestoreBtn.style.cssText = 'background:#10B981; color:white; border:none; padding:8px 14px; border-radius:8px; cursor:pointer; font-weight:600; font-size:13px; transition:all 0.2s;';
+        bulkRestoreBtn.onmouseenter = () => bulkRestoreBtn.style.filter = 'brightness(1.15)';
+        bulkRestoreBtn.onmouseleave = () => bulkRestoreBtn.style.filter = 'none';
+        bulkRestoreBtn.onclick = async () => {
+            const aid = document.querySelector('.recorder-ui')?.getAttribute('data-assignment');
+            if (!confirm('Restore ALL hidden instances?')) return;
+            bulkRestoreBtn.textContent = '⏳ Restoring...';
+            await sb.from('qrasm_recordings').delete().eq('assignment_id', aid).eq('student_name', 'ADMIN_HIDDEN');
+            document.querySelectorAll('.admin-hidden-item').forEach(item => {
+                item.classList.remove('admin-hidden-item');
+                item.style.opacity = '1';
+                const btn = item.querySelector('.admin-hide-btn');
+                if (btn) { btn.textContent = '🚫 Hide'; btn.style.background = '#E11D48'; }
+            });
+            recalcItemNumbers();
+            bulkRestoreBtn.textContent = '✅ All Restored';
+            setTimeout(() => bulkRestoreBtn.textContent = '👁 Restore All', 2000);
+        };
+        powerDiv.appendChild(bulkRestoreBtn);
+
+        // ── NUKE: Delete Full Lesson ──
+        const nukeBtn = document.createElement('button');
+        nukeBtn.textContent = '💣 Delete Lesson Data';
+        nukeBtn.title = 'PERMANENTLY delete ALL data for this lesson from Supabase';
+        nukeBtn.style.cssText = 'background:linear-gradient(135deg, #7F1D1D, #DC2626); color:white; border:none; padding:8px 14px; border-radius:8px; cursor:pointer; font-weight:700; font-size:13px; transition:all 0.2s; text-shadow:0 1px 2px rgba(0,0,0,0.3);';
+        nukeBtn.onmouseenter = () => nukeBtn.style.filter = 'brightness(1.2)';
+        nukeBtn.onmouseleave = () => nukeBtn.style.filter = 'none';
+        nukeBtn.onclick = async () => {
+            const aid = document.querySelector('.recorder-ui')?.getAttribute('data-assignment');
+            const typed = prompt('⚠️ DANGER ZONE ⚠️\n\nThis will PERMANENTLY DELETE all recordings, grades, and feedback for this lesson.\n\nType the lesson ID to confirm: ' + aid);
+            if (typed !== aid) { alert('Cancelled — lesson ID did not match.'); return; }
+            if (!confirm('ABSOLUTE FINAL WARNING:\n\nYou are about to permanently destroy ALL student recordings, grades, feedback, and hidden states for:\n\n' + aid + '\n\nThis CANNOT be undone. Proceed?')) return;
+            nukeBtn.textContent = '💣 Deleting...';
+            nukeBtn.disabled = true;
+            const { error } = await sb.from('qrasm_recordings').delete().eq('assignment_id', aid);
+            if (error) {
+                alert('Error: ' + error.message);
+                nukeBtn.textContent = '💣 Delete Lesson Data';
+                nukeBtn.disabled = false;
+            } else {
+                nukeBtn.textContent = '✅ Lesson Data Deleted';
+                nukeBtn.style.background = '#10B981';
+                setTimeout(() => window.location.reload(), 2000);
+            }
+        };
+        powerDiv.appendChild(nukeBtn);
+
+        kbHint.after(powerDiv);
       
       const firstUi = document.querySelector('.recorder-ui');
       if (firstUi) {
@@ -6451,6 +6584,24 @@ document.addEventListener('DOMContentLoaded', () => {
                               openFbBtn.textContent = '💬 Reply';
                               openFbBtn.className = 'admin-reply-btn';
                               wrap.appendChild(openFbBtn);
+
+                              // Per-recording delete button
+                              const delRecBtn = document.createElement('button');
+                              delRecBtn.textContent = '🗑️';
+                              delRecBtn.title = 'Delete this recording';
+                              delRecBtn.style.cssText = 'background:transparent; color:#EF4444; border:1px solid #EF4444; padding:6px 10px; border-radius:8px; cursor:pointer; font-size:14px; transition:all 0.2s; min-width:36px;';
+                              delRecBtn.onmouseenter = () => { delRecBtn.style.background = '#EF4444'; delRecBtn.style.color = 'white'; };
+                              delRecBtn.onmouseleave = () => { delRecBtn.style.background = 'transparent'; delRecBtn.style.color = '#EF4444'; };
+                              delRecBtn.onclick = async () => {
+                                  if (!confirm(`Delete recording by ${record.student_name} for instance #${inst}?`)) return;
+                                  delRecBtn.textContent = '⏳';
+                                  const { error } = await sb.from('qrasm_recordings').delete().eq('id', record.id);
+                                  // Also delete associated feedback
+                                  await sb.from('qrasm_recordings').delete().match({assignment_id: assignmentId, instance_number: parseInt(inst), student_name: 'ADMIN_FEEDBACK_' + record.student_name});
+                                  if (error) { alert('Error: ' + error.message); delRecBtn.textContent = '🗑️'; }
+                                  else { wrap.style.opacity = '0.3'; wrap.style.pointerEvents = 'none'; delRecBtn.textContent = '✅'; updateDashboard(); }
+                              };
+                              wrap.appendChild(delRecBtn);
                               
                               const fbWrapper = document.createElement('div');
                               fbWrapper.className = 'admin-fb-wrapper';
