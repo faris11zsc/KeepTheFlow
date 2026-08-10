@@ -36,11 +36,9 @@ body {
     inset: 0;
     z-index: 0;
     background:
-        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(197,164,78,0.06) 0%, transparent 50%),
-        radial-gradient(ellipse 50% 40% at 20% 80%, rgba(42,58,94,0.6) 0%, transparent 50%),
-        radial-gradient(ellipse 60% 50% at 85% 100%, rgba(42,58,94,0.5) 0%, transparent 50%),
-        radial-gradient(circle at 50% 50%, rgba(197,164,78,0.03) 0%, transparent 40%),
-        linear-gradient(180deg, #0a1525 0%, var(--navy) 40%, var(--navy-dark) 70%, #080f1d 100%);
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(197,164,78,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 100%, rgba(42,58,94,0.5) 0%, transparent 60%),
+        linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
     pointer-events: none;
 }
 .bg-particles {
@@ -132,7 +130,6 @@ body {
     background: linear-gradient(90deg, transparent, var(--gold), transparent);
     margin: 20px auto;
 }
-
 
 /* ── User Info Bar ───────────────────────── */
 .user-bar {
@@ -279,88 +276,6 @@ body {
 }
 .lesson-card:hover .card-arrow { opacity: 1; transform: translateX(0); }
 
-/* ── Admin Controls ───────────────────────── */
-.admin-toolbar {
-    position: relative;
-    z-index: 10;
-    max-width: 900px;
-    margin: 0 auto 20px;
-    padding: 16px 20px;
-    background: rgba(127,29,29,0.15);
-    border: 1px solid rgba(239,68,68,0.2);
-    border-radius: 16px;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    display: none;
-}
-.admin-toolbar-title {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: #f87171;
-    margin-bottom: 12px;
-    text-align: center;
-}
-.admin-toolbar-actions {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-.admin-btn {
-    background: rgba(239,68,68,0.15);
-    color: #f87171;
-    border: 1px solid rgba(239,68,68,0.3);
-    padding: 8px 16px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.25s;
-    font-family: 'Inter', sans-serif;
-}
-.admin-btn:hover { background: rgba(239,68,68,0.3); transform: translateY(-1px); }
-.admin-btn.danger {
-    background: linear-gradient(135deg, #7F1D1D, #DC2626);
-    color: white;
-    border-color: transparent;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-}
-.admin-btn.danger:hover { filter: brightness(1.15); }
-.card-delete-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 20;
-    background: rgba(239,68,68,0.15);
-    color: #f87171;
-    border: 1px solid rgba(239,68,68,0.3);
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    font-size: 14px;
-    cursor: pointer;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    backdrop-filter: blur(8px);
-}
-.card-delete-btn:hover { background: #DC2626; color: white; border-color: #DC2626; transform: scale(1.1); }
-.admin-badge {
-    display: inline-block;
-    background: linear-gradient(135deg, #7F1D1D, #DC2626);
-    color: white;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 4px;
-    margin-left: 8px;
-    vertical-align: middle;
-    letter-spacing: 0.05em;
-}
-
 /* ── Empty State ───────────────────────── */
 .empty-state {
     text-align: center;
@@ -463,15 +378,62 @@ body {
     .user-bar { flex-direction: column; text-align: center; padding: 14px; }
     .login-card { padding: 36px 24px; }
 }
+/* ── Elite Hero Artwork & Ribbon ───────────────── */
+.hero-art {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    background-image: url('https://dummyimage.com/1920x1080/0f1a30/c5a44e&text=LightKnight+Hero+Artwork+(Pending)');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.15;
+    pointer-events: none;
+    mix-blend-mode: screen;
+}
+.hero-ribbon {
+    position: fixed;
+    top: 50%;
+    left: -10%;
+    width: 120%;
+    height: 150px;
+    z-index: 2;
+    background: linear-gradient(90deg, transparent, rgba(197,164,78,0.2), rgba(212,184,106,0.5), rgba(197,164,78,0.2), transparent);
+    filter: blur(8px);
+    transform: rotate(-15deg);
+    pointer-events: none;
+    animation: flow-ribbon 10s linear infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.hero-motto {
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--gold-light);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    filter: drop-shadow(0 0 10px var(--gold));
+    opacity: 0.8;
+    white-space: nowrap;
+}
+@keyframes flow-ribbon {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-
 
 <!-- Animated Background -->
 <div class="bg-grid"></div>
 <div class="bg-particles" id="particles"></div>
+
+<!-- Elite Hero Artwork -->
+<div class="hero-art"></div>
+<div class="hero-ribbon">
+    <div class="hero-motto">YOU BETTER KEEP THE FLOW PAL</div>
+</div>
 
 <!-- Login Overlay -->
 <div class="login-overlay" id="loginOverlay" style="display:none;">
@@ -503,16 +465,6 @@ body {
         <div class="user-email" id="userDisplayEmail"></div>
     </div>
     <button class="user-logout" id="logoutBtn">Sign Out</button>
-</div>
-
-<!-- Admin Toolbar (hidden by default) -->
-<div class="admin-toolbar" id="adminToolbar">
-    <div class="admin-toolbar-title">🛡️ Admin Control Panel</div>
-    <div class="admin-toolbar-actions">
-        <button class="admin-btn" id="adminRefreshBtn">🔄 Refresh</button>
-        <button class="admin-btn" id="adminStudentsBtn">👥 Students</button>
-        <button class="admin-btn danger" id="adminNukeAllBtn">💣 Nuke ALL Lessons Data</button>
-    </div>
 </div>
 
 <!-- Lessons -->
@@ -595,136 +547,39 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
     overlay.style.display = 'flex';
 });
 
-// ── Admin Detection ──────────────────────────────
-const isAdmin = currentUser === '89FarisAuraKnight89';
-if (isAdmin) {
-    document.getElementById('adminToolbar').style.display = 'block';
-    // Add admin badge next to name
-    const nameEl = document.getElementById('userDisplayName');
-    if (nameEl) nameEl.innerHTML = currentUser + '<span class="admin-badge">ADMIN</span>';
-}
-
-// Supabase connection for admin operations
-const SUPABASE_URL = 'https://lhebavvnrwqojbhyodwc.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_JW75ayCf5SbvyT-02GmjNQ_vFpivPTU';
-let adminSb = null;
-if (isAdmin && window.supabase) {
-    adminSb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-}
-
 // ── Load Lessons ──────────────────────────────
-let allLessons = [];
 fetch('lessons.json')
     .then(r => r.json())
     .then(lessons => {
-        allLessons = lessons;
-        renderLessons(lessons);
+        const grid = document.getElementById('lessonsGrid');
+        if (!lessons || lessons.length === 0) {
+            grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📖</div><div>No lessons available yet</div></div>';
+            return;
+        }
+        grid.innerHTML = '';
+        lessons.forEach((L, i) => {
+            const card = document.createElement('a');
+            card.href = L.path;
+            card.className = 'lesson-card';
+            card.style.setProperty('--delay', i * 0.1 + 's');
+            card.style.setProperty('--accent', L.color || '#c5a44e');
+            card.innerHTML = `
+                <div class="card-glow"></div>
+                <div class="card-badge">${L.syllables || 'Practice'}</div>
+                <h3 class="card-title-ar">${L.titleAr || ''}</h3>
+                <h4 class="card-title-en">${L.title || 'Untitled Lesson'}</h4>
+                <div class="card-meta">
+                    <span class="card-instances">${L.instances || 0} instances</span>
+                    <span class="card-date">${L.dateAdded || ''}</span>
+                </div>
+                <div class="card-arrow">→</div>
+            `;
+            grid.appendChild(card);
+        });
     })
     .catch(() => {
         document.getElementById('lessonsGrid').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div>Failed to load lessons</div></div>';
     });
-
-function renderLessons(lessons) {
-    const grid = document.getElementById('lessonsGrid');
-    if (!lessons || lessons.length === 0) {
-        grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📖</div><div>No lessons available yet</div></div>';
-        return;
-    }
-    grid.innerHTML = '';
-    lessons.forEach((L, i) => {
-        const card = document.createElement('a');
-        card.href = L.path;
-        card.className = 'lesson-card';
-        card.style.setProperty('--delay', i * 0.1 + 's');
-        card.style.setProperty('--accent', L.color || '#c5a44e');
-        card.innerHTML = `
-            <div class="card-glow"></div>
-            <div class="card-badge">${L.syllables || 'Practice'}</div>
-            <h3 class="card-title-ar">${L.titleAr || ''}</h3>
-            <h4 class="card-title-en">${L.title || 'Untitled Lesson'}</h4>
-            <div class="card-meta">
-                <span class="card-instances">${L.instances || 0} instances</span>
-                <span class="card-date">${L.dateAdded || ''}</span>
-            </div>
-            <div class="card-arrow">→</div>
-        `;
-
-        // Admin: Add delete button to each card
-        if (isAdmin) {
-            const delBtn = document.createElement('button');
-            delBtn.className = 'card-delete-btn';
-            delBtn.style.display = 'flex';
-            delBtn.innerHTML = '🗑️';
-            delBtn.title = 'Delete lesson: ' + L.title;
-            delBtn.addEventListener('click', async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                await deleteLesson(L, card);
-            });
-            card.appendChild(delBtn);
-        }
-
-        grid.appendChild(card);
-    });
-}
-
-// ── Admin: Delete a lesson ──────────────────────────────
-async function deleteLesson(lesson, cardEl) {
-    if (!confirm(`Delete lesson "${lesson.title}"?\n\nThis will:\n• Remove it from the dashboard\n• Delete its Supabase recordings\n\nThe lesson files stay on the server.`)) return;
-    if (!confirm(`FINAL CONFIRMATION: Permanently delete "${lesson.title}"?`)) return;
-
-    cardEl.style.opacity = '0.3';
-    cardEl.style.pointerEvents = 'none';
-
-    // 1. Delete Supabase data for this lesson
-    if (adminSb && lesson.assignmentId) {
-        await adminSb.from('qrasm_recordings').delete().eq('assignment_id', lesson.assignmentId);
-    }
-
-    // 2. Remove from allLessons and re-render
-    allLessons = allLessons.filter(l => l.id !== lesson.id);
-    renderLessons(allLessons);
-
-    // 3. Save updated lessons.json (download for manual update)
-    const blob = new Blob([JSON.stringify(allLessons, null, 2)], {type: 'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'lessons.json';
-    a.click();
-
-    alert(`✅ Lesson "${lesson.title}" removed from dashboard.\n\nA new lessons.json has been downloaded. Replace the file on the server to make this permanent.\n\nSupabase recordings for "${lesson.assignmentId}" have been deleted.`);
-}
-
-// ── Admin: Toolbar actions ──────────────────────────────
-if (isAdmin) {
-    // Refresh
-    document.getElementById('adminRefreshBtn').addEventListener('click', () => window.location.reload());
-
-    // Students list
-    document.getElementById('adminStudentsBtn').addEventListener('click', async () => {
-        if (!adminSb) { alert('Supabase not connected'); return; }
-        const { data } = await adminSb.from('qrasm_student_emails').select('*');
-        if (data && data.length > 0) {
-            let msg = '👥 Registered Students:\n\n';
-            data.forEach(s => { msg += `• ${s.student_name} — ${s.email}\n`; });
-            msg += `\nTotal: ${data.length} students`;
-            alert(msg);
-        } else {
-            alert('No students registered yet.');
-        }
-    });
-
-    // Nuke ALL lesson data
-    document.getElementById('adminNukeAllBtn').addEventListener('click', async () => {
-        if (!adminSb) { alert('Supabase not connected'); return; }
-        const typed = prompt('⚠️ DANGER ZONE ⚠️\n\nThis will DELETE ALL recordings, grades, and feedback for ALL lessons.\n\nType "DELETE ALL" to confirm:');
-        if (typed !== 'DELETE ALL') { alert('Cancelled.'); return; }
-        if (!confirm('ABSOLUTE FINAL WARNING: This will destroy ALL student work across ALL lessons. Proceed?')) return;
-        const { error } = await adminSb.from('qrasm_recordings').delete().neq('id', 0);
-        if (error) alert('Error: ' + error.message);
-        else alert('✅ All lesson data has been permanently deleted from Supabase.');
-    });
-}
 </script>
 </body>
 </html>

@@ -7,7 +7,7 @@ import json, base64, os, sys
 
 LOGO_PATH = r"D:\lighknight\logo.png"
 WM_PATH   = r"D:\lighknight\myWaterMark.jpg"
-PORTAL_DIR = r"D:\humming-the-W-Y"
+PORTAL_DIR = r"D:\KeepTheFlow"
 
 def b64(path):
     ext = os.path.splitext(path)[1].lower().lstrip(".")
