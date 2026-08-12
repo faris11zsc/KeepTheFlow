@@ -1,62 +1,46 @@
 [
   {
     "id": "idgham-yw-5-12",
-    "title": "Idgham of Noon & Tanween in Yaa or Waw",
+    "title": "the humming y&w",
     "titleAr": "إدغام النون والتنوين في الياء أو الواو",
     "rule": "Idgham of Noon and Tanween in Yaa or Waw",
     "syllables": "5-12",
     "instances": 143,
     "path": "lessons/idgham-yw-5-12/",
     "assignmentId": "idgham_yw_lesson",
-    "dateAdded": "2026-08-04",
     "color": "#c5a44e"
-  },
-  {
-    "id": "idgham-yw-5-12-dark",
-    "title": "Idgham · Dark Mode",
-    "titleAr": "إدغام النون والتنوين · الوضع الداكن",
-    "rule": "Idgham of Noon and Tanween in Yaa or Waw",
-    "syllables": "5-12",
-    "instances": 143,
-    "path": "lessons/idgham-yw-5-12-dark/",
-    "assignmentId": "idgham_yw_lesson",
-    "dateAdded": "2026-08-04",
-    "color": "#1a2744"
   },
   {
     "id": "ghunnah-5-12",
     "title": "Ghunnah of Noon and Meem",
-    "titleAr": "النون والميم المشددتين",
+    "titleAr": "نّ+مّ",
     "rule": "Ghunnah of Noon and Meem",
     "syllables": "5-12",
     "instances": 696,
     "path": "lessons/ghunnah-5-12/",
     "assignmentId": "ghunnah_5_12_lesson",
-    "dateAdded": "2026-08-10",
     "color": "#e07a5f"
   },
   {
     "id": "iqlab-ikhfa-shafawi-5-20",
-    "title": "Iqlab and Ikhfa Shafawi",
+    "title": "the floating humming meem",
     "titleAr": "الإقلاب والإخفاء الشفوي",
     "rule": "Iqlab and Ikhfa Shafawi",
     "syllables": "5-20",
     "instances": 218,
     "path": "lessons/iqlab-ikhfa-shafawi-5-20/",
     "assignmentId": "iqlab_ikhfa_shafawi_5_20_lesson",
-    "dateAdded": "2026-08-10",
     "color": "#81b29a"
   },
   {
     "id": "extended-humming-5-12",
-    "title": "Extended Humming (Ikhfa)",
+    "title": "extended nasal noon",
     "titleAr": "الإخفاء الحقيقي",
     "rule": "Extended Humming",
     "syllables": "5-12",
     "instances": 364,
     "path": "lessons/extended-humming-5-12/",
     "assignmentId": "extended_humming_5_12_lesson",
-    "dateAdded": "2026-08-10",
     "color": "#3d5a80"
   }
 ]
