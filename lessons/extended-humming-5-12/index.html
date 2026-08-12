@@ -13593,6 +13593,9 @@ document.addEventListener('DOMContentLoaded', () => {
                               fbSendBtn.className = 'admin-fb-btn';
                               fbSendBtn.style.background = '#8B5CF6';
                               fbSendBtn.onclick = async () => {
+                                  const hasText = fbText.value.trim().length > 0;
+                                  const hasAudio = !!fbAudioBlob;
+                                  if (!hasText && !hasAudio) { alert('Please type feedback or record voice feedback.'); return; }
                                   fbSendBtn.disabled = true;
                                   fbSendBtn.textContent = 'Sending...';
                                   
@@ -13612,11 +13615,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                       assignment_id: assignmentId,
                                       instance_number: parseInt(inst),
                                       student_name: 'ADMIN_FEEDBACK_' + record.student_name,
-                                      grade: fbText.value || 'Please review the audio feedback.',
+                                      grade: fbText.value.trim() || (fbAudioBlob ? 'Voice feedback attached - please listen to the audio.' : ''),
                                       audio_url: audioUrl
                                   });
                                   
-                                  if(error) alert('Error: '+error.message);
+                                  if(error) { alert('Error: '+error.message); fbSendBtn.disabled = false; fbSendBtn.textContent = '\ud83d\udce4 Send'; }
                                   else {
                                       fbSendBtn.textContent = '✅ Sent!';
                                       setTimeout(()=>fbWrapper.style.display='none', 1500);
