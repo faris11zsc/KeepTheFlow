@@ -2884,6 +2884,34 @@ main {
 .item, .rule-header, .admin-dashboard, .student-progress, .student-record-wrap {
     transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease;
 }
+
+.exit-lesson-btn {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--bg) 80%, var(--line) 20%);
+    color: var(--ref);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid color-mix(in srgb, var(--ref) 12%, transparent);
+    border-radius: 99px;
+    padding: 6px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+.exit-lesson-btn:hover {
+    border-color: color-mix(in srgb, var(--ref) 30%, transparent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
 </style>
 </head>
 <body>
@@ -23839,6 +23867,12 @@ main {
     <button id="loginBtn" class="save-btn" style="width:100%; font-size:16px; padding:14px; border-radius:12px;">Start Practicing</button>
   </div>
 </div>
+
+<!-- Exit Lesson Button -->
+<a href="https://keep-the-flow.vercel.app/" class="exit-lesson-btn" title="Return to Dashboard">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="margin-right: 6px;"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Dashboard
+</a>
 <!-- Theme Toggle -->
 <div class="theme-toggle" id="themeToggle" title="Switch dark/light mode">
     <span class="toggle-icon" id="themeIcon">☀️</span>
