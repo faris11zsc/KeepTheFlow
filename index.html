@@ -484,7 +484,6 @@ document.getElementById('loginBtn').addEventListener('click', () => {
     const name = document.getElementById('loginName').value.trim();
     const email = document.getElementById('loginEmail').value.trim();
     if (!name) return alert('Please enter your name');
-    if (!email || !email.includes('@')) return alert('Please enter a valid email');
     localStorage.setItem('qrasm_student_name', name);
     localStorage.setItem('qrasm_student_email', email);
     currentUser = name;

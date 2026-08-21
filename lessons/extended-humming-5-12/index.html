@@ -13250,7 +13250,13 @@ document.addEventListener('DOMContentLoaded', () => {
               const email = (document.getElementById('emailInput') || {}).value || '';
               if (name) {
                   localStorage.setItem('qrasm_student_name', name);
-                  if (email.trim()) localStorage.setItem('qrasm_student_email', email.trim());
+                  localStorage.setItem('qrasm_student_email', email.trim());
+                  if (sb) {
+                      sb.from('qrasm_student_emails').upsert(
+                          { student_name: name, email: email.trim() },
+                          { onConflict: 'student_name' }
+                      ).then(() => {}).catch(() => {});
+                  }
                   currentUser = name;
                   // Show "add to contacts" prompt for email deliverability
                   if (email.trim()) {
