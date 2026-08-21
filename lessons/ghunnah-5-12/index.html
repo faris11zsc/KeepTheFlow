@@ -24110,10 +24110,11 @@ document.addEventListener('DOMContentLoaded', () => {
                           btn.style.background = '#10B981';
                           btn.style.color = 'white';
                       } else if (r.grade === 'retry') {
-                          btn.textContent = '🔴 Try Again';
+                          btn.innerHTML = '🎙️ Record Again';
                           btn.disabled = false;
                           btn.style.background = '#E11D48';
                           btn.style.color = 'white';
+                          btn.style.boxShadow = '0 0 8px rgba(225, 29, 72, 0.6)';
                           // Re-record: reset the recorder UI so student can submit again
                           const cRec = ui.querySelector('.record-controls');
                           const cUp = ui.querySelector('.upload-controls');
