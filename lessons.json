@@ -42,5 +42,16 @@
     "path": "lessons/extended-humming-5-12/",
     "assignmentId": "extended_humming_5_12_lesson",
     "color": "#3d5a80"
+  },
+  {
+    "id": "ghunnah-noon-meem-5-12",
+    "title": "Ghunnah of Noon and Meem",
+    "titleAr": "النون والميم المشددتان",
+    "rule": "Ghunnah of Noon and Meem",
+    "syllables": "5-12",
+    "instances": 696,
+    "path": "lessons/ghunnah-noon-meem-5-12/",
+    "assignmentId": "ghunnah_noon_meem_lesson",
+    "color": "#e07a5f"
   }
 ]
