@@ -24089,7 +24089,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!studentName) { console.error('[KTF] studentName is empty!'); return; }
       sb.from('qrasm_recordings').select('instance_number, grade, audio_url, student_name, created_at')
         .eq('assignment_id', assignmentId)
-        .in('student_name', [studentName, 'ADMIN_FEEDBACK_' + studentName])
+        .or('student_name.ilike.' + studentName + ',student_name.ilike.ADMIN_FEEDBACK_' + studentName)
         .order('created_at', {ascending: false})
         .then(({data, error})=>{
           if (error) console.error('[KTF] Supabase query error:', error);
@@ -24098,14 +24098,14 @@ document.addEventListener('DOMContentLoaded', () => {
               const processed = new Set();
               const feedbackMap = {};
               data.forEach(r => {
-                  if (r.student_name === 'ADMIN_FEEDBACK_' + studentName) {
+                  if (r.student_name.toLowerCase() === ('ADMIN_FEEDBACK_' + studentName).toLowerCase()) {
                       if (!feedbackMap[r.instance_number]) {
                           feedbackMap[r.instance_number] = r;
                       }
                   }
               });
               data.forEach(r => {
-                  if (r.student_name === 'ADMIN_FEEDBACK_' + studentName) return;
+                  if (r.student_name.toLowerCase() === ('ADMIN_FEEDBACK_' + studentName).toLowerCase()) return;
                   if(processed.has(r.instance_number)) return;
                   processed.add(r.instance_number);
                   const ui = document.querySelector(`.recorder-ui[data-instance="${r.instance_number}"]`);
@@ -24199,7 +24199,7 @@ document.addEventListener('DOMContentLoaded', () => {
               const hiddenItems = document.querySelectorAll('.item[style*="display: none"]').length;
               const visibleTotal = totalItems - hiddenItems;
               const recorded = processed.size;
-              const graded = data.filter(r => r.student_name !== 'ADMIN_FEEDBACK_' + studentName && r.grade && r.grade !== '').length;
+              const graded = data.filter(r => r.student_name.toLowerCase() !== ('ADMIN_FEEDBACK_' + studentName).toLowerCase() && r.grade && r.grade !== '').length;
               const progWrap = document.createElement('div');
               progWrap.className = 'student-progress';
               const pct = visibleTotal > 0 ? Math.round((recorded / visibleTotal) * 100) : 0;
