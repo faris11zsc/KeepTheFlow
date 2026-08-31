@@ -5957,13 +5957,6 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(({data, error})=>{
           if (error) console.error('[KTF] Supabase query error:', error);
           console.log('[KTF] fetchStudentProgress got', data ? data.length : 0, 'rows');
-          var diag = document.getElementById('ktf-diag');
-          if (diag) {
-              diag.textContent += ' | Records found: ' + (data ? data.length : 0);
-              if (error) diag.textContent += ' | ERROR: ' + JSON.stringify(error);
-              diag.style.background = (data && data.length > 0) ? '#10B981' : '#E11D48';
-              diag.style.color = '#fff';
-          }
           if (data) {
               const processed = new Set();
               const feedbackMap = {};
@@ -6151,15 +6144,6 @@ document.addEventListener('DOMContentLoaded', () => {
           });
       } else {
           console.log('[KTF] Returning student, loading progress for:', currentUser, 'assignment:', assignmentId);
-          // DIAGNOSTIC BANNER - will auto-hide after 10s
-          (function(){
-              var d = document.createElement('div');
-              d.id = 'ktf-diag';
-              d.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#1a2744;color:#c5a44e;padding:8px 16px;font-size:12px;z-index:99999;font-family:monospace;text-align:center;';
-              d.textContent = 'Loading progress for: ' + currentUser + ' | Assignment: ' + assignmentId;
-              document.body.appendChild(d);
-              setTimeout(function(){ if(d.parentElement) d.remove(); }, 10000);
-          })();
           fetchStudentProgress(assignmentId, currentUser);
       }
   }
