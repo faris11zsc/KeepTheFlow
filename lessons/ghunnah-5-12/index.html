@@ -24267,7 +24267,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   if (email.trim()) {
                       const tip = document.createElement('div');
                       tip.style.cssText = 'position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#1a2744,#2a3a5e);color:#fff;padding:16px 20px;z-index:99999;text-align:center;font-size:14px;font-family:inherit;box-shadow:0 4px 20px rgba(0,0,0,0.3);';
-                      tip.innerHTML = '<span style="color:#c5a44e;font-weight:700;">Tip:</span> To receive feedback notifications in your inbox, please <b>add lightknightf1@gmail.com to your contacts</b>. <button onclick="this.parentElement.remove()" style="margin-left:12px;background:#c5a44e;color:#1a2744;border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;">Got it</button>';
+                      tip.innerHTML = '<a href="mailto:lightknightf1@gmail.com?subject=Assalamu%20Alaikum&body=Assalamu%20alaikum" style="text-decoration:none;color:inherit;display:block;"><span style="color:#c5a44e;font-weight:700;">Tip:</span> To receive feedback notifications, <b>tap here to send a quick hello</b> to your teacher\'s email so it lands in your contacts.</a> <button onclick="event.stopPropagation();this.parentElement.remove()" style="margin-left:12px;background:#c5a44e;color:#1a2744;border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;">Got it</button>';
                       document.body.appendChild(tip);
                       setTimeout(() => { if (tip.parentElement) tip.remove(); }, 15000);
                   }
