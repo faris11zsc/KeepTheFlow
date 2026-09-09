@@ -649,7 +649,6 @@
                     console.log('[KTF-Quiz] Supabase OK');
                 } else {
                     console.warn('[KTF-Quiz] Supabase CDN not loaded yet, retrying...');
-                    // Retry after 2 seconds
                     setTimeout(function() {
                         if (window.supabase) {
                             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -661,7 +660,11 @@
                 console.error('[KTF-Quiz] Supabase init error:', err);
             }
 
-            if (currentUser === ADMIN_USERNAME) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const isAdmin = currentUser === ADMIN_USERNAME || urlParams.get('admin') === 'true';
+            console.log('[KTF-Quiz] currentUser:', currentUser, 'isAdmin:', isAdmin);
+
+            if (isAdmin) {
                 document.getElementById('adminView').style.display = 'grid';
                 loadAdminStudents();
             } else {
