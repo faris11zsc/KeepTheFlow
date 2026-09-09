@@ -636,12 +636,8 @@
                 return;
             }
 
-            // DEBUG banner
-            var dbg = document.createElement('div');
-            dbg.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#1a2744;color:#c5a44e;padding:8px;font-size:12px;z-index:99999;font-family:monospace;text-align:center;';
-            dbg.textContent = 'User: [' + currentUser + '] | Admin match: ' + (currentUser === ADMIN_USERNAME);
-            document.body.appendChild(dbg);
-            setTimeout(function(){ if(dbg.parentElement) dbg.remove(); }, 15000);
+
+
 
             document.getElementById('displayStudentName').textContent = currentUser;
             document.getElementById('logoutBtn').style.display = 'block';
@@ -972,7 +968,11 @@
         }
 
         // Run
-        window.addEventListener('DOMContentLoaded', init);
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
     </script>
 </body>
 </html>
