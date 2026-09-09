@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keep The Flow — QuizMe</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy-base: #0f1a30;
+            --navy-surface: #1a2744;
+            --navy-elevated: #2a3a5e;
+            --gold-accent: #c5a44e;
+            --gold-bright: #d4b86a;
+            --gold-dim: rgba(197, 164, 78, 0.2);
+            --text-main: #e8e6e3;
+            --text-dim: #8a95a8;
+            --success: #22c55e;
+            --danger: #ef4444;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body {
+            background-color: var(--navy-base);
+            background-image: radial-gradient(circle at top right, var(--navy-surface) 0%, var(--navy-base) 60%);
+            color: var(--text-main);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .top-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 2rem; background: rgba(15, 26, 48, 0.8);
+            backdrop-filter: blur(12px); border-bottom: 1px solid var(--gold-dim);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .back-btn { color: var(--gold-accent); text-decoration: none; font-weight: 500; }
+        .back-btn:hover { color: var(--gold-bright); }
+        .page-title {
+            font-size: 1.5rem; font-weight: 700;
+            background: linear-gradient(135deg, var(--gold-bright), var(--gold-accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .user-info { display: flex; align-items: center; gap: 1rem; }
+        .logout-btn {
+            background: none; border: 1px solid var(--gold-accent); color: var(--gold-accent);
+            padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem;
+        }
+        .logout-btn:hover { background: var(--gold-dim); color: var(--gold-bright); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .quote-section {
+            text-align: center; max-width: 800px; margin: 0 auto 3rem auto; padding: 2rem;
+            background: rgba(26, 39, 68, 0.3); border-radius: 16px;
+            border-left: 2px solid var(--gold-dim); border-right: 2px solid var(--gold-dim);
+        }
+        .quote-intro { color: var(--gold-accent); font-size: 0.875rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; opacity: 0.8; }
+        .quote-arabic { font-family: 'Amiri', serif; font-size: 1.75rem; color: var(--gold-bright); direction: rtl; line-height: 2; margin-bottom: 1.5rem; }
+        .quote-english { font-size: 0.95rem; font-style: italic; color: var(--text-dim); }
+        .quote-divider { height: 1px; background: var(--gold-accent); opacity: 0.15; margin-top: 1.5rem; width: 50%; margin-left: auto; margin-right: auto; }
+        .student-view { display: none; }
+        .quiz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; }
+        .quiz-card {
+            background: rgba(42, 58, 94, 0.4); border-radius: 12px; padding: 1.5rem;
+            border: 1px solid rgba(197, 164, 78, 0.1); backdrop-filter: blur(16px);
+            transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; gap: 1rem;
+            animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .quiz-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); border-color: var(--gold-dim); }
+        .quiz-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .quiz-title { font-size: 1.25rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.25rem; }
+        .quiz-meta { font-size: 0.875rem; color: var(--text-dim); }
+        .quiz-badge { padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .badge-completed { background: rgba(34, 197, 94, 0.1); color: var(--success); border: 1px solid rgba(34, 197, 94, 0.2); display: flex; align-items: center; gap: 4px; }
+        .badge-completed::before { content: '✓'; }
+        .badge-pending { background: rgba(197, 164, 78, 0.1); color: var(--gold-accent); border: 1px solid var(--gold-dim); }
+        .take-quiz-btn {
+            display: inline-block; text-align: center; background: var(--gold-accent); color: var(--navy-base);
+            text-decoration: none; padding: 0.75rem; border-radius: 8px; font-weight: 600; margin-top: auto;
+        }
+        .take-quiz-btn:hover { background: var(--gold-bright); }
+        .admin-view { display: none; grid-template-columns: 300px 1fr; gap: 2rem; }
+        @media (max-width: 768px) { .admin-view { grid-template-columns: 1fr; } .quiz-grid { grid-template-columns: 1fr; } }
+        .student-list-panel { background: rgba(26, 39, 68, 0.4); border-radius: 12px; border: 1px solid var(--gold-dim); padding: 1.5rem; height: fit-content; }
+        .student-list-panel h3 { margin-bottom: 1rem; color: var(--gold-bright); }
+        .student-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; max-height: 500px; overflow-y: auto; }
+        .student-item { padding: 0.75rem 1rem; background: rgba(15, 26, 48, 0.6); border-radius: 6px; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
+        .student-item:hover, .student-item.active { background: rgba(42, 58, 94, 0.6); border-color: var(--gold-dim); color: var(--gold-bright); }
+        .admin-content-panel { display: flex; flex-direction: column; gap: 1.5rem; }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; }
+        .btn-primary { background: var(--gold-accent); color: var(--navy-base); border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .btn-primary:hover { background: var(--gold-bright); }
+        .btn-secondary { background: rgba(42, 58, 94, 0.6); color: var(--text-main); border: 1px solid var(--gold-dim); padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; }
+        .btn-secondary:hover { background: rgba(42, 58, 94, 0.9); border-color: var(--gold-accent); }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 26, 48, 0.8); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal { background: var(--navy-surface); border: 1px solid var(--gold-dim); border-radius: 12px; padding: 2rem; width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .close-modal { background: none; border: none; color: var(--text-dim); font-size: 1.5rem; cursor: pointer; }
+        .close-modal:hover { color: var(--text-main); }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; color: var(--gold-accent); font-size: 0.9rem; }
+        .form-control { width: 100%; padding: 0.75rem; background: rgba(15, 26, 48, 0.6); border: 1px solid var(--navy-elevated); border-radius: 6px; color: var(--text-main); font-size: 1rem; }
+        .form-control:focus { outline: none; border-color: var(--gold-accent); }
+        textarea.form-control { resize: vertical; min-height: 120px; }
+        .q-card-editor { background: rgba(42, 58, 94, 0.3); border: 1px solid var(--navy-elevated); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .q-options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 1rem 0; }
+        @media (max-width: 600px) { .q-options { grid-template-columns: 1fr; } }
+        .q-opt-btn { background: rgba(15, 26, 48, 0.5); border: 1px solid var(--navy-elevated); color: var(--text-dim); padding: 0.5rem; border-radius: 6px; cursor: pointer; text-align: left; display: flex; align-items: center; }
+        .q-opt-btn.correct { background: rgba(34, 197, 94, 0.1); border-color: var(--success); color: var(--text-main); }
+        .q-opt-btn input { width: 100%; background: transparent; border: none; color: inherit; outline: none; margin-left: 0.5rem; }
+        .delete-q-btn { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
+        .empty-state { text-align: center; padding: 3rem; color: var(--text-dim); background: rgba(26, 39, 68, 0.2); border-radius: 12px; border: 1px dashed var(--navy-elevated); grid-column: 1 / -1; }
+        #loginOverlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--navy-base); display: none; justify-content: center; align-items: center; z-index: 9999; }
+        .login-box { background: var(--navy-surface); padding: 2.5rem; border-radius: 16px; border: 1px solid var(--gold-dim); width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .login-box h2 { color: var(--gold-bright); margin-bottom: 1.5rem; }
+    </style>
+</head>
+<body>
+
+    <!-- Login Overlay -->
+    <div id="loginOverlay" style="display: none;">
+        <div class="login-box">
+            <h2>Welcome to QuizMe</h2>
+            <div class="form-group" style="text-align: left;">
+                <label>Your Name</label>
+                <input type="text" id="loginName" class="form-control" placeholder="e.g. Abdullah">
+            </div>
+            <div class="form-group" style="text-align: left;">
+                <label>Email (Optional)</label>
+                <input type="email" id="loginEmail" class="form-control" placeholder="For progress recovery">
+            </div>
+            <button class="btn-primary" style="width: 100%;" onclick="handleLogin()">Enter</button>
+        </div>
+    </div>
+
+    <!-- Top Bar -->
+    <header class="top-bar">
+        <a href="../index.html" class="back-btn">⮜ Dashboard</a>
+        <h1 class="page-title">QuizMe</h1>
+        <div class="user-info">
+            <span id="displayStudentName"></span>
+            <button class="logout-btn" onclick="logout()" id="logoutBtn" style="display:none;">Logout</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Quote Section -->
+        <div class="quote-section">
+            <div class="quote-intro">It was narrated about the Prophet ﷺ</div>
+            <div class="quote-arabic">أَلَا إِنَّ الدُّنْيَا مَلْعُونَةٌ مَلْعُونٌ مَا فِيهَا إِلَّا ذِكْرَ اللهِ وَمَا وَالَاهُ وَعَالِمٌ أَوْ مُتَعَلِّمٌ</div>
+            <div class="quote-english">"Verily, the world is cursed and cursed is all that is in it, except the remembrance of Allah and what is associated with it, a scholar, or a student of knowledge."</div>
+            <div class="quote-divider"></div>
+        </div>
+
+        <!-- Student View -->
+        <main id="studentView" class="student-view">
+            <div id="studentQuizzes" class="quiz-grid"></div>
+        </main>
+
+        <!-- Admin View -->
+        <main id="adminView" class="admin-view">
+            <aside class="student-list-panel">
+                <h3>Students</h3>
+                <ul id="adminStudentList" class="student-list"></ul>
+            </aside>
+            <section class="admin-content-panel">
+                <div class="panel-header">
+                    <h2 style="color: var(--gold-bright);">Quizzes: <span id="adminSelectedStudent">Select a student</span></h2>
+                    <button class="btn-primary" id="addQuizBtn" style="display: none;" onclick="openQuizModal()">+ Add New Quiz</button>
+                </div>
+                <div id="adminQuizList" class="quiz-grid">
+                    <div class="empty-state">Select a student from the left panel to view or add quizzes.</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Add Quiz Modal -->
+    <div id="quizModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 style="color: var(--gold-bright);">Create New Quiz</h2>
+                <button class="close-modal" onclick="closeQuizModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>Quiz Title</label>
+                <input type="text" id="newQuizTitle" class="form-control" placeholder="e.g. Seerah Week 1 Quiz">
+            </div>
+            <div class="form-group">
+                <label>Paste Raw Questions</label>
+                <textarea id="rawQuestionsText" class="form-control" placeholder="1. Question text? A) Option A B) Option B C) Option C D) Option D"></textarea>
+                <div style="margin-top: 0.5rem; text-align: right;">
+                    <button class="btn-secondary" onclick="parseRawQuestions()">Parse Questions</button>
+                </div>
+            </div>
+            <div id="parsedQuestionsContainer"></div>
+            <div style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem;">
+                <button class="btn-secondary" onclick="closeQuizModal()">Cancel</button>
+                <button class="btn-primary" onclick="saveQuiz()">Save & Assign Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase loaded AFTER the HTML so DOM is ready -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // ===== CONFIG =====
+        var SUPABASE_URL = 'https://lhebavvnrwqojbhyodwc.supabase.co';
+        var SUPABASE_KEY = 'sb_publishable_JW75ayCf5SbvyT-02GmjNQ_vFpivPTU';
+        var ADMIN_USERNAME = '89FarisAuraKnight89';
+        var supabase = null;
+        var currentUser = localStorage.getItem('qrasm_student_name');
+        var selectedStudentForAdmin = null;
+        var draftQuestions = [];
+
+        // ===== INIT — runs immediately =====
+        (function init() {
+            console.log('[QM] init() fired. currentUser:', currentUser);
+
+            // Show login if no user
+            if (!currentUser) {
+                document.getElementById('loginOverlay').style.display = 'flex';
+                return;
+            }
+
+            // Show user name and logout
+            document.getElementById('displayStudentName').textContent = currentUser;
+            document.getElementById('logoutBtn').style.display = 'block';
+
+            // Init Supabase (best-effort)
+            try {
+                if (window.supabase && window.supabase.createClient) {
+                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                    console.log('[QM] Supabase ready');
+                } else {
+                    console.warn('[QM] Supabase CDN not available');
+                }
+            } catch (e) {
+                console.error('[QM] Supabase error:', e);
+            }
+
+            // Admin check — case insensitive + URL param fallback
+            var urlParams = new URLSearchParams(window.location.search);
+            var isAdmin = (currentUser.trim().toLowerCase() === ADMIN_USERNAME.toLowerCase()) || (urlParams.get('admin') === 'true');
+            console.log('[QM] isAdmin:', isAdmin);
+
+            if (isAdmin) {
+                document.getElementById('adminView').style.display = 'grid';
+                loadAdminStudents();
+            } else {
+                document.getElementById('studentView').style.display = 'block';
+                if (supabase) loadStudentQuizzes(currentUser);
+            }
+        })();
+
+        // ===== AUTH =====
+        function handleLogin() {
+            var name = document.getElementById('loginName').value.trim();
+            var email = document.getElementById('loginEmail').value.trim();
+            if (!name) { alert('Please enter your name.'); return; }
+            localStorage.setItem('qrasm_student_name', name);
+            if (email && supabase) {
+                supabase.from('qrasm_student_emails').upsert({ student_name: name, email: email }).then(function() {
+                    window.location.reload();
+                });
+            } else {
+                window.location.reload();
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('qrasm_student_name');
+            window.location.reload();
+        }
+
+        // ===== ADMIN: STUDENT LIST (hardcoded) =====
+        function loadAdminStudents() {
+            var STUDENTS = [
+                { name: 'Youssef', email: 'awawda.sanaa@yahoo.com' },
+                { name: 'Omar Awawda', email: 'awawda.sanaa@yahoo.com' },
+                { name: 'Abraham musbeh', email: 'musbehabraham@gmail.com' },
+                { name: 'Mohammad Musbeh', email: 'mohammadmusbeh@gmail.com' },
+                { name: 'Teddy', email: '' },
+                { name: 'jack', email: '' }
+            ];
+
+            var list = document.getElementById('adminStudentList');
+            list.innerHTML = '';
+            for (var i = 0; i < STUDENTS.length; i++) {
+                var s = STUDENTS[i];
+                var li = document.createElement('li');
+                li.className = 'student-item';
+                li.innerHTML = '<span>' + s.name + '</span>' +
+                    (s.email
+                        ? '<span style="font-size:11px;color:var(--text-dim);display:block;">' + s.email + '</span>'
+                        : '<span style="font-size:11px;color:#EF4444;display:block;">No email</span>');
+                li.setAttribute('data-name', s.name);
+                li.onclick = (function(name, el) {
+                    return function() { selectAdminStudent(name, el); };
+                })(s.name, li);
+                list.appendChild(li);
+            }
+            console.log('[QM] Loaded', STUDENTS.length, 'students');
+        }
+
+        function selectAdminStudent(name, liElement) {
+            var items = document.querySelectorAll('.student-item');
+            for (var i = 0; i < items.length; i++) items[i].classList.remove('active');
+            if (liElement) liElement.classList.add('active');
+            selectedStudentForAdmin = name;
+            document.getElementById('adminSelectedStudent').textContent = name;
+            document.getElementById('addQuizBtn').style.display = 'block';
+            if (supabase) loadStudentQuizzes(name, true);
+        }
+
+        // ===== STUDENT VIEW: LOAD QUIZZES =====
+        function loadStudentQuizzes(studentName, isAdminView) {
+            if (!supabase) {
+                var c = isAdminView ? document.getElementById('adminQuizList') : document.getElementById('studentQuizzes');
+                c.innerHTML = '<div class="empty-state">Database not loaded. Please refresh the page.</div>';
+                return;
+            }
+
+            supabase.from('qrasm_recordings').select('*')
+                .eq('student_name', 'QUIZ_DEF_' + studentName)
+                .eq('assignment_id', 'quizme')
+                .order('created_at', { ascending: false })
+                .then(function(res) {
+                    if (res.error) throw res.error;
+                    var defs = res.data || [];
+
+                    supabase.from('qrasm_recordings').select('*')
+                        .eq('student_name', 'QUIZ_SCORE_' + studentName)
+                        .eq('assignment_id', 'quizme')
+                        .then(function(res2) {
+                            var scores = (res2.data || []);
+                            var scoreMap = {};
+                            for (var i = 0; i < scores.length; i++) {
+                                scoreMap[scores[i].instance_number] = scores[i].grade;
+                            }
+
+                            var container = isAdminView ? document.getElementById('adminQuizList') : document.getElementById('studentQuizzes');
+                            container.innerHTML = '';
+
+                            if (defs.length === 0) {
+                                container.innerHTML = '<div class="empty-state">No quizzes assigned yet.</div>';
+                                return;
+                            }
+
+                            for (var d = 0; d < defs.length; d++) {
+                                var def = defs[d];
+                                var quizData = {};
+                                try { quizData = typeof def.grade === 'string' ? JSON.parse(def.grade) : def.grade; } catch(e) {}
+
+                                var title = (quizData.title || def.audio_url || 'Untitled Quiz');
+                                var date = (quizData.date || new Date(def.created_at).toLocaleDateString());
+                                var qCount = quizData.questions ? quizData.questions.length : 0;
+                                var score = scoreMap[def.instance_number];
+
+                                var card = document.createElement('div');
+                                card.className = 'quiz-card';
+
+                                var badgeHtml = '';
+                                var actionHtml = '';
+                                var quizLink = '../quizme/quiz.html?quizId=' + def.instance_number + '&student=' + encodeURIComponent(studentName);
+
+                                if (score) {
+                                    badgeHtml = '<span class="quiz-badge badge-completed">' + score + '</span>';
+                                    if (!isAdminView) {
+                                        actionHtml = '<a href="' + quizLink + '" class="take-quiz-btn" style="background: var(--navy-elevated); color: var(--text-main);">Review Quiz</a>';
+                                    }
+                                } else {
+                                    badgeHtml = '<span class="quiz-badge badge-pending">' + qCount + ' Questions</span>';
+                                    if (!isAdminView) {
+                                        actionHtml = '<a href="' + quizLink + '" class="take-quiz-btn">Take Quiz &rarr;</a>';
+                                    }
+                                }
+
+                                card.innerHTML = '<div class="quiz-header"><div><div class="quiz-title">' + title + '</div><div class="quiz-meta">Assigned: ' + date + '</div></div>' + badgeHtml + '</div>' + actionHtml;
+                                container.appendChild(card);
+                            }
+                        });
+                })
+                .catch(function(err) {
+                    console.error('[QM] Error:', err);
+                    var c = isAdminView ? document.getElementById('adminQuizList') : document.getElementById('studentQuizzes');
+                    c.innerHTML = '<div class="empty-state" style="color:var(--danger)">Error loading quizzes.</div>';
+                });
+        }
+
+        // ===== ADMIN: QUIZ MODAL =====
+        function openQuizModal() {
+            document.getElementById('quizModal').style.display = 'flex';
+            document.getElementById('newQuizTitle').value = '';
+            document.getElementById('rawQuestionsText').value = '';
+            document.getElementById('parsedQuestionsContainer').innerHTML = '';
+            draftQuestions = [];
+        }
+
+        function closeQuizModal() {
+            document.getElementById('quizModal').style.display = 'none';
+        }
+
+        function parseRawQuestions() {
+            var raw = document.getElementById('rawQuestionsText').value;
+            var splitByNumbers = raw.split(/\d+\.\s*/).filter(function(s) { return s.trim().length > 0; });
+
+            draftQuestions = splitByNumbers.map(function(block, index) {
+                var qText = block.trim();
+                var opts = ['Option A', 'Option B', 'Option C', 'Option D'];
+                var optMatch = block.match(/A\)(.*?)(?=B\)|$)B\)(.*?)(?=C\)|$)C\)(.*?)(?=D\)|$)D\)(.*)/s);
+                if (optMatch) {
+                    qText = block.substring(0, block.indexOf('A)')).trim();
+                    opts = [optMatch[1].trim(), optMatch[2].trim(), optMatch[3].trim(), optMatch[4].trim()];
+                }
+                return { id: Date.now() + index, text: qText, options: opts, correctIndex: 0, rationale: '', tier: 'Standard' };
+            });
+            renderDraftQuestions();
+        }
+
+        function renderDraftQuestions() {
+            var container = document.getElementById('parsedQuestionsContainer');
+            container.innerHTML = '';
+            for (var qi = 0; qi < draftQuestions.length; qi++) {
+                var q = draftQuestions[qi];
+                var card = document.createElement('div');
+                card.className = 'q-card-editor';
+                var optsHtml = '';
+                for (var oi = 0; oi < q.options.length; oi++) {
+                    var isC = q.correctIndex === oi;
+                    optsHtml += '<div class="q-opt-btn ' + (isC ? 'correct' : '') + '" onclick="setCorrectOption(' + qi + ',' + oi + ')">' +
+                        '<span style="font-weight:bold;color:var(--gold-accent);margin-right:8px;">' + String.fromCharCode(65 + oi) + ')</span>' +
+                        '<input type="text" value="' + q.options[oi].replace(/"/g, '&quot;') + '" onchange="updateOption(' + qi + ',' + oi + ',this.value)" onclick="event.stopPropagation()">' +
+                        '</div>';
+                }
+                card.innerHTML = '<div style="display:flex;justify-content:space-between;margin-bottom:1rem;"><strong style="color:var(--gold-bright);">Question ' + (qi + 1) + '</strong><button class="delete-q-btn" onclick="deleteDraftQuestion(' + qi + ')">Delete</button></div>' +
+                    '<textarea class="form-control" style="min-height:60px;margin-bottom:1rem;" onchange="updateQText(' + qi + ',this.value)">' + q.text + '</textarea>' +
+                    '<div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:0.5rem;">Click an option box to mark as correct answer</div>' +
+                    '<div class="q-options">' + optsHtml + '</div>' +
+                    '<div style="display:flex;gap:1rem;flex-wrap:wrap;">' +
+                    '<div style="flex:1;min-width:200px;"><label style="font-size:0.8rem;color:var(--gold-accent);">Rationale</label><textarea class="form-control" style="min-height:40px;" onchange="updateQRationale(' + qi + ',this.value)">' + q.rationale + '</textarea></div>' +
+                    '<div style="width:150px;"><label style="font-size:0.8rem;color:var(--gold-accent);">Tier</label><input type="text" class="form-control" value="' + q.tier + '" onchange="updateQTier(' + qi + ',this.value)"></div>' +
+                    '</div>';
+                container.appendChild(card);
+            }
+        }
+
+        function setCorrectOption(qi, oi) { draftQuestions[qi].correctIndex = oi; renderDraftQuestions(); }
+        function updateOption(qi, oi, v) { draftQuestions[qi].options[oi] = v; }
+        function updateQText(qi, v) { draftQuestions[qi].text = v; }
+        function updateQRationale(qi, v) { draftQuestions[qi].rationale = v; }
+        function updateQTier(qi, v) { draftQuestions[qi].tier = v; }
+        function deleteDraftQuestion(qi) { draftQuestions.splice(qi, 1); renderDraftQuestions(); }
+
+        function saveQuiz() {
+            if (!selectedStudentForAdmin) return alert('No student selected');
+            if (!supabase) return alert('Database not available. Please refresh.');
+            var title = document.getElementById('newQuizTitle').value.trim() || 'Untitled Quiz';
+            if (draftQuestions.length === 0) return alert('Please add at least one question.');
+
+            var quizData = { title: title, date: new Date().toLocaleDateString(), questions: draftQuestions };
+            var instanceId = Date.now().toString();
+
+            supabase.from('qrasm_recordings').insert({
+                student_name: 'QUIZ_DEF_' + selectedStudentForAdmin,
+                assignment_id: 'quizme',
+                instance_number: instanceId,
+                grade: JSON.stringify(quizData),
+                audio_url: title
+            }).then(function(res) {
+                if (res.error) { alert('Failed: ' + res.error.message); return; }
+                alert('Quiz assigned successfully!');
+                closeQuizModal();
+                loadStudentQuizzes(selectedStudentForAdmin, true);
+            });
+        }
+    </script>
+</body>
+</html>
