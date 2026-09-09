@@ -636,32 +636,26 @@
                 return;
             }
 
-
-
+            // Init Supabase
+            if (window.supabase) {
+                try {
+                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                } catch (err) {
+                    console.error('[KTF-Quiz] Supabase init error:', err);
+                }
+            } else {
+                console.error('[KTF-Quiz] Supabase CDN not loaded!');
+                alert('Network error: Supabase library failed to load. Please refresh.');
+                return;
+            }
 
             document.getElementById('displayStudentName').textContent = currentUser;
             document.getElementById('logoutBtn').style.display = 'block';
 
-            // Try to init Supabase (non-blocking for admin student list)
-            try {
-                if (window.supabase) {
-                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                    console.log('[KTF-Quiz] Supabase OK');
-                } else {
-                    console.warn('[KTF-Quiz] Supabase CDN not loaded yet, retrying...');
-                    setTimeout(function() {
-                        if (window.supabase) {
-                            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                            console.log('[KTF-Quiz] Supabase OK (retry)');
-                        }
-                    }, 2000);
-                }
-            } catch (err) {
-                console.error('[KTF-Quiz] Supabase init error:', err);
-            }
-
+            // Robust admin check
             const urlParams = new URLSearchParams(window.location.search);
-            const isAdmin = currentUser === ADMIN_USERNAME || urlParams.get('admin') === 'true';
+            const isAdmin = (currentUser.trim().toLowerCase() === ADMIN_USERNAME.toLowerCase()) || (urlParams.get('admin') === 'true');
+            
             console.log('[KTF-Quiz] currentUser:', currentUser, 'isAdmin:', isAdmin);
 
             if (isAdmin) {
