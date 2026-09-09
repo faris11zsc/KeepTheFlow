@@ -630,29 +630,40 @@
 
         async function init() {
             console.log('[KTF-Quiz] Initializing...');
-            try {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            } catch (err) {
-                console.error('[KTF-Quiz] Failed to init Supabase:', err);
-                alert('Database initialization failed. Please refresh.');
-                return;
-            }
-
+            
             if (!currentUser) {
                 document.getElementById('loginOverlay').style.display = 'flex';
                 return;
             }
 
-            // DEBUG: show who is logged in
-            console.log('[KTF-Quiz] currentUser:', JSON.stringify(currentUser), 'ADMIN:', JSON.stringify(ADMIN_USERNAME), 'match:', currentUser === ADMIN_USERNAME);
+            // DEBUG banner
             var dbg = document.createElement('div');
             dbg.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#1a2744;color:#c5a44e;padding:8px;font-size:12px;z-index:99999;font-family:monospace;text-align:center;';
-            dbg.textContent = 'User: [' + currentUser + '] | Admin match: ' + (currentUser === ADMIN_USERNAME) + ' | Length: ' + currentUser.length;
+            dbg.textContent = 'User: [' + currentUser + '] | Admin match: ' + (currentUser === ADMIN_USERNAME);
             document.body.appendChild(dbg);
             setTimeout(function(){ if(dbg.parentElement) dbg.remove(); }, 15000);
 
             document.getElementById('displayStudentName').textContent = currentUser;
             document.getElementById('logoutBtn').style.display = 'block';
+
+            // Try to init Supabase (non-blocking for admin student list)
+            try {
+                if (window.supabase) {
+                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                    console.log('[KTF-Quiz] Supabase OK');
+                } else {
+                    console.warn('[KTF-Quiz] Supabase CDN not loaded yet, retrying...');
+                    // Retry after 2 seconds
+                    setTimeout(function() {
+                        if (window.supabase) {
+                            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                            console.log('[KTF-Quiz] Supabase OK (retry)');
+                        }
+                    }, 2000);
+                }
+            } catch (err) {
+                console.error('[KTF-Quiz] Supabase init error:', err);
+            }
 
             if (currentUser === ADMIN_USERNAME) {
                 document.getElementById('adminView').style.display = 'grid';
