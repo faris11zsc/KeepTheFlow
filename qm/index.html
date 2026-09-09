@@ -365,7 +365,7 @@
 
                                 var badgeHtml = '';
                                 var actionHtml = '';
-                                var quizLink = '../quizme/quiz.html?quizId=' + def.instance_number + '&student=' + encodeURIComponent(studentName);
+                                var quizLink = 'quiz.html?quizId=' + def.instance_number + '&student=' + encodeURIComponent(studentName);
 
                                 if (score) {
                                     badgeHtml = '<span class="quiz-badge badge-completed">' + score + '</span>';
@@ -406,19 +406,124 @@
 
         function parseRawQuestions() {
             var raw = document.getElementById('rawQuestionsText').value;
-            var splitByNumbers = raw.split(/\d+\.\s*/).filter(function(s) { return s.trim().length > 0; });
 
-            draftQuestions = splitByNumbers.map(function(block, index) {
-                var qText = block.trim();
-                var opts = ['Option A', 'Option B', 'Option C', 'Option D'];
-                var optMatch = block.match(/A\)(.*?)(?=B\)|$)B\)(.*?)(?=C\)|$)C\)(.*?)(?=D\)|$)D\)(.*)/s);
-                if (optMatch) {
-                    qText = block.substring(0, block.indexOf('A)')).trim();
-                    opts = [optMatch[1].trim(), optMatch[2].trim(), optMatch[3].trim(), optMatch[4].trim()];
+            // --- Step 1: Split into questions section and answer key section ---
+            var answerKeyIdx = raw.search(/answer\s*key/i);
+            var questionsRaw = answerKeyIdx > -1 ? raw.substring(0, answerKeyIdx) : raw;
+            var answerKeyRaw = answerKeyIdx > -1 ? raw.substring(answerKeyIdx) : '';
+
+            // --- Step 2: Parse answer key lines ---
+            // Format: "N. LETTER — rationale" or just "LETTER — rationale" (sequential)
+            var answerKeys = [];
+            if (answerKeyRaw) {
+                var akLines = answerKeyRaw.split('\n');
+                for (var i = 0; i < akLines.length; i++) {
+                    var line = akLines[i].trim();
+                    // Match: "1. B — rationale" or "B — rationale" or "B) rationale"
+                    var akMatch = line.match(/^(?:\d+[\.\)]\s*)?([A-D])\s*[\—\-–]\s*(.*)/i);
+                    if (akMatch) {
+                        var letter = akMatch[1].toUpperCase();
+                        var rationale = akMatch[2].trim();
+                        answerKeys.push({ letter: letter, rationale: rationale, index: 'ABCD'.indexOf(letter) });
+                    }
                 }
-                return { id: Date.now() + index, text: qText, options: opts, correctIndex: 0, rationale: '', tier: 'Standard' };
-            });
+            }
+            console.log('[QM] Parsed', answerKeys.length, 'answer keys');
+
+            // --- Step 3: Detect tier sections ---
+            // Find "Tier N" or "## Tier" headers and track which questions belong to which tier
+            var currentTier = 'Standard';
+            var tierMap = {}; // questionNumber -> tierName
+
+            // --- Step 4: Parse questions ---
+            // Split on numbered questions: "1." "**1." "**1." etc.
+            var qBlocks = questionsRaw.split(/(?:^|\n)\s*(?:\*\*)?(\d+)[\.\)]\s*/);
+            // qBlocks alternates: [preamble, "1", question1text, "2", question2text, ...]
+
+            draftQuestions = [];
+            var qNum = 0;
+            for (var b = 1; b < qBlocks.length; b += 2) {
+                var num = parseInt(qBlocks[b]);
+                var block = (qBlocks[b + 1] || '').trim();
+                // Remove trailing ** from bold markdown
+                block = block.replace(/\*\*/g, '');
+
+                // Check for tier header in the text BEFORE this question
+                if (b >= 3) {
+                    var prevText = qBlocks[b - 1] || '';
+                    var tierMatch = prevText.match(/(?:Tier\s*\d+|Tier\s+\d+\s*[—\-–]\s*)(.*?)(?:\n|$)/i);
+                    if (tierMatch) {
+                        currentTier = tierMatch[0].trim().replace(/^#+\s*/, '').replace(/\*\*/g, '');
+                    }
+                }
+
+                // Parse options: A) ... B) ... C) ... D) ...
+                // Some questions have only A-C (3 options)
+                var qText = block;
+                var opts = [];
+                var optRegex = /([A-D])\)\s*/g;
+                var optPositions = [];
+                var m;
+                while ((m = optRegex.exec(block)) !== null) {
+                    optPositions.push({ letter: m[1], pos: m.index, endPos: m.index + m[0].length });
+                }
+
+                if (optPositions.length >= 2) {
+                    qText = block.substring(0, optPositions[0].pos).trim();
+                    // Remove trailing ? if duplicated
+                    for (var op = 0; op < optPositions.length; op++) {
+                        var optStart = optPositions[op].endPos;
+                        var optEnd = (op + 1 < optPositions.length) ? optPositions[op + 1].pos : block.length;
+                        var optText = block.substring(optStart, optEnd).trim();
+                        // Clean trailing newlines and whitespace
+                        optText = optText.replace(/\n/g, ' ').trim();
+                        opts.push(optText);
+                    }
+                } else {
+                    opts = ['Option A', 'Option B', 'Option C', 'Option D'];
+                }
+
+                // Match answer key by question order
+                var correctIdx = 0;
+                var rationale = '';
+                if (qNum < answerKeys.length) {
+                    correctIdx = answerKeys[qNum].index;
+                    rationale = answerKeys[qNum].rationale;
+                }
+
+                draftQuestions.push({
+                    id: Date.now() + qNum,
+                    text: qText,
+                    options: opts,
+                    correctIndex: correctIdx,
+                    rationale: rationale,
+                    tier: currentTier,
+                    question: qText
+                });
+                qNum++;
+            }
+
+            // Also detect tiers from preamble text
+            var preamble = qBlocks[0] || '';
+            var tierLines = preamble.match(/(?:^|\n)(?:#+\s*)?(?:\*\*)?Tier\s+\d+\s*[—\-–]\s*(.*?)(?:\*\*)?(?:\n|$)/gi);
+
+            console.log('[QM] Parsed', draftQuestions.length, 'questions with', answerKeys.length, 'answers');
+            
+            // Also auto-fill the quiz title from the first line if empty
+            var titleInput = document.getElementById('newQuizTitle');
+            if (!titleInput.value.trim()) {
+                var firstLine = raw.split('\n')[0].replace(/^#+\s*/, '').replace(/\*\*/g, '').trim();
+                if (firstLine && firstLine.length < 100) {
+                    titleInput.value = firstLine;
+                }
+            }
+
             renderDraftQuestions();
+            
+            // Show summary
+            var summary = 'Parsed ' + draftQuestions.length + ' questions';
+            if (answerKeys.length > 0) summary += ' with ' + answerKeys.length + ' auto-mapped answers';
+            alert(summary);
         }
 
         function renderDraftQuestions() {
