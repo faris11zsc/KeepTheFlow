@@ -775,39 +775,28 @@
 
         // --- ADMIN VIEW ---
         async function loadAdminStudents() {
-            try {
-                const { data, error } = await supabase
-                    .from('qrasm_recordings')
-                    .select('student_name');
-                
-                if (error) throw error;
+            // Hardcoded student roster — add new students here
+            const QUIZME_STUDENTS = [
+                { name: 'Youssef', email: 'awawda.sanaa@yahoo.com' },
+                { name: 'Omar Awawda', email: 'awawda.sanaa@yahoo.com' },
+                { name: 'Abraham musbeh', email: 'musbehabraham@gmail.com' },
+                { name: 'Mohammad Musbeh', email: 'mohammadmusbeh@gmail.com' },
+                { name: 'Teddy', email: '' },
+                { name: 'jack', email: '' },
+            ];
 
-                const uniqueNames = new Set();
-                data.forEach(row => {
-                    let name = row.student_name;
-                    if (name && 
-                        !name.startsWith('EMAIL_SENT_') && 
-                        !name.startsWith('ADMIN_') && 
-                        !name.startsWith('QUIZ_') && 
-                        !name.startsWith('SYSTEM')) {
-                        uniqueNames.add(name);
-                    }
-                });
-
-                const list = document.getElementById('adminStudentList');
-                list.innerHTML = '';
-                
-                Array.from(uniqueNames).sort().forEach(name => {
-                    const li = document.createElement('li');
-                    li.className = 'student-item';
-                    li.textContent = name;
-                    li.onclick = () => selectAdminStudent(name, li);
-                    list.appendChild(li);
-                });
-
-            } catch(err) {
-                console.error('[KTF-Quiz] Error loading students:', err);
-            }
+            const list = document.getElementById('adminStudentList');
+            list.innerHTML = '';
+            
+            QUIZME_STUDENTS.forEach(s => {
+                const li = document.createElement('li');
+                li.className = 'student-item';
+                li.innerHTML = `<span>${s.name}</span>${s.email ? '<span style="font-size:11px;color:var(--text-dim);display:block;">'+s.email+'</span>' : '<span style="font-size:11px;color:#EF4444;display:block;">No email</span>'}`;
+                li.onclick = () => selectAdminStudent(s.name, li);
+                list.appendChild(li);
+            });
+            
+            console.log('[KTF-Quiz] Loaded', QUIZME_STUDENTS.length, 'students');
         }
 
         function selectAdminStudent(name, liElement) {
