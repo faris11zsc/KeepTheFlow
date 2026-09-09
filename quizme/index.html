@@ -644,9 +644,7 @@
                     console.error('[KTF-Quiz] Supabase init error:', err);
                 }
             } else {
-                console.error('[KTF-Quiz] Supabase CDN not loaded!');
-                alert('Network error: Supabase library failed to load. Please refresh.');
-                return;
+                console.warn('[KTF-Quiz] Supabase CDN not loaded! Real-time DB disabled.');
             }
 
             document.getElementById('displayStudentName').textContent = currentUser;
