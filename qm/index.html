@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --navy-base: #0f1a30;
@@ -205,8 +206,15 @@
         </div>
     </div>
 
-    <!-- Supabase loaded AFTER the HTML so DOM is ready -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Supabase fallback if CDN in head was blocked -->
+    <script>
+        if (!window.supabase) {
+            console.warn('[QM] jsdelivr blocked, trying unpkg...');
+            var s = document.createElement('script');
+            s.src = 'https://unpkg.com/@supabase/supabase-js@2';
+            document.head.appendChild(s);
+        }
+    </script>
     <script>
         // ===== CONFIG =====
         var SUPABASE_URL = 'https://lhebavvnrwqojbhyodwc.supabase.co';
@@ -216,6 +224,16 @@
         var currentUser = localStorage.getItem('qrasm_student_name');
         var selectedStudentForAdmin = null;
         var draftQuestions = [];
+
+        function ensureSupabase() {
+            if (supabase) return true;
+            if (window.supabase && window.supabase.createClient) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                console.log('[QM] Supabase initialized (lazy)');
+                return true;
+            }
+            return false;
+        }
 
         // ===== INIT — runs immediately =====
         (function init() {
@@ -319,11 +337,7 @@
 
         // ===== STUDENT VIEW: LOAD QUIZZES =====
         function loadStudentQuizzes(studentName, isAdminView) {
-            // Lazy-init Supabase
-            if (!supabase && window.supabase && window.supabase.createClient) {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            }
-            if (!supabase) {
+            if (!ensureSupabase()) {
                 var c = isAdminView ? document.getElementById('adminQuizList') : document.getElementById('studentQuizzes');
                 c.innerHTML = '<div class="empty-state">Database not loaded. Please refresh the page.</div>';
                 return;
@@ -567,11 +581,7 @@
 
         function saveQuiz() {
             if (!selectedStudentForAdmin) return alert('No student selected');
-            // Lazy-init Supabase if it wasn't ready during page load
-            if (!supabase && window.supabase && window.supabase.createClient) {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            }
-            if (!supabase) return alert('Database not available. Please refresh.');
+            if (!ensureSupabase()) return alert('Database not available. Please wait a moment and try again.');
             var title = document.getElementById('newQuizTitle').value.trim() || 'Untitled Quiz';
             if (draftQuestions.length === 0) return alert('Please add at least one question.');
 
