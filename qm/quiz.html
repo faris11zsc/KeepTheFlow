@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Keep The Flow — Quiz</title>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --bg-navy: #0f1a30;
@@ -462,10 +461,27 @@
     </div>
 
     <script>
-        // Supabase Configuration
-        const supabaseUrl = 'https://lhebavvnrwqojbhyodwc.supabase.co';
-        const supabaseKey = 'sb_publishable_JW75ayCf5SbvyT-02GmjNQ_vFpivPTU';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        // Config
+        const SUPABASE_URL = 'https://lhebavvnrwqojbhyodwc.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_JW75ayCf5SbvyT-02GmjNQ_vFpivPTU';
+        const REST = SUPABASE_URL + '/rest/v1/';
+
+        function dbHeaders(extra) {
+            var h = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+            if (extra) for (var k in extra) h[k] = extra[k];
+            return h;
+        }
+        function dbSelect(table, filters) {
+            var qs = 'select=*';
+            for (var key in filters) qs += '&' + key + '=eq.' + encodeURIComponent(filters[key]);
+            return fetch(REST + table + '?' + qs, { method: 'GET', headers: dbHeaders() }).then(r => r.json());
+        }
+        function dbInsert(table, row) {
+            return fetch(REST + table, { method: 'POST', headers: dbHeaders(), body: JSON.stringify(row) }).then(r => { if (!r.ok) return r.json().then(e => { throw new Error(e.message); }); return r.json(); });
+        }
+        function dbUpdate(table, id, data) {
+            return fetch(REST + table + '?id=eq.' + id, { method: 'PATCH', headers: dbHeaders(), body: JSON.stringify(data) }).then(r => { if (!r.ok) return r.json().then(e => { throw new Error(e.message); }); return r.json(); });
+        }
 
         // State
         let quizDef = null;
@@ -490,14 +506,13 @@
         async function init() {
             showScreen('loading');
             
-            // Validate student
             studentName = localStorage.getItem('qrasm_student_name');
             const urlParams = new URLSearchParams(window.location.search);
             const urlStudent = urlParams.get('student');
             quizId = urlParams.get('quizId');
 
             if (!studentName || studentName !== urlStudent) {
-                window.location.href = 'index.html';
+                window.location.href = '/qm/';
                 return;
             }
 
@@ -507,15 +522,11 @@
             }
 
             try {
-                // Fetch Quiz Definition
-                const { data: defData, error: defError } = await supabase
-                    .from('qrasm_recordings')
-                    .select('*')
-                    .eq('assignment_id', 'quizme')
-                    .eq('instance_number', quizId)
-                    .like('student_name', 'QUIZ_DEF_%');
+                // Fetch Quiz Definition using REST API with like filter
+                const defUrl = REST + 'qrasm_recordings?select=*&assignment_id=eq.quizme&instance_number=eq.' + encodeURIComponent(quizId) + '&student_name=like.QUIZ_DEF_%25';
+                const defRes = await fetch(defUrl, { method: 'GET', headers: dbHeaders() });
+                const defData = await defRes.json();
 
-                if (defError) throw defError;
                 if (!defData || defData.length === 0) {
                     showError('Quiz not found.');
                     return;
@@ -525,15 +536,8 @@
                 const gradeData = typeof quizDef.grade === 'string' ? JSON.parse(quizDef.grade) : quizDef.grade;
                 quizDef.parsedGrade = gradeData;
                 
-                // Fetch previous score if any
-                const { data: scoreData, error: scoreError } = await supabase
-                    .from('qrasm_recordings')
-                    .select('*')
-                    .eq('assignment_id', 'quizme')
-                    .eq('instance_number', quizId)
-                    .eq('student_name', `QUIZ_SCORE_${studentName}`);
-                
-                if (scoreError) throw scoreError;
+                // Fetch previous score
+                const scoreData = await dbSelect('qrasm_recordings', { assignment_id: 'quizme', instance_number: quizId, student_name: 'QUIZ_SCORE_' + studentName });
 
                 if (scoreData && scoreData.length > 0) {
                     previousScoreRecord = scoreData[0];
@@ -545,7 +549,7 @@
 
             } catch (err) {
                 console.error(err);
-                showError('Failed to load quiz data.');
+                showError('Failed to load quiz data: ' + err.message);
             }
         }
 
@@ -706,27 +710,20 @@
             else if (pct >= 50) msgEl.innerText = "Good effort! Review and try again 📖";
             else msgEl.innerText = "Keep studying, you'll get there! 🤲";
 
-            // Save to Supabase
+            // Save score
             try {
                 const gradeStr = `${score}/${total}`;
                 
                 if (previousScoreRecord) {
-                    // Update existing
-                    await supabase
-                        .from('qrasm_recordings')
-                        .update({ grade: gradeStr })
-                        .eq('id', previousScoreRecord.id);
+                    await dbUpdate('qrasm_recordings', previousScoreRecord.id, { grade: gradeStr });
                 } else {
-                    // Insert new
-                    await supabase
-                        .from('qrasm_recordings')
-                        .insert([{
-                            student_name: `QUIZ_SCORE_${studentName}`,
-                            assignment_id: 'quizme',
-                            instance_number: quizId,
-                            grade: gradeStr,
-                            audio_url: quizDef.parsedGrade.title || 'quiz'
-                        }]);
+                    await dbInsert('qrasm_recordings', {
+                        student_name: `QUIZ_SCORE_${studentName}`,
+                        assignment_id: 'quizme',
+                        instance_number: quizId,
+                        grade: gradeStr,
+                        audio_url: quizDef.parsedGrade.title || 'quiz'
+                    });
                 }
             } catch (err) {
                 console.error('Error saving score:', err);
