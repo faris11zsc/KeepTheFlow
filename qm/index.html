@@ -10,7 +10,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --navy-base: #0f1a30;
@@ -206,62 +205,58 @@
         </div>
     </div>
 
-    <!-- Supabase fallback if CDN in head was blocked -->
-    <script>
-        if (!window.supabase) {
-            console.warn('[QM] jsdelivr blocked, trying unpkg...');
-            var s = document.createElement('script');
-            s.src = 'https://unpkg.com/@supabase/supabase-js@2';
-            document.head.appendChild(s);
-        }
-    </script>
     <script>
         // ===== CONFIG =====
         var SUPABASE_URL = 'https://lhebavvnrwqojbhyodwc.supabase.co';
         var SUPABASE_KEY = 'sb_publishable_JW75ayCf5SbvyT-02GmjNQ_vFpivPTU';
+        var REST = SUPABASE_URL + '/rest/v1/';
         var ADMIN_USERNAME = '89FarisAuraKnight89';
-        var supabase = null;
         var currentUser = localStorage.getItem('qrasm_student_name');
         var selectedStudentForAdmin = null;
         var draftQuestions = [];
 
-        function ensureSupabase() {
-            if (supabase) return true;
-            if (window.supabase && window.supabase.createClient) {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                console.log('[QM] Supabase initialized (lazy)');
-                return true;
-            }
-            return false;
+        // ===== DIRECT REST API (no CDN needed) =====
+        function dbHeaders() {
+            return {
+                'apikey': SUPABASE_KEY,
+                'Authorization': 'Bearer ' + SUPABASE_KEY,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
+            };
         }
 
-        // ===== INIT — runs immediately =====
+        function dbSelect(table, filters) {
+            var qs = 'select=*';
+            for (var key in filters) {
+                qs += '&' + key + '=eq.' + encodeURIComponent(filters[key]);
+            }
+            return fetch(REST + table + '?' + qs + '&order=created_at.desc', {
+                method: 'GET',
+                headers: dbHeaders()
+            }).then(function(r) { return r.json(); });
+        }
+
+        function dbInsert(table, row) {
+            return fetch(REST + table, {
+                method: 'POST',
+                headers: dbHeaders(),
+                body: JSON.stringify(row)
+            }).then(function(r) {
+                if (!r.ok) return r.json().then(function(e) { throw new Error(e.message || 'Insert failed'); });
+                return r.json();
+            });
+        }
+
+        // ===== INIT =====
         (function init() {
             console.log('[QM] init() fired. currentUser:', currentUser);
-
-            // Show login if no user
             if (!currentUser) {
                 document.getElementById('loginOverlay').style.display = 'flex';
                 return;
             }
-
-            // Show user name and logout
             document.getElementById('displayStudentName').textContent = currentUser;
             document.getElementById('logoutBtn').style.display = 'block';
 
-            // Init Supabase (best-effort)
-            try {
-                if (window.supabase && window.supabase.createClient) {
-                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                    console.log('[QM] Supabase ready');
-                } else {
-                    console.warn('[QM] Supabase CDN not available');
-                }
-            } catch (e) {
-                console.error('[QM] Supabase error:', e);
-            }
-
-            // Admin check — case insensitive + URL param fallback
             var urlParams = new URLSearchParams(window.location.search);
             var isAdmin = (currentUser.trim().toLowerCase() === ADMIN_USERNAME.toLowerCase()) || (urlParams.get('admin') === 'true');
             console.log('[QM] isAdmin:', isAdmin);
@@ -271,23 +266,16 @@
                 loadAdminStudents();
             } else {
                 document.getElementById('studentView').style.display = 'block';
-                if (supabase) loadStudentQuizzes(currentUser);
+                loadStudentQuizzes(currentUser);
             }
         })();
 
         // ===== AUTH =====
         function handleLogin() {
             var name = document.getElementById('loginName').value.trim();
-            var email = document.getElementById('loginEmail').value.trim();
             if (!name) { alert('Please enter your name.'); return; }
             localStorage.setItem('qrasm_student_name', name);
-            if (email && supabase) {
-                supabase.from('qrasm_student_emails').upsert({ student_name: name, email: email }).then(function() {
-                    window.location.reload();
-                });
-            } else {
-                window.location.reload();
-            }
+            window.location.reload();
         }
 
         function logout() {
@@ -295,7 +283,7 @@
             window.location.reload();
         }
 
-        // ===== ADMIN: STUDENT LIST (hardcoded) =====
+        // ===== ADMIN: STUDENT LIST =====
         function loadAdminStudents() {
             var STUDENTS = [
                 { name: 'Youssef', email: 'awawda.sanaa@yahoo.com' },
@@ -305,7 +293,6 @@
                 { name: 'Teddy', email: '' },
                 { name: 'jack', email: '' }
             ];
-
             var list = document.getElementById('adminStudentList');
             list.innerHTML = '';
             for (var i = 0; i < STUDENTS.length; i++) {
@@ -316,13 +303,11 @@
                     (s.email
                         ? '<span style="font-size:11px;color:var(--text-dim);display:block;">' + s.email + '</span>'
                         : '<span style="font-size:11px;color:#EF4444;display:block;">No email</span>');
-                li.setAttribute('data-name', s.name);
                 li.onclick = (function(name, el) {
                     return function() { selectAdminStudent(name, el); };
                 })(s.name, li);
                 list.appendChild(li);
             }
-            console.log('[QM] Loaded', STUDENTS.length, 'students');
         }
 
         function selectAdminStudent(name, liElement) {
@@ -332,72 +317,46 @@
             selectedStudentForAdmin = name;
             document.getElementById('adminSelectedStudent').textContent = name;
             document.getElementById('addQuizBtn').style.display = 'block';
-            if (supabase) loadStudentQuizzes(name, true);
+            loadStudentQuizzes(name, true);
         }
 
-        // ===== STUDENT VIEW: LOAD QUIZZES =====
+        // ===== LOAD QUIZZES (fetch) =====
         function loadStudentQuizzes(studentName, isAdminView) {
-            if (!ensureSupabase()) {
-                var c = isAdminView ? document.getElementById('adminQuizList') : document.getElementById('studentQuizzes');
-                c.innerHTML = '<div class="empty-state">Database not loaded. Please refresh the page.</div>';
-                return;
-            }
+            var container = isAdminView ? document.getElementById('adminQuizList') : document.getElementById('studentQuizzes');
+            container.innerHTML = '<div class="empty-state">Loading...</div>';
 
-            supabase.from('qrasm_recordings').select('*')
-                .eq('student_name', 'QUIZ_DEF_' + studentName)
-                .eq('assignment_id', 'quizme')
-                .order('created_at', { ascending: false })
-                .then(function(res) {
-                    if (res.error) throw res.error;
-                    var defs = res.data || [];
-
-                    supabase.from('qrasm_recordings').select('*')
-                        .eq('student_name', 'QUIZ_SCORE_' + studentName)
-                        .eq('assignment_id', 'quizme')
-                        .then(function(res2) {
-                            var scores = (res2.data || []);
+            dbSelect('qrasm_recordings', { student_name: 'QUIZ_DEF_' + studentName, assignment_id: 'quizme' })
+                .then(function(defs) {
+                    return dbSelect('qrasm_recordings', { student_name: 'QUIZ_SCORE_' + studentName, assignment_id: 'quizme' })
+                        .then(function(scores) {
                             var scoreMap = {};
                             for (var i = 0; i < scores.length; i++) {
                                 scoreMap[scores[i].instance_number] = scores[i].grade;
                             }
-
-                            var container = isAdminView ? document.getElementById('adminQuizList') : document.getElementById('studentQuizzes');
                             container.innerHTML = '';
-
-                            if (defs.length === 0) {
+                            if (!defs || defs.length === 0) {
                                 container.innerHTML = '<div class="empty-state">No quizzes assigned yet.</div>';
                                 return;
                             }
-
                             for (var d = 0; d < defs.length; d++) {
                                 var def = defs[d];
                                 var quizData = {};
                                 try { quizData = typeof def.grade === 'string' ? JSON.parse(def.grade) : def.grade; } catch(e) {}
-
                                 var title = (quizData.title || def.audio_url || 'Untitled Quiz');
                                 var date = (quizData.date || new Date(def.created_at).toLocaleDateString());
                                 var qCount = quizData.questions ? quizData.questions.length : 0;
                                 var score = scoreMap[def.instance_number];
-
                                 var card = document.createElement('div');
                                 card.className = 'quiz-card';
-
-                                var badgeHtml = '';
-                                var actionHtml = '';
+                                var badgeHtml = '', actionHtml = '';
                                 var quizLink = 'quiz.html?quizId=' + def.instance_number + '&student=' + encodeURIComponent(studentName);
-
                                 if (score) {
                                     badgeHtml = '<span class="quiz-badge badge-completed">' + score + '</span>';
-                                    if (!isAdminView) {
-                                        actionHtml = '<a href="' + quizLink + '" class="take-quiz-btn" style="background: var(--navy-elevated); color: var(--text-main);">Review Quiz</a>';
-                                    }
+                                    if (!isAdminView) actionHtml = '<a href="' + quizLink + '" class="take-quiz-btn" style="background:var(--navy-elevated);color:var(--text-main);">Review</a>';
                                 } else {
                                     badgeHtml = '<span class="quiz-badge badge-pending">' + qCount + ' Questions</span>';
-                                    if (!isAdminView) {
-                                        actionHtml = '<a href="' + quizLink + '" class="take-quiz-btn">Take Quiz &rarr;</a>';
-                                    }
+                                    if (!isAdminView) actionHtml = '<a href="' + quizLink + '" class="take-quiz-btn">Take Quiz &rarr;</a>';
                                 }
-
                                 card.innerHTML = '<div class="quiz-header"><div><div class="quiz-title">' + title + '</div><div class="quiz-meta">Assigned: ' + date + '</div></div>' + badgeHtml + '</div>' + actionHtml;
                                 container.appendChild(card);
                             }
@@ -405,12 +364,11 @@
                 })
                 .catch(function(err) {
                     console.error('[QM] Error:', err);
-                    var c = isAdminView ? document.getElementById('adminQuizList') : document.getElementById('studentQuizzes');
-                    c.innerHTML = '<div class="empty-state" style="color:var(--danger)">Error loading quizzes.</div>';
+                    container.innerHTML = '<div class="empty-state" style="color:var(--danger)">Error loading quizzes: ' + err.message + '</div>';
                 });
         }
 
-        // ===== ADMIN: QUIZ MODAL =====
+        // ===== QUIZ MODAL =====
         function openQuizModal() {
             document.getElementById('quizModal').style.display = 'flex';
             document.getElementById('newQuizTitle').value = '';
@@ -418,133 +376,63 @@
             document.getElementById('parsedQuestionsContainer').innerHTML = '';
             draftQuestions = [];
         }
+        function closeQuizModal() { document.getElementById('quizModal').style.display = 'none'; }
 
-        function closeQuizModal() {
-            document.getElementById('quizModal').style.display = 'none';
-        }
-
+        // ===== SMART PARSER =====
         function parseRawQuestions() {
             var raw = document.getElementById('rawQuestionsText').value;
-
-            // --- Step 1: Split into questions section and answer key section ---
             var answerKeyIdx = raw.search(/answer\s*key/i);
             var questionsRaw = answerKeyIdx > -1 ? raw.substring(0, answerKeyIdx) : raw;
             var answerKeyRaw = answerKeyIdx > -1 ? raw.substring(answerKeyIdx) : '';
 
-            // --- Step 2: Parse answer key lines ---
-            // Format: "N. LETTER — rationale" or just "LETTER — rationale" (sequential)
             var answerKeys = [];
             if (answerKeyRaw) {
                 var akLines = answerKeyRaw.split('\n');
                 for (var i = 0; i < akLines.length; i++) {
                     var line = akLines[i].trim();
-                    // Match: "1. B — rationale" or "B — rationale" or "B) rationale"
-                    var akMatch = line.match(/^(?:\d+[\.\)]\s*)?([A-D])\s*[\—\-–]\s*(.*)/i);
+                    var akMatch = line.match(/^(?:\d+[\.)\]]\s*)?([A-D])\s*[\—\-–]\s*(.*)/i);
                     if (akMatch) {
-                        var letter = akMatch[1].toUpperCase();
-                        var rationale = akMatch[2].trim();
-                        answerKeys.push({ letter: letter, rationale: rationale, index: 'ABCD'.indexOf(letter) });
+                        answerKeys.push({ letter: akMatch[1].toUpperCase(), rationale: akMatch[2].trim(), index: 'ABCD'.indexOf(akMatch[1].toUpperCase()) });
                     }
                 }
             }
-            console.log('[QM] Parsed', answerKeys.length, 'answer keys');
 
-            // --- Step 3: Detect tier sections ---
-            // Find "Tier N" or "## Tier" headers and track which questions belong to which tier
             var currentTier = 'Standard';
-            var tierMap = {}; // questionNumber -> tierName
-
-            // --- Step 4: Parse questions ---
-            // Split on numbered questions: "1." "**1." "**1." etc.
-            var qBlocks = questionsRaw.split(/(?:^|\n)\s*(?:\*\*)?(\d+)[\.\)]\s*/);
-            // qBlocks alternates: [preamble, "1", question1text, "2", question2text, ...]
-
+            var qBlocks = questionsRaw.split(/(?:^|\n)\s*(?:\*\*)?(\d+)[\.)\]]\s*/);
             draftQuestions = [];
             var qNum = 0;
             for (var b = 1; b < qBlocks.length; b += 2) {
-                var num = parseInt(qBlocks[b]);
-                var block = (qBlocks[b + 1] || '').trim();
-                // Remove trailing ** from bold markdown
-                block = block.replace(/\*\*/g, '');
-
-                // Check for tier header in the text BEFORE this question
+                var block = (qBlocks[b + 1] || '').trim().replace(/\*\*/g, '');
                 if (b >= 3) {
                     var prevText = qBlocks[b - 1] || '';
                     var tierMatch = prevText.match(/(?:Tier\s*\d+|Tier\s+\d+\s*[—\-–]\s*)(.*?)(?:\n|$)/i);
-                    if (tierMatch) {
-                        currentTier = tierMatch[0].trim().replace(/^#+\s*/, '').replace(/\*\*/g, '');
-                    }
+                    if (tierMatch) currentTier = tierMatch[0].trim().replace(/^#+\s*/, '').replace(/\*\*/g, '');
                 }
-
-                // Parse options: A) ... B) ... C) ... D) ...
-                // Some questions have only A-C (3 options)
-                var qText = block;
-                var opts = [];
-                var optRegex = /([A-D])\)\s*/g;
-                var optPositions = [];
-                var m;
-                while ((m = optRegex.exec(block)) !== null) {
-                    optPositions.push({ letter: m[1], pos: m.index, endPos: m.index + m[0].length });
-                }
-
+                var qText = block, opts = [];
+                var optRegex = /([A-D])\)\s*/g, optPositions = [], m;
+                while ((m = optRegex.exec(block)) !== null) optPositions.push({ pos: m.index, endPos: m.index + m[0].length });
                 if (optPositions.length >= 2) {
                     qText = block.substring(0, optPositions[0].pos).trim();
-                    // Remove trailing ? if duplicated
                     for (var op = 0; op < optPositions.length; op++) {
-                        var optStart = optPositions[op].endPos;
                         var optEnd = (op + 1 < optPositions.length) ? optPositions[op + 1].pos : block.length;
-                        var optText = block.substring(optStart, optEnd).trim();
-                        // Clean trailing newlines and whitespace
-                        optText = optText.replace(/\n/g, ' ').trim();
-                        opts.push(optText);
+                        opts.push(block.substring(optPositions[op].endPos, optEnd).replace(/\n/g, ' ').trim());
                     }
-                } else {
-                    opts = ['Option A', 'Option B', 'Option C', 'Option D'];
-                }
-
-                // Match answer key by question order
-                var correctIdx = 0;
-                var rationale = '';
-                if (qNum < answerKeys.length) {
-                    correctIdx = answerKeys[qNum].index;
-                    rationale = answerKeys[qNum].rationale;
-                }
-
-                draftQuestions.push({
-                    id: Date.now() + qNum,
-                    text: qText,
-                    options: opts,
-                    correctIndex: correctIdx,
-                    rationale: rationale,
-                    tier: currentTier,
-                    question: qText
-                });
+                } else { opts = ['Option A', 'Option B', 'Option C', 'Option D']; }
+                var correctIdx = 0, rationale = '';
+                if (qNum < answerKeys.length) { correctIdx = answerKeys[qNum].index; rationale = answerKeys[qNum].rationale; }
+                draftQuestions.push({ id: Date.now() + qNum, text: qText, options: opts, correctIndex: correctIdx, rationale: rationale, tier: currentTier, question: qText });
                 qNum++;
             }
-
-            // Also detect tiers from preamble text
-            var preamble = qBlocks[0] || '';
-            var tierLines = preamble.match(/(?:^|\n)(?:#+\s*)?(?:\*\*)?Tier\s+\d+\s*[—\-–]\s*(.*?)(?:\*\*)?(?:\n|$)/gi);
-
-            console.log('[QM] Parsed', draftQuestions.length, 'questions with', answerKeys.length, 'answers');
-            
-            // Also auto-fill the quiz title from the first line if empty
             var titleInput = document.getElementById('newQuizTitle');
             if (!titleInput.value.trim()) {
                 var firstLine = raw.split('\n')[0].replace(/^#+\s*/, '').replace(/\*\*/g, '').trim();
-                if (firstLine && firstLine.length < 100) {
-                    titleInput.value = firstLine;
-                }
+                if (firstLine && firstLine.length < 100) titleInput.value = firstLine;
             }
-
             renderDraftQuestions();
-            
-            // Show summary
-            var summary = 'Parsed ' + draftQuestions.length + ' questions';
-            if (answerKeys.length > 0) summary += ' with ' + answerKeys.length + ' auto-mapped answers';
-            alert(summary);
+            alert('Parsed ' + draftQuestions.length + ' questions' + (answerKeys.length > 0 ? ' with ' + answerKeys.length + ' auto-mapped answers' : ''));
         }
 
+        // ===== RENDER DRAFT QUESTIONS =====
         function renderDraftQuestions() {
             var container = document.getElementById('parsedQuestionsContainer');
             container.innerHTML = '';
@@ -579,26 +467,32 @@
         function updateQTier(qi, v) { draftQuestions[qi].tier = v; }
         function deleteDraftQuestion(qi) { draftQuestions.splice(qi, 1); renderDraftQuestions(); }
 
+        // ===== SAVE QUIZ (direct fetch) =====
         function saveQuiz() {
             if (!selectedStudentForAdmin) return alert('No student selected');
-            if (!ensureSupabase()) return alert('Database not available. Please wait a moment and try again.');
             var title = document.getElementById('newQuizTitle').value.trim() || 'Untitled Quiz';
             if (draftQuestions.length === 0) return alert('Please add at least one question.');
 
             var quizData = { title: title, date: new Date().toLocaleDateString(), questions: draftQuestions };
             var instanceId = Date.now().toString();
 
-            supabase.from('qrasm_recordings').insert({
+            var btn = document.querySelector('.btn-primary[onclick="saveQuiz()"]');
+            if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+
+            dbInsert('qrasm_recordings', {
                 student_name: 'QUIZ_DEF_' + selectedStudentForAdmin,
                 assignment_id: 'quizme',
                 instance_number: instanceId,
                 grade: JSON.stringify(quizData),
                 audio_url: title
-            }).then(function(res) {
-                if (res.error) { alert('Failed: ' + res.error.message); return; }
-                alert('Quiz assigned successfully!');
+            }).then(function() {
+                alert('Quiz assigned to ' + selectedStudentForAdmin + ' successfully!');
                 closeQuizModal();
                 loadStudentQuizzes(selectedStudentForAdmin, true);
+            }).catch(function(err) {
+                alert('Failed to save: ' + err.message);
+            }).finally(function() {
+                if (btn) { btn.disabled = false; btn.textContent = 'Save & Assign Quiz'; }
             });
         }
     </script>
