@@ -474,7 +474,7 @@
             if (draftQuestions.length === 0) return alert('Please add at least one question.');
 
             var quizData = { title: title, date: new Date().toLocaleDateString(), questions: draftQuestions };
-            var instanceId = Date.now().toString();
+            var instanceId = (Date.now() % 2000000000).toString();
 
             var btn = document.querySelector('.btn-primary[onclick="saveQuiz()"]');
             if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
