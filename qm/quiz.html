@@ -34,7 +34,7 @@
             background-image:
                 radial-gradient(circle at 15% 50%, rgba(197,164,78,0.05) 0%, transparent 50%),
                 radial-gradient(circle at 85% 30%, rgba(42,58,94,0.3) 0%, transparent 50%);
-            overflow: hidden;
+            overflow-x: hidden;
         }
         .container {
             width: 100%; max-width: 800px;
@@ -170,6 +170,44 @@
         @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes spin { to { transform: rotate(360deg); } }
         .arabic { font-family: var(--font-arabic); direction: rtl; }
+
+        /* ===== MOBILE RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            body { padding: 10px; align-items: flex-start; overflow-y: auto; overflow-x: hidden; }
+            .container { padding: 20px 16px; border-radius: 16px; max-width: 100%; }
+            .header { margin-bottom: 16px; }
+            .header h3 { font-size: 13px !important; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            .back-btn { font-size: 14px; gap: 4px; }
+            .back-btn svg { width: 16px; height: 16px; }
+            .progress-container { margin-bottom: 20px; }
+            .meta-info { margin-bottom: 12px; }
+            .tier-badge { font-size: 12px; padding: 3px 8px; }
+            .question-counter { font-size: 12px; }
+            .question-text { font-size: 18px; margin-bottom: 20px; line-height: 1.5; }
+            .option-btn { padding: 14px 16px; font-size: 15px; border-radius: 12px; }
+            .option-btn:hover:not(:disabled) { transform: none; } /* no hover lift on mobile */
+            .feedback-area { padding: 14px; margin-top: 20px; }
+            .feedback-text { font-size: 14px; margin-bottom: 14px; }
+            .continue-btn { padding: 10px 20px; font-size: 15px; width: 100%; float: none; text-align: center; }
+            .results-content { padding: 20px 0; }
+            .score-circle-container { width: 160px; height: 160px; }
+            .score-fraction { font-size: 32px; }
+            .score-percentage { font-size: 16px; }
+            .results-message { font-size: 20px; }
+            .results-submessage { font-size: 14px; margin-bottom: 24px; }
+            .primary-btn { padding: 14px 24px; font-size: 16px; width: 100%; text-align: center; }
+            .message-box { padding: 24px 12px; }
+            .message-box h2 { font-size: 20px; }
+            .message-box p { font-size: 14px; }
+            #streak-banner { padding: 10px 8px; }
+            .streak-inner { padding: 8px 16px; font-size: 14px !important; letter-spacing: 0.5px; max-width: 95vw; word-break: break-word; }
+            #streak-counter { top: 8px; right: 8px; font-size: 12px !important; padding: 4px 10px; }
+        }
+        @media (max-width: 360px) {
+            .container { padding: 14px 12px; }
+            .question-text { font-size: 16px; }
+            .option-btn { padding: 12px 14px; font-size: 14px; }
+        }
     </style>
 </head>
 <body>
