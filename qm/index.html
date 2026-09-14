@@ -389,21 +389,18 @@
             if (answerKeyRaw) {
                 var akLines = answerKeyRaw.split('\n');
                 for (var i = 0; i < akLines.length; i++) {
-                    var line = akLines[i].trim();
+                    // Strip ALL markdown formatting: **, *, #, etc.
+                    var line = akLines[i].replace(/\*+/g, '').replace(/^#+\s*/, '').trim();
                     if (!line) continue;
-                    // Match: "1. **C** — rationale" or "1. C — rationale" or "C — rationale"
-                    // Handles bold markdown **X** around the letter
-                    var akMatch = line.match(/^(?:\d+[\.\)\]]\s*)?(?:\*\*)?([A-Da-d])(?:\*\*)?\s*(?:[\u2014\u2013\u2012\u2015\u00AD\-\u2010\u2011:;\.\)]\s*)?(.*)$/);
+                    // Now match clean text: "1. C — rationale" or "C — rationale" or "C - rationale"
+                    var akMatch = line.match(/^(?:\d+[\.\)\]]\s*)?([A-Da-d])\b\s*[\u2014\u2013\u2012\u2015\u00AD\u2010\u2011\-:;\.]*\s*(.*)$/);
                     if (akMatch && akMatch[1]) {
                         var letter = akMatch[1].toUpperCase();
-                        var rationale = (akMatch[2] || '').trim();
-                        // Skip if the "letter" is actually part of a word (e.g. "Answer Key" -> "A" would match)
-                        if (rationale.length > 0 || line.length <= 4) {
-                            answerKeys.push({ letter: letter, rationale: rationale, index: 'ABCD'.indexOf(letter) });
-                        }
+                        var rationale = (akMatch[2] || '').replace(/^\s*[\u2014\u2013\-]\s*/, '').trim();
+                        answerKeys.push({ letter: letter, rationale: rationale, index: 'ABCD'.indexOf(letter) });
                     }
                 }
-                console.log('[QM] Answer key lines found:', answerKeys.length, answerKeys.map(function(a){ return a.letter; }).join(','));
+                console.log('[QM] Answer key: found', answerKeys.length, 'answers:', answerKeys.map(function(a){ return a.letter; }).join(','));
             }
 
             var currentTier = 'Standard';
