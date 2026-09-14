@@ -103,6 +103,12 @@
         .admin-btn-edit:hover { background: rgba(59,130,246,0.25); }
         .admin-btn-delete { background: rgba(239,68,68,0.1); color: #f87171; border-color: rgba(239,68,68,0.3); }
         .admin-btn-delete:hover { background: rgba(239,68,68,0.25); }
+        .admin-btn-copy { background: rgba(168,85,247,0.1); color: #c084fc; border-color: rgba(168,85,247,0.3); }
+        .admin-btn-copy:hover { background: rgba(168,85,247,0.25); }
+        .copy-picker { display:none; margin-top: 8px; padding: 10px 12px; background: rgba(15,26,48,0.95); border: 1px solid rgba(168,85,247,0.3); border-radius: 8px; }
+        .copy-picker select { background: rgba(42,58,94,0.8); color: var(--text-main); border: 1px solid var(--navy-elevated); border-radius: 6px; padding: 6px 10px; font-size: 13px; font-family: inherit; margin-right: 8px; }
+        .copy-picker-confirm { background: rgba(168,85,247,0.8); color: #fff; border: none; border-radius: 6px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+        .copy-picker-confirm:hover { background: rgba(168,85,247,1); }
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 26, 48, 0.8); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal { background: var(--navy-surface); border: 1px solid var(--gold-dim); border-radius: 12px; padding: 2rem; width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
@@ -367,12 +373,22 @@
                                 }
                                 // Admin actions
                                 if (isAdminView) {
+                                    var cardId = 'card_' + def.instance_number;
                                     var previewLink = 'quiz.html?quizId=' + def.instance_number + '&student=' + encodeURIComponent(studentName) + '&admin=true';
+                                    // Build student options (exclude current student)
+                                    var studentOptions = ['Youssef','Omar Awawda','Abraham musbeh','Mohammad Musbeh','Teddy','jack']
+                                        .filter(function(n){ return n !== studentName; })
+                                        .map(function(n){ return '<option value="'+n+'">'+n+'</option>'; }).join('');
                                     actionHtml = '<div class="admin-actions">' +
-                                        '<a href="' + previewLink + '" class="admin-btn admin-btn-preview">&#9654; Preview Quiz</a>' +
+                                        '<a href="' + previewLink + '" class="admin-btn admin-btn-preview">&#9654; Preview</a>' +
                                         '<button class="admin-btn admin-btn-edit" onclick="editQuiz(\'' + def.id + '\',\'' + def.instance_number + '\')">&#9998; Edit</button>' +
+                                        '<button class="admin-btn admin-btn-copy" onclick="toggleCopyPicker(\'' + cardId + '\')">&#10560; Copy to...</button>' +
                                         '<button class="admin-btn admin-btn-delete" onclick="deleteQuiz(\'' + def.id + '\',\'' + encodeURIComponent(title) + '\')">&#10005; Delete</button>' +
                                         (score ? '<span style="font-size:12px;color:var(--text-dim);align-self:center;">Score: ' + score + '</span>' : '') +
+                                        '</div>' +
+                                        '<div class="copy-picker" id="picker_' + cardId + '">' +
+                                        '<select id="sel_' + cardId + '">' + studentOptions + '</select>' +
+                                        '<button class="copy-picker-confirm" onclick="copyQuizToStudent(\'' + def.id + '\',\'' + cardId + '\',\'' + encodeURIComponent(title) + '\')">&#10003; Copy</button>' +
                                         '</div>';
                                 }
                                 card.innerHTML = '<div class="quiz-header"><div><div class="quiz-title">' + title + '</div><div class="quiz-meta">Assigned: ' + date + ' &bull; ' + qCount + ' Qs</div></div>' + badgeHtml + '</div>' + actionHtml;
@@ -556,6 +572,46 @@
                 loadStudentQuizzes(selectedStudentForAdmin, true);
             }).catch(function(err) {
                 alert('Delete failed: ' + err.message);
+            });
+        }
+
+        // ===== ADMIN: COPY QUIZ TO ANOTHER STUDENT =====
+        function toggleCopyPicker(cardId) {
+            var picker = document.getElementById('picker_' + cardId);
+            if (!picker) return;
+            picker.style.display = picker.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function copyQuizToStudent(dbId, cardId, encodedTitle) {
+            var select = document.getElementById('sel_' + cardId);
+            if (!select) return;
+            var targetStudent = select.value;
+            if (!targetStudent) return alert('Please select a student.');
+            var title = decodeURIComponent(encodedTitle);
+
+            if (!confirm('Copy "' + title + '" to ' + targetStudent + '?')) return;
+
+            // Fetch original quiz data, then insert a copy for the target student
+            fetch(REST + 'qrasm_recordings?id=eq.' + dbId + '&select=*', {
+                method: 'GET', headers: dbHeaders()
+            }).then(function(r) { return r.json(); }).then(function(rows) {
+                if (!rows || rows.length === 0) { alert('Original quiz not found.'); return; }
+                var def = rows[0];
+                var newInstanceId = (Date.now() % 2000000000).toString();
+                return dbInsert('qrasm_recordings', {
+                    student_name: 'QUIZ_DEF_' + targetStudent,
+                    assignment_id: 'quizme',
+                    instance_number: newInstanceId,
+                    grade: def.grade,
+                    audio_url: def.audio_url
+                });
+            }).then(function() {
+                alert('Quiz copied to ' + targetStudent + ' successfully!');
+                // Hide the picker
+                var picker = document.getElementById('picker_' + cardId);
+                if (picker) picker.style.display = 'none';
+            }).catch(function(err) {
+                alert('Copy failed: ' + err.message);
             });
         }
 
