@@ -385,16 +385,25 @@
             var questionsRaw = answerKeyIdx > -1 ? raw.substring(0, answerKeyIdx) : raw;
             var answerKeyRaw = answerKeyIdx > -1 ? raw.substring(answerKeyIdx) : '';
 
-            var answerKeys = [];
+             var answerKeys = [];
             if (answerKeyRaw) {
                 var akLines = answerKeyRaw.split('\n');
                 for (var i = 0; i < akLines.length; i++) {
                     var line = akLines[i].trim();
-                    var akMatch = line.match(/^(?:\d+[\.)\]]\s*)?([A-D])\s*[\—\-–]\s*(.*)/i);
-                    if (akMatch) {
-                        answerKeys.push({ letter: akMatch[1].toUpperCase(), rationale: akMatch[2].trim(), index: 'ABCD'.indexOf(akMatch[1].toUpperCase()) });
+                    if (!line) continue;
+                    // Match: "1. B — rationale" or "B — rationale" or "B - rationale" or "B) rationale" or just "B" at start
+                    // Use very broad dash matching: any Unicode dash, hyphen, minus, or colon
+                    var akMatch = line.match(/^(?:\d+[\.\)\]]\s*)?([A-Da-d])\s*(?:[\u2014\u2013\u2012\u2015\u00AD\-\u2010\u2011:;\.\)]\s*)?(.*)$/);
+                    if (akMatch && akMatch[1]) {
+                        var letter = akMatch[1].toUpperCase();
+                        var rationale = (akMatch[2] || '').trim();
+                        // Skip if the "letter" is actually part of a word (e.g. "Answer Key" -> "A" would match)
+                        if (rationale.length > 0 || line.length <= 4) {
+                            answerKeys.push({ letter: letter, rationale: rationale, index: 'ABCD'.indexOf(letter) });
+                        }
                     }
                 }
+                console.log('[QM] Answer key lines found:', answerKeys.length, answerKeys.map(function(a){ return a.letter; }).join(','));
             }
 
             var currentTier = 'Standard';
