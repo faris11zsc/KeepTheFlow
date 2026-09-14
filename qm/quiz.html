@@ -411,7 +411,75 @@
             }
         }
 
+        // ===== PROGRESS PERSISTENCE =====
+        const PROGRESS_KEY = () => 'qm_progress_' + studentName + '_' + quizId;
+
+        function saveProgress() {
+            if (isAdminPreview) return; // never save admin runs
+            const state = {
+                quizId,
+                studentName,
+                questions: quizQuestions.map(q => ({
+                    text: q.text || q.question,
+                    shuffledOptions: q.shuffledOptions,
+                    newCorrectIndex: q.newCorrectIndex,
+                    rationale: q.rationale,
+                    tier: q.tier,
+                    question: q.question
+                })),
+                currentQuestionIndex,
+                score,
+                correctStreak,
+                wrongStreak,
+                savedAt: Date.now()
+            };
+            try { localStorage.setItem(PROGRESS_KEY(), JSON.stringify(state)); } catch(e) {}
+        }
+
+        function clearProgress() {
+            try { localStorage.removeItem(PROGRESS_KEY()); } catch(e) {}
+        }
+
+        function loadSavedProgress() {
+            try {
+                const raw = localStorage.getItem(PROGRESS_KEY());
+                if (!raw) return null;
+                const state = JSON.parse(raw);
+                // Expire after 7 days
+                if (Date.now() - state.savedAt > 7 * 24 * 60 * 60 * 1000) { clearProgress(); return null; }
+                return state;
+            } catch(e) { return null; }
+        }
+
         function startQuiz(isRetake) {
+            // Check for saved progress if not a retake and not admin
+            if (!isRetake && !isAdminPreview) {
+                const saved = loadSavedProgress();
+                if (saved && saved.currentQuestionIndex > 0 && saved.currentQuestionIndex < saved.questions.length) {
+                    const qDone = saved.currentQuestionIndex;
+                    const qTotal = saved.questions.length;
+                    const pct = Math.round((qDone / qTotal) * 100);
+                    if (confirm(`You left off at question ${qDone + 1} of ${qTotal} (${pct}% done).\n\nResume from where you stopped?`)) {
+                        // Restore state
+                        quizQuestions = saved.questions;
+                        currentQuestionIndex = saved.currentQuestionIndex;
+                        score = saved.score;
+                        correctStreak = saved.correctStreak || 0;
+                        wrongStreak = saved.wrongStreak || 0;
+                        document.getElementById('quiz-title-display').innerText = quizDef.parsedGrade.title || 'Quiz';
+                        document.getElementById('streak-counter').style.display = 'none';
+                        document.getElementById('main-container').className = 'container';
+                        showScreen('quiz');
+                        renderQuestion();
+                        return;
+                    } else {
+                        clearProgress(); // user chose to start fresh
+                    }
+                }
+            } else {
+                clearProgress(); // retake always starts fresh
+            }
+
             quizQuestions = [...quizDef.parsedGrade.questions];
             shuffleArray(quizQuestions);
             quizQuestions.forEach(q => {
@@ -499,6 +567,7 @@
 
         function nextQuestion() {
             currentQuestionIndex++;
+            saveProgress(); // save AFTER advancing index — so resume starts at the next unanswered question
             if (currentQuestionIndex < quizQuestions.length) {
                 const qs = document.getElementById('quiz-screen');
                 qs.style.animation = 'none'; void qs.offsetHeight; qs.style.animation = 'fadeIn 0.5s ease';
@@ -509,6 +578,7 @@
         }
 
         async function finishQuiz() {
+            clearProgress(); // quiz done — no need to resume anymore
             showScreen('results');
             document.getElementById('main-container').className = 'container';
             document.getElementById('streak-counter').style.display = 'none';
