@@ -369,14 +369,18 @@
         }
 
         // ===== INIT =====
+        let isAdminPreview = false;
         async function init() {
             showScreen('loading');
             studentName = localStorage.getItem('qrasm_student_name');
             const urlParams = new URLSearchParams(window.location.search);
             const urlStudent = urlParams.get('student');
             quizId = urlParams.get('quizId');
+            isAdminPreview = urlParams.get('admin') === 'true';
 
-            if (!studentName || studentName !== urlStudent) { window.location.href = '/qm/'; return; }
+            // Admin preview mode: bypass student name check
+            if (!isAdminPreview && (!studentName || studentName !== urlStudent)) { window.location.href = '/qm/'; return; }
+            if (isAdminPreview && !studentName) studentName = 'Admin Preview';
             if (!quizId) { showError('No quiz ID provided.'); return; }
 
             try {
@@ -388,13 +392,18 @@
                 quizDef = defData[0];
                 quizDef.parsedGrade = typeof quizDef.grade === 'string' ? JSON.parse(quizDef.grade) : quizDef.grade;
 
-                const scoreData = await dbSelect('qrasm_recordings', { assignment_id: 'quizme', instance_number: quizId, student_name: 'QUIZ_SCORE_' + studentName });
-                if (scoreData && scoreData.length > 0) {
-                    previousScoreRecord = scoreData[0];
-                    document.getElementById('completed-message').innerText = 'You have already taken this quiz. Previous score: ' + previousScoreRecord.grade;
-                    showScreen('completed');
-                } else {
+                // Admin preview: always start fresh, no score check
+                if (isAdminPreview) {
                     startQuiz();
+                } else {
+                    const scoreData = await dbSelect('qrasm_recordings', { assignment_id: 'quizme', instance_number: quizId, student_name: 'QUIZ_SCORE_' + studentName });
+                    if (scoreData && scoreData.length > 0) {
+                        previousScoreRecord = scoreData[0];
+                        document.getElementById('completed-message').innerText = 'You have already taken this quiz. Previous score: ' + previousScoreRecord.grade;
+                        showScreen('completed');
+                    } else {
+                        startQuiz();
+                    }
                 }
             } catch (err) {
                 console.error(err);
@@ -522,16 +531,21 @@
                 for (let i = 0; i < 5; i++) setTimeout(() => burstEffect(true, 5), i * 300);
             }
 
-            try {
-                const gradeStr = score + '/' + total;
-                if (previousScoreRecord) {
-                    await dbUpdate('qrasm_recordings', previousScoreRecord.id, { grade: gradeStr });
-                } else {
-                    await dbInsert('qrasm_recordings', { student_name: 'QUIZ_SCORE_' + studentName, assignment_id: 'quizme', instance_number: quizId, grade: gradeStr, audio_url: quizDef.parsedGrade.title || 'quiz' });
+            // Save score (skip in admin preview mode)
+            if (isAdminPreview) {
+                document.getElementById('results-submessage').innerText = "Admin Preview — score not saved.";
+            } else {
+                try {
+                    const gradeStr = score + '/' + total;
+                    if (previousScoreRecord) {
+                        await dbUpdate('qrasm_recordings', previousScoreRecord.id, { grade: gradeStr });
+                    } else {
+                        await dbInsert('qrasm_recordings', { student_name: 'QUIZ_SCORE_' + studentName, assignment_id: 'quizme', instance_number: quizId, grade: gradeStr, audio_url: quizDef.parsedGrade.title || 'quiz' });
+                    }
+                } catch (err) {
+                    console.error('Error saving score:', err);
+                    document.getElementById('results-submessage').innerText = "Note: Could not save score to database.";
                 }
-            } catch (err) {
-                console.error('Error saving score:', err);
-                document.getElementById('results-submessage').innerText = "Note: Could not save score to database.";
             }
         }
 

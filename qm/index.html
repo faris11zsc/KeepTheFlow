@@ -95,6 +95,14 @@
         .btn-primary:hover { background: var(--gold-bright); }
         .btn-secondary { background: rgba(42, 58, 94, 0.6); color: var(--text-main); border: 1px solid var(--gold-dim); padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; }
         .btn-secondary:hover { background: rgba(42, 58, 94, 0.9); border-color: var(--gold-accent); }
+        .admin-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .admin-btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid; transition: all 0.2s; font-family: inherit; }
+        .admin-btn-preview { background: rgba(197,164,78,0.15); color: var(--gold-accent); border-color: rgba(197,164,78,0.3); }
+        .admin-btn-preview:hover { background: rgba(197,164,78,0.3); }
+        .admin-btn-edit { background: rgba(59,130,246,0.1); color: #60a5fa; border-color: rgba(59,130,246,0.3); }
+        .admin-btn-edit:hover { background: rgba(59,130,246,0.25); }
+        .admin-btn-delete { background: rgba(239,68,68,0.1); color: #f87171; border-color: rgba(239,68,68,0.3); }
+        .admin-btn-delete:hover { background: rgba(239,68,68,0.25); }
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 26, 48, 0.8); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal { background: var(--navy-surface); border: 1px solid var(--gold-dim); border-radius: 12px; padding: 2rem; width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
@@ -357,7 +365,17 @@
                                     badgeHtml = '<span class="quiz-badge badge-pending">' + qCount + ' Questions</span>';
                                     if (!isAdminView) actionHtml = '<a href="' + quizLink + '" class="take-quiz-btn">Take Quiz &rarr;</a>';
                                 }
-                                card.innerHTML = '<div class="quiz-header"><div><div class="quiz-title">' + title + '</div><div class="quiz-meta">Assigned: ' + date + '</div></div>' + badgeHtml + '</div>' + actionHtml;
+                                // Admin actions
+                                if (isAdminView) {
+                                    var previewLink = 'quiz.html?quizId=' + def.instance_number + '&student=' + encodeURIComponent(studentName) + '&admin=true';
+                                    actionHtml = '<div class="admin-actions">' +
+                                        '<a href="' + previewLink + '" class="admin-btn admin-btn-preview">&#9654; Preview Quiz</a>' +
+                                        '<button class="admin-btn admin-btn-edit" onclick="editQuiz(\'' + def.id + '\',\'' + def.instance_number + '\')">&#9998; Edit</button>' +
+                                        '<button class="admin-btn admin-btn-delete" onclick="deleteQuiz(\'' + def.id + '\',\'' + encodeURIComponent(title) + '\')">&#10005; Delete</button>' +
+                                        (score ? '<span style="font-size:12px;color:var(--text-dim);align-self:center;">Score: ' + score + '</span>' : '') +
+                                        '</div>';
+                                }
+                                card.innerHTML = '<div class="quiz-header"><div><div class="quiz-title">' + title + '</div><div class="quiz-meta">Assigned: ' + date + ' &bull; ' + qCount + ' Qs</div></div>' + badgeHtml + '</div>' + actionHtml;
                                 container.appendChild(card);
                             }
                         });
@@ -375,6 +393,10 @@
             document.getElementById('rawQuestionsText').value = '';
             document.getElementById('parsedQuestionsContainer').innerHTML = '';
             draftQuestions = [];
+            editingQuizDbId = null;
+            editingQuizInstanceNumber = null;
+            var btn = document.querySelector('.btn-primary[onclick="saveQuiz()"]');
+            if (btn) btn.textContent = 'Save & Assign Quiz';
         }
         function closeQuizModal() { document.getElementById('quizModal').style.display = 'none'; }
 
@@ -473,32 +495,96 @@
         function updateQTier(qi, v) { draftQuestions[qi].tier = v; }
         function deleteDraftQuestion(qi) { draftQuestions.splice(qi, 1); renderDraftQuestions(); }
 
-        // ===== SAVE QUIZ (direct fetch) =====
+        // ===== SAVE QUIZ (direct fetch — supports both new and edit) =====
+        var editingQuizDbId = null; // set when editing an existing quiz
+        var editingQuizInstanceNumber = null;
+
         function saveQuiz() {
             if (!selectedStudentForAdmin) return alert('No student selected');
             var title = document.getElementById('newQuizTitle').value.trim() || 'Untitled Quiz';
             if (draftQuestions.length === 0) return alert('Please add at least one question.');
 
             var quizData = { title: title, date: new Date().toLocaleDateString(), questions: draftQuestions };
-            var instanceId = (Date.now() % 2000000000).toString();
 
             var btn = document.querySelector('.btn-primary[onclick="saveQuiz()"]');
             if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
 
-            dbInsert('qrasm_recordings', {
-                student_name: 'QUIZ_DEF_' + selectedStudentForAdmin,
-                assignment_id: 'quizme',
-                instance_number: instanceId,
-                grade: JSON.stringify(quizData),
-                audio_url: title
-            }).then(function() {
-                alert('Quiz assigned to ' + selectedStudentForAdmin + ' successfully!');
+            var promise;
+            if (editingQuizDbId) {
+                // UPDATE existing quiz
+                promise = fetch(REST + 'qrasm_recordings?id=eq.' + editingQuizDbId, {
+                    method: 'PATCH',
+                    headers: dbHeaders(),
+                    body: JSON.stringify({ grade: JSON.stringify(quizData), audio_url: title })
+                }).then(function(r) { if (!r.ok) return r.json().then(function(e) { throw new Error(e.message); }); return r.json(); });
+            } else {
+                // INSERT new quiz
+                var instanceId = (Date.now() % 2000000000).toString();
+                promise = dbInsert('qrasm_recordings', {
+                    student_name: 'QUIZ_DEF_' + selectedStudentForAdmin,
+                    assignment_id: 'quizme',
+                    instance_number: instanceId,
+                    grade: JSON.stringify(quizData),
+                    audio_url: title
+                });
+            }
+
+            promise.then(function() {
+                alert((editingQuizDbId ? 'Quiz updated' : 'Quiz assigned to ' + selectedStudentForAdmin) + ' successfully!');
+                editingQuizDbId = null;
+                editingQuizInstanceNumber = null;
                 closeQuizModal();
                 loadStudentQuizzes(selectedStudentForAdmin, true);
             }).catch(function(err) {
                 alert('Failed to save: ' + err.message);
             }).finally(function() {
-                if (btn) { btn.disabled = false; btn.textContent = 'Save & Assign Quiz'; }
+                if (btn) { btn.disabled = false; btn.textContent = editingQuizDbId ? 'Update Quiz' : 'Save & Assign Quiz'; }
+            });
+        }
+
+        // ===== ADMIN: DELETE QUIZ =====
+        function deleteQuiz(dbId, encodedTitle) {
+            var title = decodeURIComponent(encodedTitle);
+            if (!confirm('Delete quiz "' + title + '"?\n\nThis cannot be undone.')) return;
+
+            fetch(REST + 'qrasm_recordings?id=eq.' + dbId, {
+                method: 'DELETE',
+                headers: dbHeaders()
+            }).then(function(r) {
+                if (!r.ok) return r.json().then(function(e) { throw new Error(e.message); });
+                alert('Quiz deleted.');
+                loadStudentQuizzes(selectedStudentForAdmin, true);
+            }).catch(function(err) {
+                alert('Delete failed: ' + err.message);
+            });
+        }
+
+        // ===== ADMIN: EDIT QUIZ (load back into editor) =====
+        function editQuiz(dbId, instanceNumber) {
+            // Fetch the quiz definition
+            fetch(REST + 'qrasm_recordings?id=eq.' + dbId + '&select=*', {
+                method: 'GET', headers: dbHeaders()
+            }).then(function(r) { return r.json(); }).then(function(rows) {
+                if (!rows || rows.length === 0) { alert('Quiz not found.'); return; }
+                var def = rows[0];
+                var quizData = {};
+                try { quizData = typeof def.grade === 'string' ? JSON.parse(def.grade) : def.grade; } catch(e) {}
+
+                // Open modal and populate
+                document.getElementById('quizModal').style.display = 'flex';
+                document.getElementById('newQuizTitle').value = quizData.title || def.audio_url || '';
+                document.getElementById('rawQuestionsText').value = ''; // clear raw text
+                draftQuestions = quizData.questions || [];
+                editingQuizDbId = dbId;
+                editingQuizInstanceNumber = instanceNumber;
+
+                // Update button text
+                var btn = document.querySelector('.btn-primary[onclick="saveQuiz()"]');
+                if (btn) btn.textContent = 'Update Quiz';
+
+                renderDraftQuestions();
+            }).catch(function(err) {
+                alert('Failed to load quiz: ' + err.message);
             });
         }
     </script>
