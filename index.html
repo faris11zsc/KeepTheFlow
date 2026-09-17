@@ -703,7 +703,7 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
             if (enteredEmail && storedEmail && enteredEmail !== storedEmail) {
                 loginBtn.disabled = false;
                 loginBtn.textContent = 'Enter';
-                return alert('This name is already registered with a different email.\n\nIf this is your account, please enter the correct email.\nOtherwise, please choose a different name.');
+                return alert('This username is already taken. Please choose a different name.');
             }
             // Returning student → allow login
         } else {
