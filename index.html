@@ -676,25 +676,64 @@ if (!currentUser) {
     showUserBar();
 }
 
-document.getElementById('loginBtn').addEventListener('click', () => {
+document.getElementById('loginBtn').addEventListener('click', async () => {
     const name = document.getElementById('loginName').value.trim();
     const email = document.getElementById('loginEmail').value.trim();
     if (!name) return alert('Please enter your name');
+
+    const loginBtn = document.getElementById('loginBtn');
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Checking...';
+
+    // Supabase REST config
+    const SB_URL = 'https://lhebavvnrwqojbhyodwc.supabase.co/rest/v1/';
+    const SB_KEY = 'sb_publishable_JW75ayCf5SbvyT-02GmjNQ_vFpivPTU';
+    const hdrs = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+
+    try {
+        // Check if this username is already registered
+        const checkRes = await fetch(SB_URL + 'qrasm_student_emails?student_name=eq.' + encodeURIComponent(name) + '&select=*', { headers: hdrs });
+        const existing = await checkRes.json();
+
+        if (existing && existing.length > 0) {
+            const storedEmail = (existing[0].email || '').trim().toLowerCase();
+            const enteredEmail = email.toLowerCase();
+
+            // If user provided an email and it doesn't match the registered one → reject
+            if (enteredEmail && storedEmail && enteredEmail !== storedEmail) {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Enter';
+                return alert('This name is already registered with a different email.\n\nIf this is your account, please enter the correct email.\nOtherwise, please choose a different name.');
+            }
+            // Returning student → allow login
+        } else {
+            // New student → register them
+            await fetch(SB_URL + 'qrasm_student_emails', {
+                method: 'POST', headers: hdrs,
+                body: JSON.stringify({ student_name: name, email: email || null })
+            }).catch(() => {});
+        }
+
+        // Update email if returning student provided/changed it
+        if (existing && existing.length > 0 && email) {
+            await fetch(SB_URL + 'qrasm_student_emails?student_name=eq.' + encodeURIComponent(name), {
+                method: 'PATCH', headers: hdrs,
+                body: JSON.stringify({ email: email })
+            }).catch(() => {});
+        }
+    } catch (err) {
+        console.warn('Username check failed (offline?), proceeding:', err);
+    }
+
+    // Login
     localStorage.setItem('qrasm_student_name', name);
     localStorage.setItem('qrasm_student_email', email);
     currentUser = name;
     currentEmail = email;
     overlay.style.display = 'none';
+    loginBtn.disabled = false;
+    loginBtn.textContent = 'Enter';
     showUserBar();
-    // Persist email to Supabase for automated notifications
-    if (window.supabase) {
-        const portalSb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        portalSb.from('qrasm_student_emails').upsert(
-            { student_name: name, email: email },
-            { onConflict: 'student_name' }
-        ).then(() => console.log('Email saved to Supabase'))
-         .catch(e => console.warn('Email save failed:', e));
-    }
 });
 
 document.getElementById('logoutBtn').addEventListener('click', () => {

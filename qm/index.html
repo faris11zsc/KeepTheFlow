@@ -439,9 +439,27 @@
         }
 
         // ===== AUTH =====
-        function handleLogin() {
+        async function handleLogin() {
             var name = document.getElementById('loginName').value.trim();
             if (!name) { alert('Please enter your name.'); return; }
+
+            try {
+                var checkRes = await fetch(REST + 'qrasm_student_emails?student_name=eq.' + encodeURIComponent(name) + '&select=*', { headers: dbHeaders() });
+                var existing = await checkRes.json();
+
+                if (existing && existing.length > 0) {
+                    // Name exists — returning student, allow login
+                } else {
+                    // New student — register them
+                    await fetch(REST + 'qrasm_student_emails', {
+                        method: 'POST', headers: dbHeaders(),
+                        body: JSON.stringify({ student_name: name, email: null })
+                    }).catch(function() {});
+                }
+            } catch (err) {
+                console.warn('Username check failed, proceeding:', err);
+            }
+
             localStorage.setItem('qrasm_student_name', name);
             window.location.reload();
         }
