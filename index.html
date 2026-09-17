@@ -450,11 +450,74 @@ body {
     .user-bar { flex-direction: column; text-align: center; padding: 14px; }
     .login-card { padding: 36px 24px; }
 }
-
-
+/* ===== EMAIL NOTIFICATION BANNER ===== */
+.email-banner {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 5000;
+    background: linear-gradient(135deg, rgba(26,39,68,0.98), rgba(15,26,48,0.98));
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-bottom: 2px solid #c5a44e;
+    padding: 16px 20px;
+    display: none;
+    animation: bannerSlideDown 0.5s ease-out;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.email-banner.hiding { animation: bannerSlideUp 0.4s ease-in forwards; }
+@keyframes bannerSlideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes bannerSlideUp { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-100%); opacity: 0; } }
+.email-banner-inner {
+    max-width: 700px; margin: 0 auto;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.email-banner-icon { font-size: 28px; flex-shrink: 0; }
+.email-banner-text { flex: 1; min-width: 200px; }
+.email-banner-text strong { color: #d4b86a; display: block; margin-bottom: 2px; font-size: 14px; }
+.email-banner-text span { color: #8a95a8; font-size: 13px; line-height: 1.4; }
+.email-banner-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.email-send-btn {
+    background: #c5a44e; color: #0f1a30;
+    border: none; padding: 8px 18px; border-radius: 8px;
+    font-weight: 700; font-size: 13px; cursor: pointer;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+    transition: background 0.2s; font-family: inherit;
+}
+.email-send-btn:hover { background: #d4b86a; }
+.email-dismiss-btn {
+    background: none; border: 1px solid rgba(138,149,168,0.3); color: #8a95a8;
+    padding: 8px 14px; border-radius: 8px; font-size: 12px; cursor: pointer;
+    font-family: inherit; transition: all 0.2s;
+}
+.email-dismiss-btn:hover { border-color: #8a95a8; color: #e8e6e3; }
+.email-progress { height: 3px; background: rgba(197,164,78,0.15); margin-top: 10px; border-radius: 2px; overflow: hidden; max-width: 700px; margin-left: auto; margin-right: auto; }
+.email-progress-bar { height: 100%; background: #c5a44e; width: 100%; transition: width 10s linear; border-radius: 2px; }
+@media (max-width: 480px) {
+    .email-banner { padding: 12px 14px; }
+    .email-banner-inner { gap: 10px; }
+    .email-banner-icon { font-size: 24px; }
+    .email-banner-text strong { font-size: 13px; }
+    .email-banner-text span { font-size: 12px; }
+    .email-banner-actions { width: 100%; }
+    .email-send-btn { flex: 1; justify-content: center; padding: 10px; }
+    .email-dismiss-btn { padding: 10px 12px; }
+}
 </style>
 </head>
 <body>
+
+<!-- Email Notification Banner -->
+<div class="email-banner" id="emailBanner">
+    <div class="email-banner-inner">
+        <div class="email-banner-icon">📬</div>
+        <div class="email-banner-text">
+            <strong>Stay Updated with Keep The Flow!</strong>
+            <span>Get your progress and notifications straight to your inbox. Just tap Send — the email is ready for you!</span>
+        </div>
+        <div class="email-banner-actions">
+            <a id="emailSendBtn" class="email-send-btn" target="_blank">✉ Send Email</a>
+            <button class="email-dismiss-btn" onclick="dismissEmailBanner()">Don't show again</button>
+        </div>
+    </div>
+    <div class="email-progress"><div class="email-progress-bar" id="emailProgressBar"></div></div>
+</div>
 
 <!-- Hamburger Menu -->
 <div class="hamburger-btn" id="hamburgerBtn" onclick="toggleMenu()">
@@ -565,7 +628,46 @@ function showUserBar() {
         userBar.style.display = 'flex';
         document.getElementById('userDisplayName').textContent = currentUser;
         document.getElementById('userDisplayEmail').textContent = currentEmail || '';
+        showEmailBanner(currentUser);
     }
+}
+
+// ===== EMAIL NOTIFICATION BANNER =====
+let emailBannerTimer = null;
+
+function showEmailBanner(name) {
+    // Check if already dismissed
+    if (localStorage.getItem('qm_email_dismissed_' + name)) return;
+
+    const banner = document.getElementById('emailBanner');
+    const progressBar = document.getElementById('emailProgressBar');
+    const sendBtn = document.getElementById('emailSendBtn');
+
+    // Build Gmail compose link — works on ALL devices (opens Gmail in browser)
+    const subject = encodeURIComponent('Keep The Flow — Subscribe to Notifications');
+    const body = encodeURIComponent('Salam alaikum,\n\nThis is ' + name + '. I would like to receive email notifications for my progress and scores on Keep The Flow.\n\nJazakAllahu Khairan.');
+    sendBtn.href = 'https://mail.google.com/mail/?view=cm&to=lightknightf1@gmail.com&su=' + subject + '&body=' + body;
+
+    // Show banner
+    banner.style.display = 'block';
+
+    // Start 10-second countdown
+    setTimeout(() => { progressBar.style.width = '0%'; }, 50);
+
+    emailBannerTimer = setTimeout(() => { hideEmailBanner(); }, 10000);
+}
+
+function hideEmailBanner() {
+    const banner = document.getElementById('emailBanner');
+    banner.classList.add('hiding');
+    setTimeout(() => { banner.style.display = 'none'; banner.classList.remove('hiding'); }, 400);
+    if (emailBannerTimer) { clearTimeout(emailBannerTimer); emailBannerTimer = null; }
+}
+
+function dismissEmailBanner() {
+    const name = currentUser || '';
+    if (name) localStorage.setItem('qm_email_dismissed_' + name, 'true');
+    hideEmailBanner();
 }
 
 if (!currentUser) {
@@ -583,12 +685,6 @@ document.getElementById('loginBtn').addEventListener('click', () => {
     currentUser = name;
     currentEmail = email;
     overlay.style.display = 'none';
-    // Show "add to contacts" prompt for email deliverability
-    const tip = document.createElement('div');
-    tip.style.cssText = 'position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#1a2744,#2a3a5e);color:#fff;padding:16px 20px;z-index:99999;text-align:center;font-size:14px;font-family:inherit;box-shadow:0 4px 20px rgba(0,0,0,0.3);';
-    tip.innerHTML = '<span style="color:#c5a44e;font-weight:700;">Tip:</span> To receive feedback notifications in your inbox, please <b>add lightknightf1@gmail.com to your contacts</b>. <button onclick="this.parentElement.remove()" style="margin-left:12px;background:#c5a44e;color:#1a2744;border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;">Got it</button>';
-    document.body.appendChild(tip);
-    setTimeout(() => { if (tip.parentElement) tip.remove(); }, 20000);
     showUserBar();
     // Persist email to Supabase for automated notifications
     if (window.supabase) {
