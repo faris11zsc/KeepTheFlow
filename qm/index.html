@@ -470,21 +470,32 @@
             window.location.reload();
         }
 
-        // ===== ADMIN: STUDENT LIST (dynamic from DB) =====
+        // ===== ADMIN: STUDENT LIST (dynamic, sorted by activity) =====
         function loadAdminStudents() {
             var list = document.getElementById('adminStudentList');
             list.innerHTML = '<li style="color:var(--text-dim);padding:0.75rem;">Loading students...</li>';
 
-            fetch(REST + 'qrasm_student_emails?select=*&order=student_name.asc', {
+            // Fetch students AND their recording activity in parallel
+            var studentsReq = fetch(REST + 'qrasm_student_emails?select=student_name,email&order=student_name.asc', {
                 method: 'GET', headers: dbHeaders()
-            }).then(function(r) { return r.json(); }).then(function(rows) {
+            }).then(function(r) { return r.json(); });
+
+            var activityReq = fetch(REST + 'qrasm_recordings?select=student_name', {
+                method: 'GET', headers: dbHeaders()
+            }).then(function(r) { return r.json(); });
+
+            Promise.all([studentsReq, activityReq]).then(function(results) {
+                var rows = results[0];
+                var recordings = results[1];
                 list.innerHTML = '';
+
                 // Filter out system/junk entries
                 var students = rows.filter(function(r) {
                     var n = r.student_name || '';
                     return n &&
                         n.indexOf('QUIZ_DEF_') !== 0 &&
                         n.indexOf('QUIZ_SCORE_') !== 0 &&
+                        n.indexOf('EMAIL_SENT_') !== 0 &&
                         n !== 'TEST_STUDENT' &&
                         n.toLowerCase() !== ADMIN_USERNAME.toLowerCase() &&
                         n.length > 1;
@@ -495,14 +506,33 @@
                     return;
                 }
 
+                // Count recordings per student (exclude system rows)
+                var activityMap = {};
+                for (var r = 0; r < recordings.length; r++) {
+                    var rn = recordings[r].student_name || '';
+                    if (rn.indexOf('QUIZ_') === 0 || rn.indexOf('EMAIL_') === 0 || rn === 'TEST_STUDENT') continue;
+                    activityMap[rn] = (activityMap[rn] || 0) + 1;
+                }
+
+                // Sort students by activity (most active first)
+                students.sort(function(a, b) {
+                    var countA = activityMap[a.student_name] || 0;
+                    var countB = activityMap[b.student_name] || 0;
+                    return countB - countA;
+                });
+
                 // Cache student names for copy-to dropdown
                 cachedStudentNames = students.map(function(s) { return s.student_name; });
 
                 for (var i = 0; i < students.length; i++) {
                     var s = students[i];
+                    var count = activityMap[s.student_name] || 0;
                     var li = document.createElement('li');
                     li.className = 'student-item';
-                    li.innerHTML = '<span>' + s.student_name + '</span>' +
+                    var countBadge = count > 0
+                        ? '<span style="font-size:10px;background:rgba(197,164,78,0.15);color:var(--gold-accent);padding:2px 6px;border-radius:4px;margin-left:6px;">' + count + ' rec</span>'
+                        : '<span style="font-size:10px;background:rgba(239,68,68,0.1);color:#EF4444;padding:2px 6px;border-radius:4px;margin-left:6px;">inactive</span>';
+                    li.innerHTML = '<span>' + s.student_name + countBadge + '</span>' +
                         (s.email
                             ? '<span style="font-size:11px;color:var(--text-dim);display:block;">' + s.email + '</span>'
                             : '<span style="font-size:11px;color:#EF4444;display:block;">No email</span>');
