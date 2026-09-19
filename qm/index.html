@@ -338,6 +338,7 @@
         var currentUser = localStorage.getItem('qrasm_student_name');
         var selectedStudentForAdmin = null;
         var draftQuestions = [];
+        var cachedStudentNames = []; // populated by loadAdminStudents from DB
 
         // ===== DIRECT REST API (no CDN needed) =====
         function dbHeaders() {
@@ -469,31 +470,50 @@
             window.location.reload();
         }
 
-        // ===== ADMIN: STUDENT LIST =====
+        // ===== ADMIN: STUDENT LIST (dynamic from DB) =====
         function loadAdminStudents() {
-            var STUDENTS = [
-                { name: 'Youssef', email: 'awawda.sanaa@yahoo.com' },
-                { name: 'Omar Awawda', email: 'awawda.sanaa@yahoo.com' },
-                { name: 'Abraham musbeh', email: 'musbehabraham@gmail.com' },
-                { name: 'Mohammad Musbeh', email: 'mohammadmusbeh@gmail.com' },
-                { name: 'Teddy', email: '' },
-                { name: 'jack', email: '' }
-            ];
             var list = document.getElementById('adminStudentList');
-            list.innerHTML = '';
-            for (var i = 0; i < STUDENTS.length; i++) {
-                var s = STUDENTS[i];
-                var li = document.createElement('li');
-                li.className = 'student-item';
-                li.innerHTML = '<span>' + s.name + '</span>' +
-                    (s.email
-                        ? '<span style="font-size:11px;color:var(--text-dim);display:block;">' + s.email + '</span>'
-                        : '<span style="font-size:11px;color:#EF4444;display:block;">No email</span>');
-                li.onclick = (function(name, el) {
-                    return function() { selectAdminStudent(name, el); };
-                })(s.name, li);
-                list.appendChild(li);
-            }
+            list.innerHTML = '<li style="color:var(--text-dim);padding:0.75rem;">Loading students...</li>';
+
+            fetch(REST + 'qrasm_student_emails?select=*&order=student_name.asc', {
+                method: 'GET', headers: dbHeaders()
+            }).then(function(r) { return r.json(); }).then(function(rows) {
+                list.innerHTML = '';
+                // Filter out system/junk entries
+                var students = rows.filter(function(r) {
+                    var n = r.student_name || '';
+                    return n &&
+                        n.indexOf('QUIZ_DEF_') !== 0 &&
+                        n.indexOf('QUIZ_SCORE_') !== 0 &&
+                        n !== 'TEST_STUDENT' &&
+                        n.toLowerCase() !== ADMIN_USERNAME.toLowerCase() &&
+                        n.length > 1;
+                });
+
+                if (students.length === 0) {
+                    list.innerHTML = '<li style="color:var(--text-dim);padding:0.75rem;">No students found.</li>';
+                    return;
+                }
+
+                // Cache student names for copy-to dropdown
+                cachedStudentNames = students.map(function(s) { return s.student_name; });
+
+                for (var i = 0; i < students.length; i++) {
+                    var s = students[i];
+                    var li = document.createElement('li');
+                    li.className = 'student-item';
+                    li.innerHTML = '<span>' + s.student_name + '</span>' +
+                        (s.email
+                            ? '<span style="font-size:11px;color:var(--text-dim);display:block;">' + s.email + '</span>'
+                            : '<span style="font-size:11px;color:#EF4444;display:block;">No email</span>');
+                    li.onclick = (function(name, el) {
+                        return function() { selectAdminStudent(name, el); };
+                    })(s.student_name, li);
+                    list.appendChild(li);
+                }
+            }).catch(function(err) {
+                list.innerHTML = '<li style="color:#EF4444;padding:0.75rem;">Failed to load students: ' + err.message + '</li>';
+            });
         }
 
         function selectAdminStudent(name, liElement) {
@@ -547,8 +567,8 @@
                                 if (isAdminView) {
                                     var cardId = 'card_' + def.instance_number;
                                     var previewLink = 'quiz.html?quizId=' + def.instance_number + '&student=' + encodeURIComponent(studentName) + '&admin=true';
-                                    // Build student options (exclude current student)
-                                    var studentOptions = ['Youssef','Omar Awawda','Abraham musbeh','Mohammad Musbeh','Teddy','jack']
+                                    // Build student options (exclude current student) — dynamic from DB
+                                    var studentOptions = cachedStudentNames
                                         .filter(function(n){ return n !== studentName; })
                                         .map(function(n){ return '<option value="'+n+'">'+n+'</option>'; }).join('');
                                     actionHtml = '<div class="admin-actions">' +
