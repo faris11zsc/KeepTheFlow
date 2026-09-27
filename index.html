@@ -348,6 +348,59 @@ body {
 }
 .lesson-card:hover .card-arrow { opacity: 1; transform: translateX(0); }
 
+/* ── Admin Lesson Controls ───────────────────────── */
+.admin-toolbar { display:none; margin-bottom:16px; gap:10px; flex-wrap:wrap; align-items:center; }
+.admin-toolbar.visible { display:flex; }
+.admin-toolbar button {
+    background: linear-gradient(135deg,#1a2744,#2a3a5e); color:#c5a44e; border:1px solid rgba(197,164,78,0.3);
+    padding:10px 18px; border-radius:10px; font-weight:700; font-size:13px; cursor:pointer; transition:all .2s;
+}
+.admin-toolbar button:hover { border-color:#c5a44e; box-shadow:0 0 16px rgba(197,164,78,0.2); }
+.card-admin-bar {
+    display:none; position:absolute; top:8px; right:8px; z-index:10; gap:4px;
+}
+.admin-mode .card-admin-bar { display:flex; }
+.card-admin-btn {
+    width:30px; height:30px; border-radius:8px; border:1px solid rgba(197,164,78,0.25);
+    background:rgba(15,26,48,0.85); backdrop-filter:blur(8px); color:#c5a44e;
+    font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    transition:all .2s; padding:0;
+}
+.card-admin-btn:hover { background:rgba(197,164,78,0.2); border-color:#c5a44e; }
+.card-admin-btn.danger:hover { background:rgba(220,38,38,0.3); border-color:#dc2626; color:#f87171; }
+.lesson-card.hidden-lesson { opacity:0.4; border-style:dashed; }
+.lesson-card.hidden-lesson .hidden-tag {
+    display:inline-block; background:rgba(220,38,38,0.15); color:#f87171; font-size:10px;
+    font-weight:700; padding:2px 8px; border-radius:4px; margin-left:8px;
+}
+/* ── Lesson Edit Modal ───────────────────────── */
+.lesson-modal-overlay {
+    display:none; position:fixed; inset:0; z-index:10000;
+    background:rgba(10,18,35,0.92); backdrop-filter:blur(16px);
+    align-items:center; justify-content:center;
+}
+.lesson-modal-overlay.active { display:flex; }
+.lesson-modal {
+    background:var(--navy); border:1px solid rgba(197,164,78,0.25); border-radius:20px;
+    padding:32px; max-width:480px; width:92%; max-height:85vh; overflow-y:auto;
+    box-shadow:0 24px 80px rgba(0,0,0,0.5);
+}
+.lesson-modal h2 { color:#c5a44e; font-size:20px; margin:0 0 20px; text-align:center; }
+.lesson-modal label { display:block; font-size:12px; color:var(--text-dim); margin:12px 0 4px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; }
+.lesson-modal input, .lesson-modal select {
+    width:100%; padding:10px 14px; background:rgba(42,58,94,0.4); border:1px solid rgba(197,164,78,0.15);
+    border-radius:10px; color:var(--text); font-size:14px; font-family:'Inter',sans-serif; box-sizing:border-box;
+}
+.lesson-modal input:focus, .lesson-modal select:focus { outline:none; border-color:rgba(197,164,78,0.5); }
+.lesson-modal-actions { display:flex; gap:10px; margin-top:24px; }
+.lesson-modal-actions button {
+    flex:1; padding:12px; border-radius:10px; font-weight:700; font-size:14px; cursor:pointer; border:none; transition:all .2s;
+}
+.modal-btn-save { background:#c5a44e; color:#1a2744; }
+.modal-btn-save:hover { background:#d4b86a; }
+.modal-btn-cancel { background:rgba(42,58,94,0.5); color:var(--text-dim); border:1px solid rgba(197,164,78,0.15) !important; }
+.modal-btn-cancel:hover { background:rgba(42,58,94,0.8); }
+
 /* ── Empty State ───────────────────────── */
 .empty-state {
     text-align: center;
@@ -582,6 +635,12 @@ function toggleMenu() {
 <!-- Lessons -->
 <section class="lessons-section">
     <div class="section-title">Your Lessons</div>
+    <div class="admin-toolbar" id="adminToolbar">
+        <button onclick="openAddLesson()">➕ Add Lesson</button>
+        <button onclick="toggleReorderMode()" id="reorderToggle">↕ Reorder</button>
+        <button onclick="saveLessonsToCloud()" id="saveBtn" style="background:#c5a44e;color:#1a2744;">💾 Save Changes</button>
+        <span id="adminStatus" style="font-size:12px;color:var(--text-dim);"></span>
+    </div>
     <div class="lessons-grid" id="lessonsGrid">
         <div class="empty-state">
             <div class="empty-icon">📖</div>
@@ -589,6 +648,37 @@ function toggleMenu() {
         </div>
     </div>
 </section>
+
+<!-- Lesson Edit/Add Modal -->
+<div class="lesson-modal-overlay" id="lessonModal">
+    <div class="lesson-modal">
+        <h2 id="modalTitle">Edit Lesson</h2>
+        <input type="hidden" id="modalIndex" value="-1">
+        <label>Title (English)</label>
+        <input type="text" id="modTitle" placeholder="e.g. The Humming Y&W">
+        <label>Title (Arabic)</label>
+        <input type="text" id="modTitleAr" placeholder="e.g. إدغام النون" dir="rtl" style="font-family:'Amiri',serif;font-size:18px;">
+        <label>Rule Name</label>
+        <input type="text" id="modRule" placeholder="e.g. Idgham of Noon and Tanween">
+        <label>Lesson ID / Slug</label>
+        <input type="text" id="modId" placeholder="e.g. idgham-yw-5-12">
+        <label>Path (folder)</label>
+        <input type="text" id="modPath" placeholder="e.g. lessons/idgham-yw-5-12/">
+        <label>Assignment ID (for notifier)</label>
+        <input type="text" id="modAssignmentId" placeholder="e.g. idgham_yw_lesson">
+        <label>Syllable Range</label>
+        <input type="text" id="modSyllables" placeholder="e.g. 5-12">
+        <label>Instance Count</label>
+        <input type="number" id="modInstances" placeholder="e.g. 143">
+        <label>Card Color</label>
+        <input type="color" id="modColor" value="#c5a44e" style="height:40px;padding:4px;">
+        <div class="lesson-modal-actions">
+            <button class="modal-btn-cancel" onclick="closeLessonModal()">Cancel</button>
+            <button class="modal-btn-save" onclick="saveModalLesson()">Save</button>
+        </div>
+    </div>
+</div>
+
 
 <!-- Footer -->
 <footer class="portal-footer">
@@ -745,39 +835,220 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
     overlay.style.display = 'flex';
 });
 
-// ── Load Lessons ──────────────────────────────
-fetch('lessons.json')
-    .then(r => r.json())
-    .then(lessons => {
-        const grid = document.getElementById('lessonsGrid');
-        if (!lessons || lessons.length === 0) {
-            grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📖</div><div>No lessons available yet</div></div>';
+// ── Load Lessons (with Admin Management) ──────────────────────────────
+const ADMIN_USERNAME = '89FarisAuraKnight89';
+const isAdmin = currentUser && currentUser.trim().toLowerCase() === ADMIN_USERNAME.toLowerCase();
+let lessonsData = [];
+let reorderMode = false;
+
+const SB_URL_L = 'https://lhebavvnrwqojbhyodwc.supabase.co/rest/v1/';
+const SB_KEY_L = 'sb_publishable_JW75ayCf5SbvyT-02GmjNQ_vFpivPTU';
+const SB_HDRS = { 'apikey': SB_KEY_L, 'Authorization': 'Bearer ' + SB_KEY_L, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+
+// Try loading from Supabase first, then fallback to lessons.json
+async function loadLessons() {
+    try {
+        const res = await fetch(SB_URL_L + 'qrasm_recordings?student_name=eq.LESSONS_CONFIG&assignment_id=eq.portal&select=grade&order=created_at.desc&limit=1', { headers: SB_HDRS });
+        const rows = await res.json();
+        if (rows && rows.length > 0 && rows[0].grade) {
+            lessonsData = JSON.parse(rows[0].grade);
+            console.log('Lessons loaded from cloud:', lessonsData.length);
+            renderLessons();
             return;
         }
-        grid.innerHTML = '';
-        lessons.forEach((L, i) => {
-            const card = document.createElement('a');
-            card.href = L.path;
-            card.className = 'lesson-card';
-            card.style.setProperty('--delay', i * 0.1 + 's');
-            card.style.setProperty('--accent', L.color || '#c5a44e');
-            card.innerHTML = `
-                <div class="card-glow"></div>
-                <div class="card-badge">${L.syllables || 'Practice'}</div>
-                <h3 class="card-title-ar">${L.titleAr || ''}</h3>
-                <h4 class="card-title-en">${L.title || 'Untitled Lesson'}</h4>
-                <div class="card-meta">
-                    <span class="card-instances">${L.instances || 0} instances</span>
-                    <span class="card-date">${L.dateAdded || ''}</span>
-                </div>
-                <div class="card-arrow">→</div>
-            `;
-            grid.appendChild(card);
-        });
-    })
-    .catch(() => {
+    } catch(e) { console.warn('Cloud lessons fetch failed, using local:', e); }
+    // Fallback to static file
+    try {
+        const res = await fetch('lessons.json');
+        lessonsData = await res.json();
+        renderLessons();
+    } catch(e) {
         document.getElementById('lessonsGrid').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div>Failed to load lessons</div></div>';
+    }
+}
+
+function renderLessons() {
+    const grid = document.getElementById('lessonsGrid');
+    if (isAdmin) {
+        document.getElementById('adminToolbar').classList.add('visible');
+        grid.classList.add('admin-mode');
+    }
+    if (!lessonsData || lessonsData.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📖</div><div>No lessons available yet</div></div>';
+        return;
+    }
+    grid.innerHTML = '';
+    lessonsData.forEach((L, i) => {
+        // Students don't see hidden lessons
+        if (L.hidden && !isAdmin) return;
+
+        const card = document.createElement('div');
+        card.className = 'lesson-card' + (L.hidden ? ' hidden-lesson' : '');
+        card.style.setProperty('--delay', i * 0.1 + 's');
+        card.style.setProperty('--accent', L.color || '#c5a44e');
+        card.setAttribute('data-index', i);
+
+        // Admin control buttons
+        const adminBar = isAdmin ? `
+            <div class="card-admin-bar">
+                ${reorderMode ? `
+                    <button class="card-admin-btn" onclick="event.stopPropagation();moveLesson(${i},-1)" title="Move up">▲</button>
+                    <button class="card-admin-btn" onclick="event.stopPropagation();moveLesson(${i},1)" title="Move down">▼</button>
+                ` : ''}
+                <button class="card-admin-btn" onclick="event.stopPropagation();openEditLesson(${i})" title="Edit">✏️</button>
+                <button class="card-admin-btn" onclick="event.stopPropagation();toggleHideLesson(${i})" title="${L.hidden ? 'Show' : 'Hide'}">${L.hidden ? '👁️' : '🙈'}</button>
+                <button class="card-admin-btn danger" onclick="event.stopPropagation();deleteLesson(${i})" title="Delete">🗑️</button>
+            </div>
+        ` : '';
+
+        card.innerHTML = `
+            ${adminBar}
+            <div class="card-glow"></div>
+            <div class="card-badge">${L.syllables || 'Practice'}${L.hidden ? '<span class="hidden-tag">HIDDEN</span>' : ''}</div>
+            <h3 class="card-title-ar">${L.titleAr || ''}</h3>
+            <h4 class="card-title-en">${L.title || 'Untitled Lesson'}</h4>
+            <div class="card-meta">
+                <span class="card-instances">${L.instances || 0} instances</span>
+                <span class="card-date">${L.dateAdded || ''}</span>
+            </div>
+            <div class="card-arrow">→</div>
+        `;
+        // Click navigates to lesson (unless clicking admin buttons)
+        card.addEventListener('click', () => { window.location.href = L.path; });
+        card.style.cursor = 'pointer';
+        grid.appendChild(card);
     });
+}
+
+// ── Admin Functions ──────────────────────────────
+function openEditLesson(idx) {
+    const L = lessonsData[idx];
+    document.getElementById('modalTitle').textContent = 'Edit Lesson';
+    document.getElementById('modalIndex').value = idx;
+    document.getElementById('modTitle').value = L.title || '';
+    document.getElementById('modTitleAr').value = L.titleAr || '';
+    document.getElementById('modRule').value = L.rule || '';
+    document.getElementById('modId').value = L.id || '';
+    document.getElementById('modPath').value = L.path || '';
+    document.getElementById('modAssignmentId').value = L.assignmentId || '';
+    document.getElementById('modSyllables').value = L.syllables || '';
+    document.getElementById('modInstances').value = L.instances || 0;
+    document.getElementById('modColor').value = L.color || '#c5a44e';
+    document.getElementById('lessonModal').classList.add('active');
+}
+
+function openAddLesson() {
+    document.getElementById('modalTitle').textContent = 'Add New Lesson';
+    document.getElementById('modalIndex').value = -1;
+    document.getElementById('modTitle').value = '';
+    document.getElementById('modTitleAr').value = '';
+    document.getElementById('modRule').value = '';
+    document.getElementById('modId').value = '';
+    document.getElementById('modPath').value = 'lessons/';
+    document.getElementById('modAssignmentId').value = '';
+    document.getElementById('modSyllables').value = '';
+    document.getElementById('modInstances').value = '';
+    document.getElementById('modColor').value = '#c5a44e';
+    document.getElementById('lessonModal').classList.add('active');
+}
+
+function closeLessonModal() {
+    document.getElementById('lessonModal').classList.remove('active');
+}
+
+function saveModalLesson() {
+    const idx = parseInt(document.getElementById('modalIndex').value);
+    const lesson = {
+        id: document.getElementById('modId').value.trim(),
+        title: document.getElementById('modTitle').value.trim(),
+        titleAr: document.getElementById('modTitleAr').value.trim(),
+        rule: document.getElementById('modRule').value.trim(),
+        syllables: document.getElementById('modSyllables').value.trim(),
+        instances: parseInt(document.getElementById('modInstances').value) || 0,
+        path: document.getElementById('modPath').value.trim(),
+        assignmentId: document.getElementById('modAssignmentId').value.trim(),
+        color: document.getElementById('modColor').value,
+        dateAdded: new Date().toISOString().split('T')[0],
+    };
+    if (!lesson.title) return alert('Title is required');
+    if (!lesson.id) return alert('Lesson ID is required');
+
+    if (idx >= 0) {
+        // Preserve hidden state when editing
+        lesson.hidden = lessonsData[idx].hidden || false;
+        lessonsData[idx] = lesson;
+    } else {
+        lessonsData.push(lesson);
+    }
+    closeLessonModal();
+    renderLessons();
+    setStatus('Unsaved changes — click 💾 Save');
+}
+
+function deleteLesson(idx) {
+    const L = lessonsData[idx];
+    if (!confirm(`Delete "${L.title}"?\n\nThis cannot be undone.`)) return;
+    lessonsData.splice(idx, 1);
+    renderLessons();
+    setStatus('Lesson deleted — click 💾 Save');
+}
+
+function toggleHideLesson(idx) {
+    lessonsData[idx].hidden = !lessonsData[idx].hidden;
+    renderLessons();
+    setStatus(lessonsData[idx].hidden ? 'Lesson hidden from students' : 'Lesson visible to students');
+}
+
+function moveLesson(idx, dir) {
+    const newIdx = idx + dir;
+    if (newIdx < 0 || newIdx >= lessonsData.length) return;
+    [lessonsData[idx], lessonsData[newIdx]] = [lessonsData[newIdx], lessonsData[idx]];
+    renderLessons();
+}
+
+function toggleReorderMode() {
+    reorderMode = !reorderMode;
+    document.getElementById('reorderToggle').textContent = reorderMode ? '✓ Done Reordering' : '↕ Reorder';
+    renderLessons();
+}
+
+async function saveLessonsToCloud() {
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true; btn.textContent = 'Saving...';
+    try {
+        // Check if config row exists
+        const check = await fetch(SB_URL_L + 'qrasm_recordings?student_name=eq.LESSONS_CONFIG&assignment_id=eq.portal&select=id', { headers: SB_HDRS });
+        const existing = await check.json();
+        const payload = { student_name: 'LESSONS_CONFIG', assignment_id: 'portal', instance_number: 0, grade: JSON.stringify(lessonsData) };
+        if (existing && existing.length > 0) {
+            await fetch(SB_URL_L + 'qrasm_recordings?student_name=eq.LESSONS_CONFIG&assignment_id=eq.portal', {
+                method: 'PATCH', headers: SB_HDRS, body: JSON.stringify({ grade: JSON.stringify(lessonsData) })
+            });
+        } else {
+            await fetch(SB_URL_L + 'qrasm_recordings', {
+                method: 'POST', headers: SB_HDRS, body: JSON.stringify(payload)
+            });
+        }
+        setStatus('✅ Saved to cloud!');
+    } catch(e) {
+        setStatus('❌ Save failed: ' + e.message);
+        console.error('Save failed:', e);
+    }
+    btn.disabled = false; btn.textContent = '💾 Save Changes';
+}
+
+function setStatus(msg) {
+    const el = document.getElementById('adminStatus');
+    el.textContent = msg;
+    setTimeout(() => { if (el.textContent === msg) el.textContent = ''; }, 5000);
+}
+
+// Close modal on overlay click
+document.getElementById('lessonModal').addEventListener('click', function(e) {
+    if (e.target === this) closeLessonModal();
+});
+
+loadLessons();
 </script>
 </body>
 </html>
