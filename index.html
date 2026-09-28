@@ -368,13 +368,13 @@ body {
 }
 .admin-toolbar button:hover { border-color:#c5a44e; box-shadow:0 0 16px rgba(197,164,78,0.2); }
 .card-admin-bar {
-    display:none; position:absolute; top:8px; right:8px; z-index:10; gap:4px;
+    display:none; position:absolute; top:8px; right:8px; z-index:10; gap:3px; flex-wrap:wrap; max-width:180px; justify-content:flex-end;
 }
 .admin-mode .card-admin-bar { display:flex; }
 .card-admin-btn {
-    width:30px; height:30px; border-radius:8px; border:1px solid rgba(197,164,78,0.25);
+    width:28px; height:28px; border-radius:7px; border:1px solid rgba(197,164,78,0.25);
     background:rgba(15,26,48,0.85); backdrop-filter:blur(8px); color:#c5a44e;
-    font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center;
     transition:all .2s; padding:0;
 }
 .card-admin-btn:hover { background:rgba(197,164,78,0.2); border-color:#c5a44e; }
@@ -384,6 +384,12 @@ body {
     display:inline-block; background:rgba(220,38,38,0.15); color:#f87171; font-size:10px;
     font-weight:700; padding:2px 8px; border-radius:4px; margin-left:8px;
 }
+.new-tag {
+    display:inline-block; background:rgba(34,197,94,0.15); color:#22c55e; font-size:10px;
+    font-weight:700; padding:2px 8px; border-radius:4px; margin-left:8px;
+    animation: new-pulse 2s ease-in-out infinite;
+}
+@keyframes new-pulse { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
 /* ── Lesson Edit Modal ───────────────────────── */
 .lesson-modal-overlay {
     display:none; position:fixed; inset:0; z-index:10000;
@@ -655,9 +661,12 @@ function toggleMenu() {
 <section class="lessons-section">
     <div class="section-title">Your Lessons</div>
     <div class="admin-toolbar" id="adminToolbar">
-        <button onclick="openAddLesson()">➕ Add Lesson</button>
+        <button onclick="openAddLesson()">➕ Add</button>
         <button onclick="toggleReorderMode()" id="reorderToggle">↕ Reorder</button>
-        <button onclick="saveLessonsToCloud()" id="saveBtn" style="background:#c5a44e;color:#1a2744;">💾 Save Changes</button>
+        <button onclick="saveLessonsToCloud()" id="saveBtn" style="background:#c5a44e;color:#1a2744;">💾 Save</button>
+        <button onclick="exportLessons()" title="Download lessons JSON">📥 Export</button>
+        <button onclick="document.getElementById('importFile').click()" title="Import lessons JSON">📤 Import</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importLessons(event)">
         <span id="adminStatus" style="font-size:12px;color:var(--text-dim);"></span>
     </div>
     <div class="lessons-grid" id="lessonsGrid">
@@ -914,16 +923,22 @@ function renderLessons() {
                     <button class="card-admin-btn" onclick="event.stopPropagation();moveLesson(${i},-1)" title="Move up">▲</button>
                     <button class="card-admin-btn" onclick="event.stopPropagation();moveLesson(${i},1)" title="Move down">▼</button>
                 ` : ''}
+                <button class="card-admin-btn" onclick="event.stopPropagation();window.open('${L.path}','_blank')" title="Preview in new tab">🔗</button>
+                <button class="card-admin-btn" onclick="event.stopPropagation();copyShareLink(${i})" title="Copy link">📋</button>
+                <button class="card-admin-btn" onclick="event.stopPropagation();duplicateLesson(${i})" title="Duplicate">📑</button>
+                <button class="card-admin-btn" onclick="event.stopPropagation();toggleNewBadge(${i})" title="${L.isNew ? 'Remove NEW badge' : 'Mark as NEW'}">${L.isNew ? '🔴' : '🟢'}</button>
                 <button class="card-admin-btn" onclick="event.stopPropagation();openEditLesson(${i})" title="Edit">✏️</button>
                 <button class="card-admin-btn" onclick="event.stopPropagation();toggleHideLesson(${i})" title="${L.hidden ? 'Show' : 'Hide'}">${L.hidden ? '👁️' : '🙈'}</button>
                 <button class="card-admin-btn danger" onclick="event.stopPropagation();deleteLesson(${i})" title="Delete">🗑️</button>
             </div>
         ` : '';
 
+        const newBadge = L.isNew ? '<span class="new-tag">NEW</span>' : '';
+
         card.innerHTML = `
             ${adminBar}
             <div class="card-glow"></div>
-            <div class="card-badge">${L.syllables || 'Practice'}${L.hidden ? '<span class="hidden-tag">HIDDEN</span>' : ''}</div>
+            <div class="card-badge">${L.syllables || 'Practice'}${L.hidden ? '<span class="hidden-tag">HIDDEN</span>' : ''}${newBadge}</div>
             <h3 class="card-title-ar">${L.titleAr || ''}</h3>
             <h4 class="card-title-en">${L.title || 'Untitled Lesson'}</h4>
             <div class="card-meta">
@@ -993,10 +1008,12 @@ function saveModalLesson() {
     if (!lesson.id) return alert('Lesson ID is required');
 
     if (idx >= 0) {
-        // Preserve hidden state when editing
+        // Preserve flags when editing
         lesson.hidden = lessonsData[idx].hidden || false;
+        lesson.isNew = lessonsData[idx].isNew || false;
         lessonsData[idx] = lesson;
     } else {
+        lesson.isNew = true; // new lessons get the NEW badge automatically
         lessonsData.push(lesson);
     }
     closeLessonModal();
@@ -1029,6 +1046,64 @@ function toggleReorderMode() {
     reorderMode = !reorderMode;
     document.getElementById('reorderToggle').textContent = reorderMode ? '✓ Done Reordering' : '↕ Reorder';
     renderLessons();
+}
+
+// ── New Admin Functions ──────────────────────────────
+
+function duplicateLesson(idx) {
+    const copy = JSON.parse(JSON.stringify(lessonsData[idx]));
+    copy.title = copy.title + ' (Copy)';
+    copy.id = copy.id + '-copy';
+    copy.dateAdded = new Date().toISOString().split('T')[0];
+    lessonsData.splice(idx + 1, 0, copy);
+    renderLessons();
+    setStatus('Lesson duplicated — edit it, then 💾 Save');
+}
+
+function copyShareLink(idx) {
+    const L = lessonsData[idx];
+    const url = window.location.origin + '/' + L.path;
+    navigator.clipboard.writeText(url).then(() => {
+        setStatus('📋 Link copied: ' + url);
+    }).catch(() => {
+        prompt('Copy this link:', url);
+    });
+}
+
+function toggleNewBadge(idx) {
+    lessonsData[idx].isNew = !lessonsData[idx].isNew;
+    renderLessons();
+    setStatus(lessonsData[idx].isNew ? '🟢 Marked as NEW' : 'NEW badge removed');
+}
+
+function exportLessons() {
+    const blob = new Blob([JSON.stringify(lessonsData, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'lessons-backup-' + new Date().toISOString().split('T')[0] + '.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    setStatus('📥 Lessons exported');
+}
+
+function importLessons(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const imported = JSON.parse(e.target.result);
+            if (!Array.isArray(imported)) throw new Error('Not an array');
+            if (!confirm(`Import ${imported.length} lessons?\n\nThis will REPLACE all current lessons.\nMake sure you exported a backup first.`)) return;
+            lessonsData = imported;
+            renderLessons();
+            setStatus('📤 Imported ' + imported.length + ' lessons — click 💾 Save');
+        } catch (err) {
+            alert('Invalid JSON file: ' + err.message);
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = ''; // reset so same file can be re-imported
 }
 
 async function saveLessonsToCloud() {
