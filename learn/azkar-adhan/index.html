@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Azkar of the Adhan — LightKnight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg: #0f1a30;
+    --bg2: #162040;
+    --navy: #1a2744;
+    --card: rgba(26,39,68,0.7);
+    --gold: #c5a44e;
+    --gold-light: #e8d5a0;
+    --gold-dim: rgba(197,164,78,0.12);
+    --text: #e8e6e1;
+    --text-dim: rgba(232,230,225,0.5);
+    --ivory: #f5f0e8;
+    --radius: 16px;
+    --glass-border: rgba(197,164,78,0.12);
+    --glass-blur: blur(20px);
+}
+[data-theme="light"] {
+    --bg: #f5f0e8;
+    --bg2: #ece5d8;
+    --navy: #ffffff;
+    --card: rgba(255,255,255,0.85);
+    --text: #1a2744;
+    --text-dim: rgba(26,39,68,0.45);
+    --glass-border: rgba(26,39,68,0.1);
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.7;
+    transition: background .4s, color .4s;
+}
+
+/* ── Progress Bar ─────────────── */
+.progress-bar {
+    position: fixed; top:0; left:0; height:3px; z-index:9999;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    width: 0%; transition: width .15s;
+    box-shadow: 0 0 12px rgba(197,164,78,0.4);
+}
+
+/* ── Top Nav ──────────────────── */
+.top-nav {
+    position: fixed; top:0; left:0; right:0; z-index:100;
+    background: rgba(15,26,48,0.8); backdrop-filter: var(--glass-blur);
+    border-bottom: 1px solid var(--glass-border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 24px; transition: background .4s;
+}
+[data-theme="light"] .top-nav { background: rgba(245,240,232,0.9); }
+.nav-back {
+    color: var(--gold); text-decoration: none; font-weight: 600; font-size: 14px;
+    display: flex; align-items: center; gap: 6px; transition: opacity .2s;
+}
+.nav-back:hover { opacity: 0.7; }
+.nav-controls { display: flex; align-items: center; gap: 12px; }
+.theme-toggle {
+    width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--glass-border);
+    background: var(--card); color: var(--gold); font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all .2s;
+}
+.theme-toggle:hover { border-color: var(--gold); }
+
+/* ── Hero ─────────────────────── */
+.hero {
+    padding: 120px 24px 60px; text-align: center;
+    background: radial-gradient(ellipse at 50% 0%, rgba(197,164,78,0.08) 0%, transparent 70%);
+}
+.hero-icon { font-size: 48px; margin-bottom: 16px; animation: float 3s ease-in-out infinite; }
+@keyframes float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-8px); } }
+.hero-title {
+    font-size: clamp(28px, 5vw, 42px); font-weight: 800; letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 12px;
+}
+.hero-subtitle { font-size: 16px; color: var(--text-dim); max-width: 500px; margin: 0 auto; }
+
+/* ── Content Container ────────── */
+.content { max-width: 720px; margin: 0 auto; padding: 0 24px 80px; }
+
+/* ── Dhikr Card ───────────────── */
+.dhikr-card {
+    background: var(--card); backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border); border-radius: var(--radius);
+    padding: 32px 28px; margin-bottom: 28px;
+    position: relative; overflow: hidden;
+    animation: card-in .6s ease backwards;
+    transition: border-color .3s, box-shadow .3s;
+}
+.dhikr-card:nth-child(1) { animation-delay: .1s; }
+.dhikr-card:nth-child(2) { animation-delay: .25s; }
+.dhikr-card:nth-child(3) { animation-delay: .4s; }
+@keyframes card-in { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+.dhikr-card:hover { border-color: rgba(197,164,78,0.25); box-shadow: 0 8px 40px rgba(0,0,0,0.15); }
+
+.dhikr-card::before {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle at 30% 30%, rgba(197,164,78,0.04), transparent 60%);
+    pointer-events: none;
+}
+
+.dhikr-english {
+    font-size: 19px; font-weight: 500; line-height: 1.8; color: var(--text);
+    margin-bottom: 16px; position: relative; z-index: 1;
+}
+.dhikr-arabic {
+    font-family: 'Amiri', serif; font-size: 16px; color: var(--text-dim);
+    direction: rtl; text-align: right; line-height: 2;
+    padding-top: 14px; border-top: 1px solid var(--glass-border);
+    position: relative; z-index: 1;
+}
+
+/* ── Audio Player ─────────────── */
+.audio-row {
+    display: flex; align-items: center; gap: 12px; margin-top: 18px;
+    padding: 12px 16px; border-radius: 12px;
+    background: var(--gold-dim); position: relative; z-index: 1;
+}
+.play-btn {
+    width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--gold);
+    background: transparent; color: var(--gold); font-size: 16px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all .25s; flex-shrink: 0;
+}
+.play-btn:hover { background: var(--gold); color: var(--bg); }
+.play-btn.playing { background: var(--gold); color: var(--bg); animation: pulse-ring 1.5s infinite; }
+@keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(197,164,78,0.4); } 70% { box-shadow: 0 0 0 10px rgba(197,164,78,0); } }
+.audio-label { font-size: 13px; color: var(--gold); font-weight: 600; letter-spacing: .02em; }
+.audio-time { font-size: 12px; color: var(--text-dim); margin-left: auto; font-variant-numeric: tabular-nums; }
+
+/* ── Definition Tooltips ──────── */
+.term {
+    color: var(--gold); cursor: pointer; position: relative;
+    border-bottom: 1px dotted rgba(197,164,78,0.4); transition: border-color .2s;
+}
+.term:hover { border-bottom-color: var(--gold); }
+.tooltip {
+    display: none; position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%);
+    background: var(--navy); border: 1px solid rgba(197,164,78,0.3); border-radius: 12px;
+    padding: 14px 18px; min-width: 240px; max-width: 320px; z-index: 200;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4); pointer-events: none;
+}
+.term:hover .tooltip, .term:focus .tooltip { display: block; }
+.tooltip-ar { font-family:'Amiri',serif; font-size:18px; color:var(--gold-light); direction:rtl; text-align:right; margin-bottom:6px; }
+.tooltip-meaning { font-size:13px; color:var(--text); margin-bottom:4px; }
+.tooltip-source { font-size:11px; color:var(--text-dim); font-style:italic; }
+
+/* ── Source Citations ─────────── */
+.citation {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--gold-dim); color: var(--gold); font-size: 11px; font-weight: 700;
+    padding: 3px 10px; border-radius: 20px; margin-left: 6px;
+    letter-spacing: .03em; white-space: nowrap;
+}
+
+/* ── Expandable Deep Dive ─────── */
+details {
+    margin-top: 14px; border-top: 1px solid var(--glass-border); padding-top: 14px;
+    position: relative; z-index: 1;
+}
+details summary {
+    color: var(--gold); font-size: 13px; font-weight: 600; cursor: pointer;
+    list-style: none; display: flex; align-items: center; gap: 6px;
+    transition: opacity .2s;
+}
+details summary::-webkit-details-marker { display: none; }
+details summary::before { content: '▸'; transition: transform .2s; }
+details[open] summary::before { transform: rotate(90deg); }
+details summary:hover { opacity: 0.7; }
+details .deep-content {
+    margin-top: 12px; font-size: 14px; color: var(--text-dim); line-height: 1.7;
+}
+
+/* ── Footer ───────────────────── */
+.lesson-footer {
+    text-align: center; padding: 40px 24px 32px;
+    border-top: 1px solid var(--glass-border); margin-top: 20px;
+}
+.footer-brand { font-size: 13px; color: var(--text-dim); letter-spacing: .04em; }
+.footer-brand strong { color: var(--gold); }
+
+/* ── Mobile ───────────────────── */
+@media (max-width: 480px) {
+    .hero { padding: 100px 16px 40px; }
+    .content { padding: 0 16px 60px; }
+    .dhikr-card { padding: 24px 20px; }
+    .dhikr-english { font-size: 17px; }
+    .tooltip { min-width: 200px; left: 0; transform: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Top Navigation -->
+<nav class="top-nav">
+    <a href="../../" class="nav-back">← Back to Dashboard</a>
+    <div class="nav-controls">
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme">🌙</button>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-icon">🕌</div>
+    <h1 class="hero-title">Azkar of the Adhan</h1>
+    <p class="hero-subtitle">Three powerful supplications to say after hearing the call to prayer</p>
+</section>
+
+<!-- Content -->
+<div class="content">
+
+    <!-- Dhikr 1: Du'a al-Waseelah -->
+    <div class="dhikr-card">
+        <div class="dhikr-english">
+            O Allah, Lord of this perfect call and established prayer, grant Prophet Muhammad
+            <span class="term" tabindex="0">al-Waseelah
+                <span class="tooltip">
+                    <div class="tooltip-ar">الوسيلة</div>
+                    <div class="tooltip-meaning">The highest station in Paradise, granted only to one servant of Allah — and the Prophet ﷺ hoped it would be him.</div>
+                    <div class="tooltip-source">Sahih Muslim 384</div>
+                </span>
+            </span>
+            and
+            <span class="term" tabindex="0">al-Fadeelah
+                <span class="tooltip">
+                    <div class="tooltip-ar">الفضيلة</div>
+                    <div class="tooltip-meaning">A rank of extra virtue and honor above all creation.</div>
+                    <div class="tooltip-source">Sahih al-Bukhari 614</div>
+                </span>
+            </span>, and resurrect him to
+            <span class="term" tabindex="0">the Praiseworthy Station
+                <span class="tooltip">
+                    <div class="tooltip-ar">المقام المحمود</div>
+                    <div class="tooltip-meaning">The station of Grand Intercession on the Day of Judgment, where the Prophet ﷺ will intercede for all of humanity.</div>
+                    <div class="tooltip-source">Surah Al-Isra 17:79</div>
+                </span>
+            </span>
+            that You have promised him.
+            <span class="citation">📖 Bukhari 614</span>
+        </div>
+        <div class="dhikr-arabic">
+            اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ وَالصَّلَاةِ الْقَائِمَةِ، آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ، وَابْعَثْهُ مَقَامًا مَحْمُودًا الَّذِي وَعَدْتَهُ
+        </div>
+        <div class="audio-row">
+            <button class="play-btn" onclick="toggleAudio(this, 'audio/dua-waseelah.mp3')" aria-label="Play audio">▶</button>
+            <span class="audio-label">Listen to pronunciation</span>
+            <span class="audio-time" id="time-0">0:00</span>
+        </div>
+        <details>
+            <summary>Why this du'a is special</summary>
+            <div class="deep-content">
+                The Prophet ﷺ said: <em>"Whoever says this du'a after hearing the adhan, my intercession will be guaranteed for him on the Day of Judgment."</em> This is the only du'a in Islam with a direct promise of the Prophet's intercession attached to it. It is narrated in Sahih al-Bukhari (614) through the chain of Jabir ibn Abdullah رضي الله عنه.
+            </div>
+        </details>
+    </div>
+
+    <!-- Dhikr 2: Raditu billahi rabba -->
+    <div class="dhikr-card">
+        <div class="dhikr-english">
+            I am pleased with Allah as my Lord, with Islam as my religion, and with Muhammad ﷺ as my messenger.
+            <span class="citation">📖 Muslim 386</span>
+        </div>
+        <div class="dhikr-arabic">
+            رَضِيتُ بِاللَّهِ رَبًّا، وَبِالْإِسْلَامِ دِينًا، وَبِمُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ رَسُولًا
+        </div>
+        <div class="audio-row">
+            <button class="play-btn" onclick="toggleAudio(this, 'audio/dua-raditu.mp3')" aria-label="Play audio">▶</button>
+            <span class="audio-label">Listen to pronunciation</span>
+            <span class="audio-time" id="time-1">0:00</span>
+        </div>
+        <details>
+            <summary>The reward for this dhikr</summary>
+            <div class="deep-content">
+                The Prophet ﷺ said: <em>"Whoever says this when the muezzin finishes, his sins will be forgiven."</em> (Sahih Muslim 386). This short yet powerful declaration renews your covenant with Allah — affirming your satisfaction with His lordship, His religion, and His final messenger. Sa'd ibn Abi Waqqas رضي الله عنه reported this hadith.
+            </div>
+        </details>
+    </div>
+
+    <!-- Dhikr 3: La hawla wa la quwwata illa billah -->
+    <div class="dhikr-card">
+        <div class="dhikr-english">
+            There is no
+            <span class="term" tabindex="0">strength or power
+                <span class="tooltip">
+                    <div class="tooltip-ar">لَا حَوْلَ وَلَا قُوَّةَ</div>
+                    <div class="tooltip-meaning"><strong>Hawl</strong> (حَوْل) = the ability to change one's state or move from one condition to another. <strong>Quwwah</strong> (قُوَّة) = the power to carry out and sustain that change.</div>
+                    <div class="tooltip-source">Ibn Qayyim — Al-Fawa'id</div>
+                </span>
+            </span>
+            except through Allah.
+            <span class="citation">📖 Bukhari 613</span>
+        </div>
+        <div class="dhikr-arabic">
+            لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ
+        </div>
+        <div class="audio-row">
+            <button class="play-btn" onclick="toggleAudio(this, 'audio/dua-hawla.mp3')" aria-label="Play audio">▶</button>
+            <span class="audio-label">Listen to pronunciation</span>
+            <span class="audio-time" id="time-2">0:00</span>
+        </div>
+        <details>
+            <summary>A treasure of Paradise</summary>
+            <div class="deep-content">
+                The Prophet ﷺ told Abu Musa al-Ash'ari رضي الله عنه: <em>"Shall I not guide you to a treasure from the treasures of Paradise? Say: La hawla wa la quwwata illa billah."</em> (Sahih al-Bukhari 6384, Sahih Muslim 2704). This phrase is said specifically when the muezzin says <em>"Hayya 'ala as-salah"</em> and <em>"Hayya 'ala al-falah."</em> It is a complete surrender of one's own agency to Allah's will — acknowledging that without Him, we can neither change our condition nor sustain any effort.
+            </div>
+        </details>
+    </div>
+
+</div>
+
+<!-- Footer -->
+<div class="lesson-footer">
+    <div class="footer-brand">Crafted with care by <strong>LightKnight Academy</strong></div>
+</div>
+
+<script>
+// ── Audio Player ──────────────────────────────
+let currentAudio = null;
+let currentBtn = null;
+
+function toggleAudio(btn, src) {
+    // If same button is clicked again, pause
+    if (currentBtn === btn && currentAudio && !currentAudio.paused) {
+        currentAudio.pause();
+        btn.textContent = '▶';
+        btn.classList.remove('playing');
+        return;
+    }
+    // Stop any playing audio
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        if (currentBtn) { currentBtn.textContent = '▶'; currentBtn.classList.remove('playing'); }
+    }
+    // Play new
+    currentAudio = new Audio(src);
+    currentBtn = btn;
+    btn.textContent = '⏸';
+    btn.classList.add('playing');
+
+    const timeEl = btn.closest('.audio-row').querySelector('.audio-time');
+    currentAudio.addEventListener('timeupdate', () => {
+        const m = Math.floor(currentAudio.currentTime / 60);
+        const s = Math.floor(currentAudio.currentTime % 60).toString().padStart(2, '0');
+        timeEl.textContent = m + ':' + s;
+    });
+    currentAudio.addEventListener('ended', () => {
+        btn.textContent = '▶';
+        btn.classList.remove('playing');
+        timeEl.textContent = '0:00';
+    });
+    currentAudio.play().catch(() => { btn.textContent = '▶'; btn.classList.remove('playing'); });
+}
+
+// ── Theme Toggle ──────────────────────────────
+const themeToggle = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('lk_learn_theme') || 'dark';
+if (savedTheme === 'light') { document.documentElement.setAttribute('data-theme', 'light'); themeToggle.textContent = '☀️'; }
+
+themeToggle.addEventListener('click', () => {
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    if (isLight) {
+        document.documentElement.removeAttribute('data-theme');
+        themeToggle.textContent = '🌙';
+        localStorage.setItem('lk_learn_theme', 'dark');
+    } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        themeToggle.textContent = '☀️';
+        localStorage.setItem('lk_learn_theme', 'light');
+    }
+});
+
+// ── Progress Bar ──────────────────────────────
+function updateProgress() {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? Math.min((scrollTop / docHeight) * 100, 100) : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+    localStorage.setItem('lk_azkar_adhan_progress', pct.toFixed(1));
+}
+window.addEventListener('scroll', updateProgress);
+updateProgress();
+</script>
+</body>
+</html>
