@@ -605,10 +605,8 @@ body {
     <button class="learn-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open');">
         📚 Learn <span class="toggle-arrow">▸</span>
     </button>
-    <div class="learn-submenu">
-        <a href="learn/azkar-adhan/" class="menu-item">
-            <span class="menu-icon">🕌</span> Azkar of the Adhan
-        </a>
+    <div class="learn-submenu" id="learnSubmenu">
+        <div style="padding:8px 18px;font-size:12px;color:var(--text-dim);">Loading...</div>
     </div>
 </nav>
 <script>
@@ -707,6 +705,50 @@ function toggleMenu() {
     </div>
 </div>
 
+
+<!-- Learn Section -->
+<section class="lessons-section" style="margin-top:0;">
+    <div class="section-title">📚 Learn</div>
+    <div class="admin-toolbar" id="learnAdminToolbar">
+        <button onclick="openAddLearn()">➕ Add</button>
+        <button onclick="toggleLearnReorder()" id="learnReorderToggle">↕ Reorder</button>
+        <button onclick="saveLearnToCloud()" id="learnSaveBtn" style="background:#c5a44e;color:#1a2744;">💾 Save</button>
+        <button onclick="exportLearn()" title="Download learn JSON">📥 Export</button>
+        <button onclick="document.getElementById('importLearnFile').click()" title="Import learn JSON">📤 Import</button>
+        <input type="file" id="importLearnFile" accept=".json" style="display:none" onchange="importLearn(event)">
+        <span id="learnAdminStatus" style="font-size:12px;color:var(--text-dim);"></span>
+    </div>
+    <div class="lessons-grid" id="learnGrid">
+        <div class="empty-state">
+            <div class="empty-icon">📚</div>
+            <div>Loading learn content...</div>
+        </div>
+    </div>
+</section>
+
+<!-- Learn Edit/Add Modal -->
+<div class="lesson-modal-overlay" id="learnModal">
+    <div class="lesson-modal">
+        <h2 id="learnModalTitle">Edit Learn Item</h2>
+        <input type="hidden" id="learnModalIndex" value="-1">
+        <label>Title</label>
+        <input type="text" id="learnModTitle" placeholder="e.g. Azkar of the Adhan">
+        <label>Description</label>
+        <input type="text" id="learnModDesc" placeholder="e.g. Three supplications after the call to prayer">
+        <label>Icon (emoji)</label>
+        <input type="text" id="learnModIcon" placeholder="e.g. 🕌" style="font-size:24px;text-align:center;">
+        <label>Path (URL)</label>
+        <input type="text" id="learnModPath" placeholder="e.g. learn/azkar-adhan/">
+        <label>Card Color</label>
+        <input type="color" id="learnModColor" value="#c5a44e" style="height:40px;padding:4px;">
+        <label>Category (optional)</label>
+        <input type="text" id="learnModCategory" placeholder="e.g. Azkar, Tajweed, Aqeedah">
+        <div class="lesson-modal-actions">
+            <button class="modal-btn-cancel" onclick="closeLearnModal()">Cancel</button>
+            <button class="modal-btn-save" onclick="saveLearnModal()">Save</button>
+        </div>
+    </div>
+</div>
 
 <!-- Footer -->
 <footer class="portal-footer">
@@ -1143,6 +1185,259 @@ document.getElementById('lessonModal').addEventListener('click', function(e) {
 });
 
 loadLessons();
+
+// ══════════════════════════════════════════════════════════════
+// ── LEARN SECTION (Admin-Managed) ────────────────────────────
+// ══════════════════════════════════════════════════════════════
+
+let learnData = [];
+let learnReorderMode = false;
+
+async function loadLearn() {
+    try {
+        const res = await fetch(SB_URL_L + 'qrasm_recordings?student_name=eq.LEARN_CONFIG&assignment_id=eq.portal&select=grade&order=created_at.desc&limit=1', { headers: SB_HDRS });
+        const rows = await res.json();
+        if (rows && rows.length > 0 && rows[0].grade) {
+            learnData = JSON.parse(rows[0].grade);
+            console.log('Learn loaded from cloud:', learnData.length);
+        }
+    } catch(e) { console.warn('Learn load failed:', e); }
+
+    // Seed with default if empty
+    if (!learnData || learnData.length === 0) {
+        learnData = [{
+            id: 'azkar-adhan', title: 'Azkar of the Adhan', desc: 'Three supplications after the call to prayer',
+            icon: '🕌', path: 'learn/azkar-adhan/', color: '#c5a44e', category: 'Azkar',
+            isNew: false, hidden: false, dateAdded: '2026-09-28'
+        }];
+    }
+    renderLearn();
+}
+
+function renderLearn() {
+    const grid = document.getElementById('learnGrid');
+    if (isAdmin) {
+        document.getElementById('learnAdminToolbar').classList.add('visible');
+        grid.classList.add('admin-mode');
+    }
+    if (!learnData || learnData.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📚</div><div>No learn content yet</div></div>';
+    } else {
+        grid.innerHTML = '';
+        learnData.forEach((L, i) => {
+            if (L.hidden && !isAdmin) return;
+
+            const card = document.createElement('div');
+            card.className = 'lesson-card' + (L.hidden ? ' hidden-lesson' : '');
+            card.style.setProperty('--delay', i * 0.08 + 's');
+            card.style.setProperty('--accent', L.color || '#c5a44e');
+
+            const adminBar = isAdmin ? `
+                <div class="card-admin-bar">
+                    ${learnReorderMode ? `
+                        <button class="card-admin-btn" onclick="event.stopPropagation();moveLearnItem(${i},-1)" title="Move up">▲</button>
+                        <button class="card-admin-btn" onclick="event.stopPropagation();moveLearnItem(${i},1)" title="Move down">▼</button>
+                    ` : ''}
+                    <button class="card-admin-btn" onclick="event.stopPropagation();window.open('${L.path}','_blank')" title="Preview">🔗</button>
+                    <button class="card-admin-btn" onclick="event.stopPropagation();copyLearnLink(${i})" title="Copy link">📋</button>
+                    <button class="card-admin-btn" onclick="event.stopPropagation();duplicateLearnItem(${i})" title="Duplicate">📑</button>
+                    <button class="card-admin-btn" onclick="event.stopPropagation();toggleLearnNew(${i})" title="${L.isNew ? 'Remove NEW' : 'Mark NEW'}">${L.isNew ? '🔴' : '🟢'}</button>
+                    <button class="card-admin-btn" onclick="event.stopPropagation();openEditLearn(${i})" title="Edit">✏️</button>
+                    <button class="card-admin-btn" onclick="event.stopPropagation();toggleLearnHide(${i})" title="${L.hidden ? 'Show' : 'Hide'}">${L.hidden ? '👁️' : '🙈'}</button>
+                    <button class="card-admin-btn danger" onclick="event.stopPropagation();deleteLearnItem(${i})" title="Delete">🗑️</button>
+                </div>
+            ` : '';
+
+            const newBadge = L.isNew ? '<span class="new-tag">NEW</span>' : '';
+            const catBadge = L.category ? `<span style="margin-left:6px;opacity:0.6;font-size:10px;">${L.category}</span>` : '';
+
+            card.innerHTML = `
+                ${adminBar}
+                <div class="card-glow"></div>
+                <div class="card-badge">${L.icon || '📚'}${L.hidden ? '<span class="hidden-tag">HIDDEN</span>' : ''}${newBadge}${catBadge}</div>
+                <h4 class="card-title-en" style="margin-bottom:8px;">${L.title || 'Untitled'}</h4>
+                <div class="card-meta">
+                    <span class="card-instances" style="font-size:13px;color:var(--text-dim);">${L.desc || ''}</span>
+                </div>
+                <div class="card-arrow">→</div>
+            `;
+            card.addEventListener('click', () => { window.location.href = L.path; });
+            card.style.cursor = 'pointer';
+            grid.appendChild(card);
+        });
+    }
+    // Sync hamburger menu
+    syncLearnSubmenu();
+}
+
+function syncLearnSubmenu() {
+    const sub = document.getElementById('learnSubmenu');
+    if (!sub) return;
+    const visible = learnData.filter(L => !L.hidden);
+    if (visible.length === 0) {
+        sub.innerHTML = '<div style="padding:8px 18px;font-size:12px;color:var(--text-dim);">No lessons yet</div>';
+        return;
+    }
+    sub.innerHTML = visible.map(L =>
+        `<a href="${L.path}" class="menu-item"><span class="menu-icon">${L.icon || '📚'}</span> ${L.title}</a>`
+    ).join('');
+}
+
+// ── Learn Admin Functions ──────────────────────────
+function openEditLearn(idx) {
+    const L = learnData[idx];
+    document.getElementById('learnModalTitle').textContent = 'Edit Learn Item';
+    document.getElementById('learnModalIndex').value = idx;
+    document.getElementById('learnModTitle').value = L.title || '';
+    document.getElementById('learnModDesc').value = L.desc || '';
+    document.getElementById('learnModIcon').value = L.icon || '';
+    document.getElementById('learnModPath').value = L.path || '';
+    document.getElementById('learnModColor').value = L.color || '#c5a44e';
+    document.getElementById('learnModCategory').value = L.category || '';
+    document.getElementById('learnModal').classList.add('active');
+}
+
+function openAddLearn() {
+    document.getElementById('learnModalTitle').textContent = 'Add Learn Item';
+    document.getElementById('learnModalIndex').value = -1;
+    document.getElementById('learnModTitle').value = '';
+    document.getElementById('learnModDesc').value = '';
+    document.getElementById('learnModIcon').value = '📖';
+    document.getElementById('learnModPath').value = 'learn/';
+    document.getElementById('learnModColor').value = '#c5a44e';
+    document.getElementById('learnModCategory').value = '';
+    document.getElementById('learnModal').classList.add('active');
+}
+
+function closeLearnModal() { document.getElementById('learnModal').classList.remove('active'); }
+
+function saveLearnModal() {
+    const idx = parseInt(document.getElementById('learnModalIndex').value);
+    const item = {
+        id: document.getElementById('learnModTitle').value.trim().toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,''),
+        title: document.getElementById('learnModTitle').value.trim(),
+        desc: document.getElementById('learnModDesc').value.trim(),
+        icon: document.getElementById('learnModIcon').value.trim() || '📖',
+        path: document.getElementById('learnModPath').value.trim(),
+        color: document.getElementById('learnModColor').value,
+        category: document.getElementById('learnModCategory').value.trim(),
+        dateAdded: new Date().toISOString().split('T')[0],
+    };
+    if (!item.title) return alert('Title is required');
+    if (!item.path) return alert('Path is required');
+
+    if (idx >= 0) {
+        item.hidden = learnData[idx].hidden || false;
+        item.isNew = learnData[idx].isNew || false;
+        item.id = learnData[idx].id || item.id;
+        learnData[idx] = item;
+    } else {
+        item.isNew = true;
+        learnData.push(item);
+    }
+    closeLearnModal();
+    renderLearn();
+    setLearnStatus('Unsaved changes — click 💾 Save');
+}
+
+function deleteLearnItem(idx) {
+    if (!confirm(`Delete "${learnData[idx].title}"?\n\nThis cannot be undone.`)) return;
+    learnData.splice(idx, 1);
+    renderLearn();
+    setLearnStatus('Deleted — click 💾 Save');
+}
+
+function toggleLearnHide(idx) {
+    learnData[idx].hidden = !learnData[idx].hidden;
+    renderLearn();
+    setLearnStatus(learnData[idx].hidden ? 'Hidden from students' : 'Visible to students');
+}
+
+function moveLearnItem(idx, dir) {
+    const n = idx + dir;
+    if (n < 0 || n >= learnData.length) return;
+    [learnData[idx], learnData[n]] = [learnData[n], learnData[idx]];
+    renderLearn();
+}
+
+function toggleLearnReorder() {
+    learnReorderMode = !learnReorderMode;
+    document.getElementById('learnReorderToggle').textContent = learnReorderMode ? '✓ Done' : '↕ Reorder';
+    renderLearn();
+}
+
+function duplicateLearnItem(idx) {
+    const copy = JSON.parse(JSON.stringify(learnData[idx]));
+    copy.title += ' (Copy)';
+    copy.id += '-copy';
+    copy.dateAdded = new Date().toISOString().split('T')[0];
+    learnData.splice(idx + 1, 0, copy);
+    renderLearn();
+    setLearnStatus('Duplicated — edit it, then 💾 Save');
+}
+
+function copyLearnLink(idx) {
+    const url = window.location.origin + '/' + learnData[idx].path;
+    navigator.clipboard.writeText(url).then(() => setLearnStatus('📋 Link copied')).catch(() => prompt('Copy:', url));
+}
+
+function toggleLearnNew(idx) {
+    learnData[idx].isNew = !learnData[idx].isNew;
+    renderLearn();
+    setLearnStatus(learnData[idx].isNew ? '🟢 Marked NEW' : 'NEW badge removed');
+}
+
+function exportLearn() {
+    const blob = new Blob([JSON.stringify(learnData, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'learn-backup-' + new Date().toISOString().split('T')[0] + '.json';
+    a.click(); URL.revokeObjectURL(a.href);
+    setLearnStatus('📥 Exported');
+}
+
+function importLearn(event) {
+    const file = event.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const imported = JSON.parse(e.target.result);
+            if (!Array.isArray(imported)) throw new Error('Not an array');
+            if (!confirm(`Import ${imported.length} items? This REPLACES all current learn content.`)) return;
+            learnData = imported; renderLearn();
+            setLearnStatus('📤 Imported ' + imported.length + ' items — click 💾 Save');
+        } catch(err) { alert('Invalid JSON: ' + err.message); }
+    };
+    reader.readAsText(file); event.target.value = '';
+}
+
+async function saveLearnToCloud() {
+    const btn = document.getElementById('learnSaveBtn');
+    btn.disabled = true; btn.textContent = 'Saving...';
+    try {
+        const check = await fetch(SB_URL_L + 'qrasm_recordings?student_name=eq.LEARN_CONFIG&assignment_id=eq.portal&select=id', { headers: SB_HDRS });
+        const existing = await check.json();
+        const payload = { student_name: 'LEARN_CONFIG', assignment_id: 'portal', instance_number: 0, grade: JSON.stringify(learnData) };
+        if (existing && existing.length > 0) {
+            await fetch(SB_URL_L + 'qrasm_recordings?student_name=eq.LEARN_CONFIG&assignment_id=eq.portal', {
+                method: 'PATCH', headers: SB_HDRS, body: JSON.stringify({ grade: JSON.stringify(learnData) })
+            });
+        } else {
+            await fetch(SB_URL_L + 'qrasm_recordings', { method: 'POST', headers: SB_HDRS, body: JSON.stringify(payload) });
+        }
+        setLearnStatus('✅ Saved to cloud!');
+    } catch(e) { setLearnStatus('❌ Save failed: ' + e.message); }
+    btn.disabled = false; btn.textContent = '💾 Save';
+}
+
+function setLearnStatus(msg) {
+    const el = document.getElementById('learnAdminStatus');
+    el.textContent = msg;
+    setTimeout(() => { if (el.textContent === msg) el.textContent = ''; }, 5000);
+}
+
+document.getElementById('learnModal').addEventListener('click', function(e) { if (e.target === this) closeLearnModal(); });
+
+loadLearn();
 </script>
 </body>
 </html>
