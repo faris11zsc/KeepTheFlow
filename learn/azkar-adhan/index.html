@@ -210,6 +210,90 @@ details .deep-content {
         position: fixed; transform: translateY(-50%);
     }
 }
+
+/* ── Admin Inline Editing ─────── */
+.admin-fab {
+    display:none; position:fixed; bottom:24px; right:24px; z-index:500;
+    background:linear-gradient(135deg, var(--gold), #b8953e); color:#1a2744;
+    border-radius:16px; padding:10px 18px; font-weight:700; font-size:13px;
+    border:none; cursor:pointer; box-shadow:0 4px 20px rgba(197,164,78,0.4);
+    transition:all .25s; font-family:'Inter',sans-serif; gap:8px; align-items:center;
+}
+.admin-fab:hover { transform:translateY(-2px); box-shadow:0 6px 28px rgba(197,164,78,0.5); }
+.admin-fab.visible { display:flex; }
+
+.admin-floating-bar {
+    display:none; position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    z-index:500; background:rgba(26,39,68,0.95); backdrop-filter:blur(16px);
+    border:1px solid rgba(197,164,78,0.25); border-radius:14px;
+    padding:8px 12px; gap:6px; align-items:center;
+    box-shadow:0 8px 32px rgba(0,0,0,0.3); flex-wrap:wrap; justify-content:center; max-width:95vw;
+}
+.admin-floating-bar.visible { display:flex; }
+.admin-floating-bar button {
+    padding:6px 12px; border-radius:8px; border:1px solid rgba(197,164,78,0.2);
+    background:rgba(197,164,78,0.1); color:#c5a44e; font-size:12px; font-weight:600;
+    cursor:pointer; transition:all .2s; font-family:'Inter',sans-serif; white-space:nowrap;
+}
+.admin-floating-bar button:hover { background:rgba(197,164,78,0.25); border-color:#c5a44e; }
+.admin-floating-bar button.save-btn { background:#c5a44e; color:#1a2744; border-color:#c5a44e; }
+.admin-floating-bar button.save-btn:hover { background:#b8953e; }
+.admin-floating-bar .bar-status { font-size:11px; color:rgba(232,230,225,0.6); }
+
+.admin-mode .dhikr-card { position:relative; }
+.admin-mode .dhikr-card:hover { border-color:rgba(197,164,78,0.3); }
+.card-edit-bar {
+    display:none; position:absolute; top:6px; right:6px; gap:4px; z-index:10;
+}
+.admin-mode .card-edit-bar { display:flex; }
+.card-edit-btn {
+    width:26px; height:26px; border-radius:6px; border:1px solid rgba(197,164,78,0.2);
+    background:rgba(26,39,68,0.85); color:#c5a44e; font-size:11px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    transition:all .2s; backdrop-filter:blur(8px);
+}
+.card-edit-btn:hover { background:rgba(197,164,78,0.2); border-color:#c5a44e; }
+.card-edit-btn.danger:hover { background:rgba(220,38,38,0.3); color:#f87171; border-color:#dc2626; }
+
+.admin-mode [contenteditable="true"] {
+    outline: 2px dashed rgba(197,164,78,0.3); border-radius:6px; padding:2px 4px;
+    transition: outline-color .2s;
+}
+.admin-mode [contenteditable="true"]:focus { outline-color: var(--gold); }
+
+.add-card-btn {
+    display:none; border:2px dashed rgba(197,164,78,0.3); border-radius:var(--radius);
+    padding:32px; text-align:center; color:var(--gold); font-size:14px; font-weight:600;
+    cursor:pointer; transition:all .2s; background:transparent; width:100%;
+    font-family:'Inter',sans-serif; margin-bottom:24px;
+}
+.admin-mode .add-card-btn { display:block; }
+.add-card-btn:hover { border-color:var(--gold); background:var(--gold-dim); }
+
+/* Admin modal */
+.admin-modal-overlay {
+    display:none; position:fixed; inset:0; z-index:10000;
+    background:rgba(0,0,0,0.6); backdrop-filter:blur(4px);
+    justify-content:center; align-items:center;
+}
+.admin-modal-overlay.active { display:flex; }
+.admin-modal {
+    background:var(--navy); border:1px solid rgba(197,164,78,0.2); border-radius:16px;
+    padding:28px 24px; max-width:500px; width:90%; max-height:85vh; overflow-y:auto;
+    box-shadow:0 16px 48px rgba(0,0,0,0.4);
+}
+.admin-modal h3 { color:var(--gold); font-size:16px; margin-bottom:16px; }
+.admin-modal label { display:block; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-dim); margin:12px 0 4px; }
+.admin-modal input, .admin-modal textarea {
+    width:100%; padding:10px 14px; border-radius:8px; border:1px solid var(--glass-border);
+    background:var(--bg2); color:var(--text); font-size:14px; font-family:'Inter',sans-serif;
+}
+.admin-modal textarea { min-height:80px; resize:vertical; line-height:1.6; }
+.admin-modal .ar-input { font-family:'Amiri',serif; font-size:18px; direction:rtl; text-align:right; }
+.admin-modal-actions { display:flex; gap:8px; margin-top:16px; justify-content:flex-end; }
+.admin-modal-actions button { padding:8px 20px; border-radius:8px; font-weight:600; font-size:13px; cursor:pointer; border:none; font-family:'Inter',sans-serif; }
+.admin-modal-actions .btn-cancel { background:transparent; border:1px solid var(--glass-border); color:var(--text-dim); }
+.admin-modal-actions .btn-save { background:var(--gold); color:#1a2744; }
 </style>
 </head>
 <body>
@@ -325,7 +409,65 @@ details .deep-content {
             </div>
         </details>
     </div>
+    <!-- Admin: Add Card Button -->
+    <button class="add-card-btn" onclick="openAddCard()">➕ Add New Dhikr Card</button>
 
+</div>
+
+<!-- Admin Floating Toolbar -->
+<button class="admin-fab" id="adminFab" onclick="enableEditMode()">🔧 Edit Lesson</button>
+<div class="admin-floating-bar" id="adminBar">
+    <button onclick="openEditTitle()">✏️ Title</button>
+    <button onclick="openAddCard()">➕ Card</button>
+    <button onclick="undoLastAction()">↩ Undo</button>
+    <button onclick="copyLessonLink()">📋 Link</button>
+    <button onclick="exportLessonData()">📥 Export</button>
+    <button onclick="document.getElementById('audioUpload').click()">🎵 Audio</button>
+    <input type="file" id="audioUpload" accept=".mp3,.m4a,.wav,.ogg" style="display:none" onchange="handleAudioUpload(event)">
+    <button class="save-btn" onclick="saveLessonToCloud()">💾 Save</button>
+    <button onclick="exitEditMode()">✕</button>
+    <span class="bar-status" id="barStatus"></span>
+</div>
+
+<!-- Admin Edit Card Modal -->
+<div class="admin-modal-overlay" id="cardModal">
+    <div class="admin-modal">
+        <h3 id="cardModalTitle">Edit Card</h3>
+        <input type="hidden" id="cardModalIdx" value="-1">
+        <label>English Text</label>
+        <textarea id="cmEnglish" placeholder="The English text of the dhikr..."></textarea>
+        <label>Arabic Text</label>
+        <textarea id="cmArabic" class="ar-input" placeholder="النص العربي..."></textarea>
+        <label>Citation (e.g. Bukhari 614)</label>
+        <input type="text" id="cmCitation" placeholder="e.g. Bukhari 614">
+        <label>Audio File Name (in audio/ folder)</label>
+        <input type="text" id="cmAudio" placeholder="e.g. dua-waseelah.mp3">
+        <label>Deep Dive Title</label>
+        <input type="text" id="cmDeepTitle" placeholder="e.g. Why this du'a is special">
+        <label>Deep Dive Content</label>
+        <textarea id="cmDeepContent" placeholder="The expanded explanation..."></textarea>
+        <div class="admin-modal-actions">
+            <button class="btn-cancel" onclick="closeCardModal()">Cancel</button>
+            <button class="btn-save" onclick="saveCardModal()">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Admin Title Edit Modal -->
+<div class="admin-modal-overlay" id="titleModal">
+    <div class="admin-modal">
+        <h3>Edit Lesson Header</h3>
+        <label>Lesson Title</label>
+        <input type="text" id="tmTitle" placeholder="e.g. Azkar of the Adhan">
+        <label>Subtitle / Description</label>
+        <input type="text" id="tmSubtitle" placeholder="e.g. Three powerful supplications...">
+        <label>Hero Icon (emoji)</label>
+        <input type="text" id="tmIcon" placeholder="e.g. 🕌" style="font-size:24px;text-align:center;">
+        <div class="admin-modal-actions">
+            <button class="btn-cancel" onclick="closeTitleModal()">Cancel</button>
+            <button class="btn-save" onclick="saveTitleModal()">Save</button>
+        </div>
+    </div>
 </div>
 
 <!-- Footer -->
@@ -405,6 +547,339 @@ function fixTooltips() {
 }
 fixTooltips();
 window.addEventListener('resize', fixTooltips);
+
+// ══════════════════════════════════════════════════════════════
+// ── ADMIN LESSON PAGE EDITOR ─────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+
+const ADMIN_USER = '89FarisAuraKnight89';
+const SB_URL = 'https://lhebavvnrwqojbhyodwc.supabase.co/rest/v1/';
+const SB_KEY = 'sb_publishable_JW75ayCf5SbvyT-02GmjNQ_vFpivPTU';
+const SB_H = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+const LESSON_ID = 'azkar-adhan';
+const CONFIG_KEY = 'LEARN_PAGE_' + LESSON_ID;
+
+const loggedUser = localStorage.getItem('qrasm_student_name');
+const isAdmin = loggedUser && loggedUser.trim().toLowerCase() === ADMIN_USER.toLowerCase();
+let editMode = false;
+let undoStack = [];
+let lessonPageData = null; // null = use static HTML, object = use saved data
+
+if (isAdmin) {
+    document.getElementById('adminFab').classList.add('visible');
+    loadLessonData();
+}
+
+async function loadLessonData() {
+    try {
+        const res = await fetch(SB_URL + 'qrasm_recordings?student_name=eq.' + CONFIG_KEY + '&assignment_id=eq.portal&select=grade&order=created_at.desc&limit=1', { headers: SB_H });
+        const rows = await res.json();
+        if (rows && rows.length > 0 && rows[0].grade) {
+            lessonPageData = JSON.parse(rows[0].grade);
+            console.log('Lesson page data loaded from cloud');
+            renderFromData();
+        }
+    } catch(e) { console.warn('No cloud data, using static HTML'); }
+}
+
+// ── Serialize current page state into data ────
+function serializePage() {
+    const hero = document.querySelector('.hero');
+    const data = {
+        icon: hero.querySelector('.hero-icon').textContent.trim(),
+        title: hero.querySelector('.hero-title').textContent.trim(),
+        subtitle: hero.querySelector('.hero-subtitle').textContent.trim(),
+        cards: []
+    };
+    document.querySelectorAll('.dhikr-card').forEach(card => {
+        const engEl = card.querySelector('.dhikr-english');
+        const arEl = card.querySelector('.dhikr-arabic');
+        const citEl = card.querySelector('.citation');
+        const audioBtn = card.querySelector('.play-btn');
+        const details = card.querySelector('details');
+        
+        // Get English text without the citation span
+        let engText = '';
+        engEl.childNodes.forEach(node => {
+            if (node.nodeType === 3) engText += node.textContent;
+            else if (node.classList && !node.classList.contains('citation')) engText += node.textContent;
+        });
+
+        data.cards.push({
+            english: engText.trim(),
+            arabic: arEl ? arEl.textContent.trim() : '',
+            citation: citEl ? citEl.textContent.replace('📖 ', '').trim() : '',
+            audio: audioBtn ? audioBtn.getAttribute('onclick')?.match(/'([^']+)'/)?.[1] || '' : '',
+            deepTitle: details ? details.querySelector('summary')?.textContent.trim() : '',
+            deepContent: details ? details.querySelector('.deep-content')?.innerHTML.trim() : ''
+        });
+    });
+    return data;
+}
+
+// ── Render page from saved data object ────────
+function renderFromData() {
+    if (!lessonPageData) return;
+    const d = lessonPageData;
+
+    // Update hero
+    const hero = document.querySelector('.hero');
+    hero.querySelector('.hero-icon').textContent = d.icon || '🕌';
+    hero.querySelector('.hero-title').textContent = d.title || 'Untitled';
+    hero.querySelector('.hero-subtitle').textContent = d.subtitle || '';
+
+    // Rebuild cards
+    const content = document.querySelector('.content');
+    content.querySelectorAll('.dhikr-card').forEach(c => c.remove());
+    const addBtn = content.querySelector('.add-card-btn');
+
+    d.cards.forEach(c => {
+        const card = buildCardElement(c);
+        content.insertBefore(card, addBtn);
+    });
+
+    if (editMode) injectCardAdminButtons();
+    fixTooltips();
+}
+
+function buildCardElement(c) {
+    const card = document.createElement('div');
+    card.className = 'dhikr-card';
+    card.innerHTML = `
+        <div class="dhikr-english">
+            ${c.english}
+            ${c.citation ? `<span class="citation">📖 ${c.citation}</span>` : ''}
+        </div>
+        <div class="dhikr-arabic">${c.arabic}</div>
+        <div class="audio-row">
+            <button class="play-btn" onclick="toggleAudio(this, '${c.audio}')" aria-label="Play">▶</button>
+        </div>
+        ${c.deepTitle ? `
+        <details>
+            <summary>${c.deepTitle}</summary>
+            <div class="deep-content">${c.deepContent}</div>
+        </details>` : ''}
+    `;
+    return card;
+}
+
+// ── Edit Mode ─────────────────────────────────
+function enableEditMode() {
+    editMode = true;
+    document.querySelector('.content').classList.add('admin-mode');
+    document.getElementById('adminFab').classList.remove('visible');
+    document.getElementById('adminBar').classList.add('visible');
+    // Save current state for undo
+    pushUndo();
+    injectCardAdminButtons();
+}
+
+function exitEditMode() {
+    editMode = false;
+    document.querySelector('.content').classList.remove('admin-mode');
+    document.getElementById('adminBar').classList.remove('visible');
+    document.getElementById('adminFab').classList.add('visible');
+    // Remove admin buttons from cards
+    document.querySelectorAll('.card-edit-bar').forEach(b => b.remove());
+}
+
+function injectCardAdminButtons() {
+    document.querySelectorAll('.card-edit-bar').forEach(b => b.remove());
+    const cards = document.querySelectorAll('.dhikr-card');
+    cards.forEach((card, i) => {
+        const bar = document.createElement('div');
+        bar.className = 'card-edit-bar';
+        bar.innerHTML = `
+            <button class="card-edit-btn" onclick="event.stopPropagation();openEditCard(${i})" title="Edit">✏️</button>
+            <button class="card-edit-btn" onclick="event.stopPropagation();moveCard(${i},-1)" title="Move up">▲</button>
+            <button class="card-edit-btn" onclick="event.stopPropagation();moveCard(${i},1)" title="Move down">▼</button>
+            <button class="card-edit-btn" onclick="event.stopPropagation();duplicateCard(${i})" title="Duplicate">📑</button>
+            <button class="card-edit-btn danger" onclick="event.stopPropagation();deleteCard(${i})" title="Delete">🗑️</button>
+        `;
+        card.prepend(bar);
+    });
+}
+
+// ── Undo ──────────────────────────────────────
+function pushUndo() {
+    undoStack.push(serializePage());
+    if (undoStack.length > 20) undoStack.shift();
+}
+
+function undoLastAction() {
+    if (undoStack.length === 0) { setBarStatus('Nothing to undo'); return; }
+    lessonPageData = undoStack.pop();
+    renderFromData();
+    setBarStatus('↩ Undone');
+}
+
+// ── Card Operations ──────────────────────────
+function openEditCard(idx) {
+    const data = serializePage();
+    const c = data.cards[idx];
+    if (!c) return;
+    document.getElementById('cardModalTitle').textContent = 'Edit Card #' + (idx + 1);
+    document.getElementById('cardModalIdx').value = idx;
+    document.getElementById('cmEnglish').value = c.english;
+    document.getElementById('cmArabic').value = c.arabic;
+    document.getElementById('cmCitation').value = c.citation;
+    document.getElementById('cmAudio').value = c.audio;
+    document.getElementById('cmDeepTitle').value = c.deepTitle;
+    document.getElementById('cmDeepContent').value = c.deepContent.replace(/<[^>]+>/g, '').trim();
+    document.getElementById('cardModal').classList.add('active');
+}
+
+function openAddCard() {
+    document.getElementById('cardModalTitle').textContent = 'Add New Card';
+    document.getElementById('cardModalIdx').value = -1;
+    document.getElementById('cmEnglish').value = '';
+    document.getElementById('cmArabic').value = '';
+    document.getElementById('cmCitation').value = '';
+    document.getElementById('cmAudio').value = '';
+    document.getElementById('cmDeepTitle').value = '';
+    document.getElementById('cmDeepContent').value = '';
+    document.getElementById('cardModal').classList.add('active');
+}
+
+function closeCardModal() { document.getElementById('cardModal').classList.remove('active'); }
+
+function saveCardModal() {
+    pushUndo();
+    const idx = parseInt(document.getElementById('cardModalIdx').value);
+    const cardObj = {
+        english: document.getElementById('cmEnglish').value.trim(),
+        arabic: document.getElementById('cmArabic').value.trim(),
+        citation: document.getElementById('cmCitation').value.trim(),
+        audio: document.getElementById('cmAudio').value.trim(),
+        deepTitle: document.getElementById('cmDeepTitle').value.trim(),
+        deepContent: document.getElementById('cmDeepContent').value.trim()
+    };
+    if (!cardObj.english) { alert('English text is required'); return; }
+
+    const data = serializePage();
+    if (idx >= 0) {
+        data.cards[idx] = cardObj;
+    } else {
+        data.cards.push(cardObj);
+    }
+    lessonPageData = data;
+    renderFromData();
+    closeCardModal();
+    setBarStatus(idx >= 0 ? 'Card updated' : 'Card added');
+}
+
+function deleteCard(idx) {
+    const data = serializePage();
+    if (!confirm(`Delete card #${idx + 1}?`)) return;
+    pushUndo();
+    data.cards.splice(idx, 1);
+    lessonPageData = data;
+    renderFromData();
+    setBarStatus('Card deleted');
+}
+
+function moveCard(idx, dir) {
+    const data = serializePage();
+    const n = idx + dir;
+    if (n < 0 || n >= data.cards.length) return;
+    pushUndo();
+    [data.cards[idx], data.cards[n]] = [data.cards[n], data.cards[idx]];
+    lessonPageData = data;
+    renderFromData();
+}
+
+function duplicateCard(idx) {
+    pushUndo();
+    const data = serializePage();
+    const copy = JSON.parse(JSON.stringify(data.cards[idx]));
+    copy.english += ' (copy)';
+    data.cards.splice(idx + 1, 0, copy);
+    lessonPageData = data;
+    renderFromData();
+    setBarStatus('Card duplicated');
+}
+
+// ── Title Editing ─────────────────────────────
+function openEditTitle() {
+    const hero = document.querySelector('.hero');
+    document.getElementById('tmTitle').value = hero.querySelector('.hero-title').textContent.trim();
+    document.getElementById('tmSubtitle').value = hero.querySelector('.hero-subtitle').textContent.trim();
+    document.getElementById('tmIcon').value = hero.querySelector('.hero-icon').textContent.trim();
+    document.getElementById('titleModal').classList.add('active');
+}
+
+function closeTitleModal() { document.getElementById('titleModal').classList.remove('active'); }
+
+function saveTitleModal() {
+    pushUndo();
+    const hero = document.querySelector('.hero');
+    hero.querySelector('.hero-title').textContent = document.getElementById('tmTitle').value.trim();
+    hero.querySelector('.hero-subtitle').textContent = document.getElementById('tmSubtitle').value.trim();
+    hero.querySelector('.hero-icon').textContent = document.getElementById('tmIcon').value.trim();
+    document.title = document.getElementById('tmTitle').value.trim() + ' — LightKnight';
+    closeTitleModal();
+    setBarStatus('Title updated');
+}
+
+// ── Copy Link ─────────────────────────────────
+function copyLessonLink() {
+    navigator.clipboard.writeText(window.location.href)
+        .then(() => setBarStatus('📋 Link copied'))
+        .catch(() => prompt('Copy:', window.location.href));
+}
+
+// ── Export ─────────────────────────────────────
+function exportLessonData() {
+    const data = serializePage();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = LESSON_ID + '-backup-' + new Date().toISOString().split('T')[0] + '.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    setBarStatus('📥 Exported');
+}
+
+// ── Audio Upload Helper ───────────────────────
+function handleAudioUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    setBarStatus('🎵 Audio: ' + file.name + ' — place in audio/ folder and use filename in card edit');
+    event.target.value = '';
+}
+
+// ── Save to Supabase ──────────────────────────
+async function saveLessonToCloud() {
+    const data = serializePage();
+    const btn = document.querySelector('.save-btn');
+    btn.disabled = true; btn.textContent = 'Saving...';
+    try {
+        const check = await fetch(SB_URL + 'qrasm_recordings?student_name=eq.' + CONFIG_KEY + '&assignment_id=eq.portal&select=id', { headers: SB_H });
+        const existing = await check.json();
+        const payload = { student_name: CONFIG_KEY, assignment_id: 'portal', instance_number: 0, grade: JSON.stringify(data) };
+        if (existing && existing.length > 0) {
+            await fetch(SB_URL + 'qrasm_recordings?student_name=eq.' + CONFIG_KEY + '&assignment_id=eq.portal', {
+                method: 'PATCH', headers: SB_H, body: JSON.stringify({ grade: JSON.stringify(data) })
+            });
+        } else {
+            await fetch(SB_URL + 'qrasm_recordings', { method: 'POST', headers: SB_H, body: JSON.stringify(payload) });
+        }
+        setBarStatus('✅ Saved to cloud!');
+    } catch(e) {
+        setBarStatus('❌ Save failed: ' + e.message);
+    }
+    btn.disabled = false; btn.textContent = '💾 Save';
+}
+
+function setBarStatus(msg) {
+    const el = document.getElementById('barStatus');
+    el.textContent = msg;
+    setTimeout(() => { if (el.textContent === msg) el.textContent = ''; }, 4000);
+}
+
+// ── Modal overlay dismiss ─────────────────────
+document.getElementById('cardModal').addEventListener('click', function(e) { if (e.target === this) closeCardModal(); });
+document.getElementById('titleModal').addEventListener('click', function(e) { if (e.target === this) closeTitleModal(); });
 </script>
 </body>
 </html>
