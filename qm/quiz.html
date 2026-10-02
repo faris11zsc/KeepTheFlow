@@ -166,6 +166,88 @@
         .message-box h2 { margin-bottom: 16px; color: var(--gold); }
         .message-box p { color: var(--text-dim); margin-bottom: 24px; }
 
+        /* ===== COMPLETION CEREMONY ===== */
+        .ceremony-overlay {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            background: radial-gradient(ellipse at center, rgba(15,26,48,0.97) 0%, rgba(8,14,28,0.99) 100%);
+            overflow-y: auto; overflow-x: hidden;
+        }
+        .ceremony-overlay.active { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+        .ceremony-inner {
+            width: 90%; max-width: 640px; padding: 40px 24px 60px; text-align: center;
+            animation: ceremonyFadeIn 1.5s ease-out;
+        }
+        @keyframes ceremonyFadeIn { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+
+        .ceremony-grade {
+            font-size: 72px; font-weight: 900; font-family: var(--font-ui);
+            margin: 40px 0 8px; letter-spacing: -1px;
+            animation: gradePopIn 0.8s cubic-bezier(0.34,1.56,0.64,1) 0.5s both;
+        }
+        @keyframes gradePopIn { from { opacity:0; transform:scale(0.3); } to { opacity:1; transform:scale(1); } }
+        .ceremony-grade-pct {
+            font-size: 28px; font-weight: 700; margin-bottom: 4px;
+            animation: gradePopIn 0.8s cubic-bezier(0.34,1.56,0.64,1) 0.7s both;
+        }
+        .ceremony-msg {
+            font-size: 20px; font-weight: 600; margin-bottom: 32px; color: var(--text-main);
+            animation: ceremonyFadeIn 1s ease-out 0.9s both;
+        }
+
+        /* Grade-dependent glow */
+        .grade-outstanding .ceremony-grade { color: #10B981; text-shadow: 0 0 40px rgba(16,185,129,0.5), 0 0 80px rgba(16,185,129,0.2); }
+        .grade-outstanding .ceremony-grade-pct { color: #34D399; }
+        .grade-great .ceremony-grade { color: #c5a44e; text-shadow: 0 0 40px rgba(197,164,78,0.5), 0 0 80px rgba(197,164,78,0.2); }
+        .grade-great .ceremony-grade-pct { color: #d4b86a; }
+        .grade-good .ceremony-grade { color: #60A5FA; text-shadow: 0 0 40px rgba(96,165,250,0.4); }
+        .grade-good .ceremony-grade-pct { color: #93C5FD; }
+        .grade-low .ceremony-grade { color: #F87171; text-shadow: 0 0 40px rgba(248,113,113,0.4); }
+        .grade-low .ceremony-grade-pct { color: #FCA5A5; }
+
+        /* Separator line */
+        .ceremony-divider {
+            width: 120px; height: 2px; margin: 0 auto 32px;
+            background: linear-gradient(90deg, transparent, rgba(16,185,129,0.5), transparent);
+            animation: ceremonyFadeIn 1s ease-out 1.1s both;
+        }
+
+        /* Prayer text */
+        .ceremony-prayer-en {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 15px; line-height: 1.9; color: rgba(72,187,120,0.75);
+            margin-bottom: 28px; font-style: italic; font-weight: 400;
+            max-width: 520px; margin-left: auto; margin-right: auto;
+            animation: prayerFadeIn 1.2s ease-out 1.4s both;
+        }
+        .ceremony-prayer-ar {
+            font-family: var(--font-arabic); font-size: 22px; line-height: 2.2;
+            color: rgba(72,187,120,0.7); direction: rtl; text-align: center;
+            max-width: 560px; margin: 0 auto 36px; font-weight: 700;
+            animation: prayerFadeIn 1.2s ease-out 1.8s both;
+        }
+        @keyframes prayerFadeIn { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
+
+        .ceremony-back-btn {
+            display: inline-block; padding: 14px 32px; border-radius: 12px;
+            background: rgba(197,164,78,0.15); border: 1px solid rgba(197,164,78,0.3);
+            color: var(--gold); font-family: var(--font-ui); font-weight: 700; font-size: 15px;
+            text-decoration: none; cursor: pointer; transition: all 0.2s;
+            animation: ceremonyFadeIn 1s ease-out 2.2s both;
+        }
+        .ceremony-back-btn:hover { background: rgba(197,164,78,0.25); border-color: var(--gold); transform: translateY(-2px); }
+
+        /* Floating light particles */
+        .ceremony-particles { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+        .ceremony-particle {
+            position: absolute; border-radius: 50%;
+            animation: floatUp linear infinite;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            20% { opacity: 1; }
+            100% { transform: translateY(-20vh) scale(1); opacity: 0; }
+        }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -202,6 +284,12 @@
             #streak-banner { padding: 10px 8px; }
             .streak-inner { padding: 8px 16px; font-size: 14px !important; letter-spacing: 0.5px; max-width: 95vw; word-break: break-word; }
             #streak-counter { top: 8px; right: 8px; font-size: 12px !important; padding: 4px 10px; }
+            .ceremony-grade { font-size: 48px; }
+            .ceremony-grade-pct { font-size: 22px; }
+            .ceremony-msg { font-size: 17px; }
+            .ceremony-prayer-en { font-size: 13px; }
+            .ceremony-prayer-ar { font-size: 18px; }
+            .ceremony-inner { padding: 24px 16px 40px; }
         }
         @media (max-width: 360px) {
             .container { padding: 14px 12px; }
@@ -249,6 +337,21 @@
             </div>
         </div>
     </div>
+
+    <!-- ═══ COMPLETION CEREMONY OVERLAY ═══ -->
+    <div class="ceremony-overlay" id="ceremonyOverlay">
+        <div class="ceremony-particles" id="ceremonyParticles"></div>
+        <div class="ceremony-inner">
+            <div class="ceremony-grade" id="ceremonyGrade">0/0</div>
+            <div class="ceremony-grade-pct" id="ceremonyPct">0%</div>
+            <div class="ceremony-msg" id="ceremonyMsg">Outstanding! Ma sha Allah! 🌟</div>
+            <div class="ceremony-divider"></div>
+            <p class="ceremony-prayer-en">O Allah, send Your blessings upon our master Muhammad, the Opener of that which was closed, the Seal of that which preceded him, the Champion of the Truth through the Truth, and the Guide to Your Straight Path.<br><br>May Allah bless him and grant him peace, and bless his family and his Companions, in a manner befitting his true worth and his immense rank.</p>
+            <p class="ceremony-prayer-ar">«اللَّهُمَّ صَلِّ عَلَى سَيِّدِنَا مُحَمَّدٍ الْفَاتِحِ لِمَا أُغْلِقَ، وَالْخَاتِمِ لِمَا سَبَقَ، نَاصِرِ الْحَقِّ بِالْحَقِّ، وَالْهَادِي إِلَى صِرَاطِكَ الْمُسْتَقِيمِ، صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ، وَعَلَى آلِهِ وَأَصْحَابِهِ حَقَّ قَدْرِهِ وَمِقْدَارِهِ الْعَظِيمِ»</p>
+            <a href="/qm/" class="ceremony-back-btn">&larr; Back to QuizMe</a>
+        </div>
+    </div>
+    <audio id="ceremonyAudio" src="audio/salat-alfatih.mp3" preload="auto" loop></audio>
 
     <script>
         // ===== CONFIG =====
@@ -624,20 +727,18 @@
             const total = quizQuestions.length;
             const pct = Math.round((score / total) * 100);
 
+            // Populate the underlying results screen (still there behind ceremony)
             document.getElementById('score-fraction').innerText = score + '/' + total;
             document.getElementById('score-percentage').innerText = pct + '%';
             setTimeout(() => { document.getElementById('score-circle').style.background = 'conic-gradient(var(--gold) ' + pct + '%, var(--navy-lighter) ' + pct + '%)'; }, 100);
 
             const msgEl = document.getElementById('results-message');
-            if (pct >= 90) msgEl.innerText = "Outstanding! Ma sha Allah! 🌟";
-            else if (pct >= 70) msgEl.innerText = "Great work! Keep it up! 💪";
-            else if (pct >= 50) msgEl.innerText = "Good effort! Review and try again 📖";
-            else msgEl.innerText = "Keep studying, you'll get there! 🤲";
-
-            // Victory particles
-            if (pct >= 70) {
-                for (let i = 0; i < 5; i++) setTimeout(() => burstEffect(true, 5), i * 300);
-            }
+            let msg = '';
+            if (pct >= 90) msg = "Outstanding! Ma sha Allah! 🌟";
+            else if (pct >= 70) msg = "Great work! Keep it up! 💪";
+            else if (pct >= 50) msg = "Good effort! Review and try again 📖";
+            else msg = "Keep studying, you'll get there! 🤲";
+            msgEl.innerText = msg;
 
             // Save score (skip in admin preview mode)
             if (isAdminPreview) {
@@ -654,6 +755,68 @@
                     console.error('Error saving score:', err);
                     document.getElementById('results-submessage').innerText = "Note: Could not save score to database.";
                 }
+            }
+
+            // ═══ LAUNCH COMPLETION CEREMONY ═══
+            launchCeremony(score, total, pct, msg);
+        }
+
+        function launchCeremony(sc, total, pct, msg) {
+            const overlay = document.getElementById('ceremonyOverlay');
+            document.getElementById('ceremonyGrade').innerText = sc + '/' + total;
+            document.getElementById('ceremonyPct').innerText = pct + '%';
+            document.getElementById('ceremonyMsg').innerText = msg;
+
+            // Grade-dependent theme class
+            overlay.className = 'ceremony-overlay active';
+            if (pct >= 90) overlay.classList.add('grade-outstanding');
+            else if (pct >= 70) overlay.classList.add('grade-great');
+            else if (pct >= 50) overlay.classList.add('grade-good');
+            else overlay.classList.add('grade-low');
+
+            // Adjust divider color to match grade
+            const divider = overlay.querySelector('.ceremony-divider');
+            if (pct >= 90) divider.style.background = 'linear-gradient(90deg, transparent, rgba(16,185,129,0.5), transparent)';
+            else if (pct >= 70) divider.style.background = 'linear-gradient(90deg, transparent, rgba(197,164,78,0.5), transparent)';
+            else if (pct >= 50) divider.style.background = 'linear-gradient(90deg, transparent, rgba(96,165,250,0.4), transparent)';
+            else divider.style.background = 'linear-gradient(90deg, transparent, rgba(248,113,113,0.4), transparent)';
+
+            // Spawn floating particles
+            spawnCeremonyParticles(pct);
+
+            // Play the Salat al-Fatih audio (looped)
+            const audio = document.getElementById('ceremonyAudio');
+            audio.currentTime = 0;
+            audio.play().catch(() => {}); // auto-play may be blocked
+        }
+
+        function spawnCeremonyParticles(pct) {
+            const container = document.getElementById('ceremonyParticles');
+            container.innerHTML = '';
+            // Color based on grade
+            let colors;
+            if (pct >= 90) colors = ['rgba(16,185,129,', 'rgba(52,211,153,', 'rgba(197,164,78,'];
+            else if (pct >= 70) colors = ['rgba(197,164,78,', 'rgba(212,184,106,', 'rgba(232,230,225,'];
+            else if (pct >= 50) colors = ['rgba(96,165,250,', 'rgba(147,197,253,', 'rgba(197,164,78,'];
+            else colors = ['rgba(248,113,113,', 'rgba(252,165,165,', 'rgba(197,164,78,'];
+
+            const count = pct >= 70 ? 30 : 15;
+            for (let i = 0; i < count; i++) {
+                const p = document.createElement('div');
+                p.className = 'ceremony-particle';
+                const size = 3 + Math.random() * 6;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const opacity = 0.3 + Math.random() * 0.5;
+                p.style.cssText = `
+                    width: ${size}px; height: ${size}px;
+                    background: ${color}${opacity});
+                    left: ${Math.random() * 100}%;
+                    bottom: -20px;
+                    animation-duration: ${6 + Math.random() * 8}s;
+                    animation-delay: ${Math.random() * 6}s;
+                    box-shadow: 0 0 ${size * 2}px ${color}0.3);
+                `;
+                container.appendChild(p);
             }
         }
 
