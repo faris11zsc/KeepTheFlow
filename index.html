@@ -1155,20 +1155,24 @@ async function saveLessonsToCloud() {
         // Check if config row exists
         const check = await fetch(SB_URL_L + 'qrasm_recordings?student_name=eq.LESSONS_CONFIG&assignment_id=eq.portal&select=id', { headers: SB_HDRS });
         const existing = await check.json();
-        const payload = { student_name: 'LESSONS_CONFIG', assignment_id: 'portal', instance_number: 0, grade: JSON.stringify(lessonsData) };
+        const gradeJson = JSON.stringify(lessonsData);
         if (existing && existing.length > 0) {
-            await fetch(SB_URL_L + 'qrasm_recordings?student_name=eq.LESSONS_CONFIG&assignment_id=eq.portal', {
-                method: 'PATCH', headers: SB_HDRS, body: JSON.stringify({ grade: JSON.stringify(lessonsData) })
+            const resp = await fetch(SB_URL_L + 'qrasm_recordings?student_name=eq.LESSONS_CONFIG&assignment_id=eq.portal', {
+                method: 'PATCH', headers: SB_HDRS, body: JSON.stringify({ grade: gradeJson })
             });
+            if (!resp.ok) { const e = await resp.json(); throw new Error(e.message || resp.statusText); }
         } else {
-            await fetch(SB_URL_L + 'qrasm_recordings', {
+            const payload = { student_name: 'LESSONS_CONFIG', assignment_id: 'portal', instance_number: 0, grade: gradeJson, audio_url: 'config' };
+            const resp = await fetch(SB_URL_L + 'qrasm_recordings', {
                 method: 'POST', headers: SB_HDRS, body: JSON.stringify(payload)
             });
+            if (!resp.ok) { const e = await resp.json(); throw new Error(e.message || resp.statusText); }
         }
         setStatus('✅ Saved to cloud!');
     } catch(e) {
         setStatus('❌ Save failed: ' + e.message);
         console.error('Save failed:', e);
+        alert('Save failed: ' + e.message);
     }
     btn.disabled = false; btn.textContent = '💾 Save Changes';
 }
@@ -1416,16 +1420,19 @@ async function saveLearnToCloud() {
     try {
         const check = await fetch(SB_URL_L + 'qrasm_recordings?student_name=eq.LEARN_CONFIG&assignment_id=eq.portal&select=id', { headers: SB_HDRS });
         const existing = await check.json();
-        const payload = { student_name: 'LEARN_CONFIG', assignment_id: 'portal', instance_number: 0, grade: JSON.stringify(learnData) };
+        const gradeJson = JSON.stringify(learnData);
         if (existing && existing.length > 0) {
-            await fetch(SB_URL_L + 'qrasm_recordings?student_name=eq.LEARN_CONFIG&assignment_id=eq.portal', {
-                method: 'PATCH', headers: SB_HDRS, body: JSON.stringify({ grade: JSON.stringify(learnData) })
+            const resp = await fetch(SB_URL_L + 'qrasm_recordings?student_name=eq.LEARN_CONFIG&assignment_id=eq.portal', {
+                method: 'PATCH', headers: SB_HDRS, body: JSON.stringify({ grade: gradeJson })
             });
+            if (!resp.ok) { const e = await resp.json(); throw new Error(e.message || resp.statusText); }
         } else {
-            await fetch(SB_URL_L + 'qrasm_recordings', { method: 'POST', headers: SB_HDRS, body: JSON.stringify(payload) });
+            const payload = { student_name: 'LEARN_CONFIG', assignment_id: 'portal', instance_number: 0, grade: gradeJson, audio_url: 'config' };
+            const resp = await fetch(SB_URL_L + 'qrasm_recordings', { method: 'POST', headers: SB_HDRS, body: JSON.stringify(payload) });
+            if (!resp.ok) { const e = await resp.json(); throw new Error(e.message || resp.statusText); }
         }
         setLearnStatus('✅ Saved to cloud!');
-    } catch(e) { setLearnStatus('❌ Save failed: ' + e.message); }
+    } catch(e) { setLearnStatus('❌ Save failed: ' + e.message); alert('Save failed: ' + e.message); }
     btn.disabled = false; btn.textContent = '💾 Save';
 }
 
