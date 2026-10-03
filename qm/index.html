@@ -641,7 +641,12 @@
         // ===== SMART PARSER =====
         function parseRawQuestions() {
             var raw = document.getElementById('rawQuestionsText').value;
-            var answerKeyIdx = raw.search(/answer\s*key/i);
+            // Normalize line endings
+            raw = raw.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+            // Find answer key — must be at the START of a line (heading), not inside body text
+            var answerKeyMatch = raw.match(/\n\s*(?:#{1,4}\s*)?answer\s*key\b/i);
+            var answerKeyIdx = answerKeyMatch ? answerKeyMatch.index : -1;
             var questionsRaw = answerKeyIdx > -1 ? raw.substring(0, answerKeyIdx) : raw;
             var answerKeyRaw = answerKeyIdx > -1 ? raw.substring(answerKeyIdx) : '';
 
@@ -664,7 +669,8 @@
             }
 
             var currentTier = 'Standard';
-            var qBlocks = questionsRaw.split(/(?:^|\n)\s*(?:\*\*)?(\d+)[\.)\]]\s*/);
+            // Split on question numbers: handles **1.** and 1. and 1) formats
+            var qBlocks = questionsRaw.split(/(?:^|\n)\s*\*{0,2}(\d+)[\.\)\]]+\*{0,2}\s+/);
             draftQuestions = [];
             var qNum = 0;
             for (var b = 1; b < qBlocks.length; b += 2) {
@@ -675,15 +681,29 @@
                     if (tierMatch) currentTier = tierMatch[0].trim().replace(/^#+\s*/, '').replace(/\*\*/g, '');
                 }
                 var qText = block, opts = [];
-                var optRegex = /([A-D])\)\s*/g, optPositions = [], m;
-                while ((m = optRegex.exec(block)) !== null) optPositions.push({ pos: m.index, endPos: m.index + m[0].length });
-                if (optPositions.length >= 2) {
-                    qText = block.substring(0, optPositions[0].pos).trim();
-                    for (var op = 0; op < optPositions.length; op++) {
-                        var optEnd = (op + 1 < optPositions.length) ? optPositions[op + 1].pos : block.length;
-                        opts.push(block.substring(optPositions[op].endPos, optEnd).replace(/\n/g, ' ').trim());
+                // Try "- A) text" format first (markdown list options)
+                var dashOptRegex = /(?:^|\n)\s*[-*]\s*([A-D])\)\s*/g;
+                var dashPositions = [], dm;
+                while ((dm = dashOptRegex.exec(block)) !== null) dashPositions.push({ pos: dm.index, endPos: dm.index + dm[0].length, letter: dm[1] });
+
+                if (dashPositions.length >= 2) {
+                    qText = block.substring(0, dashPositions[0].pos).trim();
+                    for (var op = 0; op < dashPositions.length; op++) {
+                        var optEnd = (op + 1 < dashPositions.length) ? dashPositions[op + 1].pos : block.length;
+                        opts.push(block.substring(dashPositions[op].endPos, optEnd).replace(/\n/g, ' ').trim());
                     }
-                } else { opts = ['Option A', 'Option B', 'Option C', 'Option D']; }
+                } else {
+                    // Fallback: "A) text" format without dash
+                    var optRegex = /([A-D])\)\s*/g, optPositions = [], m;
+                    while ((m = optRegex.exec(block)) !== null) optPositions.push({ pos: m.index, endPos: m.index + m[0].length });
+                    if (optPositions.length >= 2) {
+                        qText = block.substring(0, optPositions[0].pos).trim();
+                        for (var op = 0; op < optPositions.length; op++) {
+                            var optEnd = (op + 1 < optPositions.length) ? optPositions[op + 1].pos : block.length;
+                            opts.push(block.substring(optPositions[op].endPos, optEnd).replace(/\n/g, ' ').trim());
+                        }
+                    } else { opts = ['Option A', 'Option B', 'Option C', 'Option D']; }
+                }
                 var correctIdx = 0, rationale = '';
                 if (qNum < answerKeys.length) { correctIdx = answerKeys[qNum].index; rationale = answerKeys[qNum].rationale; }
                 draftQuestions.push({ id: Date.now() + qNum, text: qText, options: opts, correctIndex: correctIdx, rationale: rationale, tier: currentTier, question: qText });
