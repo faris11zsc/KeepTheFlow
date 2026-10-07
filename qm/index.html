@@ -613,7 +613,7 @@
                                         '<button class="copy-picker-confirm" onclick="copyQuizToStudent(\'' + def.id + '\',\'' + cardId + '\',\'' + encodeURIComponent(title) + '\')">&#10003; Copy</button>' +
                                         '</div>';
                                 }
-                                card.innerHTML = '<div class="quiz-header"><div><div class="quiz-title">' + title + '</div><div class="quiz-meta">Assigned: ' + date + ' &bull; ' + qCount + ' Qs</div></div>' + badgeHtml + '</div>' + actionHtml;
+                                card.innerHTML = '<div class="quiz-header"><div><div class="quiz-title" dir="auto">' + title + '</div><div class="quiz-meta">Assigned: ' + date + ' &bull; ' + qCount + ' Qs</div></div>' + badgeHtml + '</div>' + actionHtml;
                                 container.appendChild(card);
                             }
                         });

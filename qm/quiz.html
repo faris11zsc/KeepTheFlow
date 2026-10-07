@@ -314,7 +314,7 @@
         <div id="quiz-screen">
             <div class="header">
                 <a href="/qm/" class="back-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>QuizMe</a>
-                <h3 id="quiz-title-display" style="color:var(--gold);margin:0;font-size:16px;">Quiz</h3>
+                <h3 id="quiz-title-display" dir="auto" style="color:var(--gold);margin:0;font-size:16px;">Quiz</h3>
             </div>
             <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
             <div class="meta-info"><span class="tier-badge" id="question-tier">Tier</span><span class="question-counter" id="question-counter">Question 1 of X</span></div>
@@ -698,10 +698,10 @@
             feedbackArea.className = 'feedback-area clearfix ' + (isCorrect ? 'correct' : 'incorrect');
             if (isCorrect) {
                 document.getElementById('feedback-title').innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Correct!';
-                document.getElementById('feedback-text').innerText = q.rationale || 'Great job!';
+                document.getElementById('feedback-text').innerHTML = '<div dir="auto">' + (q.rationale || 'Great job!') + '</div>';
             } else {
                 document.getElementById('feedback-title').innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Incorrect';
-                document.getElementById('feedback-text').innerHTML = '<strong>Correct Answer:</strong> ' + q.shuffledOptions[q.newCorrectIndex] + '<br><br>' + (q.rationale || '');
+                document.getElementById('feedback-text').innerHTML = '<div dir="auto"><strong>Correct Answer:</strong> ' + q.shuffledOptions[q.newCorrectIndex] + '</div>' + (q.rationale ? '<br><div dir="auto">' + q.rationale + '</div>' : '');
             }
             feedbackArea.style.display = 'block';
             feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
