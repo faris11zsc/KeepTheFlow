@@ -251,7 +251,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .arabic { font-family: var(--font-arabic); direction: rtl; }
+        .arabic { font-family: var(--font-arabic); }
 
         /* ===== MOBILE RESPONSIVE ===== */
         @media (max-width: 480px) {
@@ -318,11 +318,11 @@
             </div>
             <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
             <div class="meta-info"><span class="tier-badge" id="question-tier">Tier</span><span class="question-counter" id="question-counter">Question 1 of X</span></div>
-            <h2 class="question-text" id="question-text"></h2>
+            <h2 class="question-text" id="question-text" dir="auto"></h2>
             <div class="options-grid" id="options-grid"></div>
             <div class="feedback-area clearfix" id="feedback-area">
                 <div class="feedback-title" id="feedback-title"></div>
-                <div class="feedback-text" id="feedback-text"></div>
+                <div class="feedback-text" id="feedback-text" dir="auto"></div>
                 <button class="continue-btn" onclick="nextQuestion()">Continue &rarr;</button>
             </div>
         </div>
@@ -654,6 +654,7 @@
             q.shuffledOptions.forEach((opt, idx) => {
                 const btn = document.createElement('button');
                 btn.className = 'option-btn' + (isArabic(opt) ? ' arabic' : '');
+                btn.setAttribute('dir', 'auto');
                 btn.innerHTML = '<span>' + opt + '</span><span class="icon"></span>';
                 btn.onclick = () => handleAnswer(idx);
                 optionsGrid.appendChild(btn);

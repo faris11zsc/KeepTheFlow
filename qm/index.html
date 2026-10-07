@@ -316,7 +316,7 @@
             </div>
             <div class="form-group">
                 <label>Paste Raw Questions</label>
-                <textarea id="rawQuestionsText" class="form-control" placeholder="1. Question text? A) Option A B) Option B C) Option C D) Option D"></textarea>
+                <textarea dir="auto" id="rawQuestionsText" class="form-control" placeholder="1. Question text? A) Option A B) Option B C) Option C D) Option D"></textarea>
                 <div style="margin-top: 0.5rem; text-align: right;">
                     <button class="btn-secondary" onclick="parseRawQuestions()">Parse Questions</button>
                 </div>
@@ -731,15 +731,15 @@
                     var isC = q.correctIndex === oi;
                     optsHtml += '<div class="q-opt-btn ' + (isC ? 'correct' : '') + '" onclick="setCorrectOption(' + qi + ',' + oi + ')">' +
                         '<span style="font-weight:bold;color:var(--gold-accent);margin-right:8px;">' + String.fromCharCode(65 + oi) + ')</span>' +
-                        '<input type="text" value="' + q.options[oi].replace(/"/g, '&quot;') + '" onchange="updateOption(' + qi + ',' + oi + ',this.value)" onclick="event.stopPropagation()">' +
+                        '<input dir="auto" type="text" value="' + q.options[oi].replace(/"/g, '&quot;') + '" onchange="updateOption(' + qi + ',' + oi + ',this.value)" onclick="event.stopPropagation()">' +
                         '</div>';
                 }
                 card.innerHTML = '<div style="display:flex;justify-content:space-between;margin-bottom:1rem;"><strong style="color:var(--gold-bright);">Question ' + (qi + 1) + '</strong><button class="delete-q-btn" onclick="deleteDraftQuestion(' + qi + ')">Delete</button></div>' +
-                    '<textarea class="form-control" style="min-height:60px;margin-bottom:1rem;" onchange="updateQText(' + qi + ',this.value)">' + q.text + '</textarea>' +
+                    '<textarea dir="auto" class="form-control" style="min-height:60px;margin-bottom:1rem;" onchange="updateQText(' + qi + ',this.value)">' + q.text + '</textarea>' +
                     '<div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:0.5rem;">Click an option box to mark as correct answer</div>' +
                     '<div class="q-options">' + optsHtml + '</div>' +
                     '<div style="display:flex;gap:1rem;flex-wrap:wrap;">' +
-                    '<div style="flex:1;min-width:200px;"><label style="font-size:0.8rem;color:var(--gold-accent);">Rationale</label><textarea class="form-control" style="min-height:40px;" onchange="updateQRationale(' + qi + ',this.value)">' + q.rationale + '</textarea></div>' +
+                    '<div style="flex:1;min-width:200px;"><label style="font-size:0.8rem;color:var(--gold-accent);">Rationale</label><textarea dir="auto" class="form-control" style="min-height:40px;" onchange="updateQRationale(' + qi + ',this.value)">' + q.rationale + '</textarea></div>' +
                     '<div style="width:150px;"><label style="font-size:0.8rem;color:var(--gold-accent);">Tier</label><input type="text" class="form-control" value="' + q.tier + '" onchange="updateQTier(' + qi + ',this.value)"></div>' +
                     '</div>';
                 container.appendChild(card);
