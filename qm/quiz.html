@@ -821,6 +821,26 @@
             }
         }
 
+        // ===== CEREMONY AUDIO CLEANUP =====
+        function stopCeremonyAudio() {
+            const audio = document.getElementById('ceremonyAudio');
+            if (audio) { audio.pause(); audio.currentTime = 0; }
+        }
+
+        // Stop when user switches to another tab or minimizes
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) stopCeremonyAudio();
+        });
+
+        // Stop when user navigates away, closes tab/browser, or refreshes
+        window.addEventListener('pagehide', stopCeremonyAudio);
+        window.addEventListener('beforeunload', stopCeremonyAudio);
+
+        // Stop when clicking Back to QuizMe
+        document.querySelector('.ceremony-back-btn')?.addEventListener('click', function() {
+            stopCeremonyAudio();
+        });
+
         // ===== HELPERS =====
         function showScreen(id) { Object.values(screens).forEach(s => s.style.display = 'none'); screens[id].style.display = (id === 'quiz' || id === 'results') ? 'block' : 'flex'; }
         function showError(msg) { document.getElementById('error-message').innerText = msg; showScreen('error'); }
