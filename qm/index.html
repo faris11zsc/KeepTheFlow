@@ -389,6 +389,23 @@
             if (isAdmin) {
                 document.getElementById('adminView').style.display = 'grid';
                 loadAdminStudents();
+
+                var editParam = urlParams.get('editQuiz');
+                if (editParam) {
+                    setTimeout(function() {
+                        fetch(REST + 'qrasm_recordings?assignment_id=eq.quizme&instance_number=eq.' + encodeURIComponent(editParam) + '&student_name=like.QUIZ_DEF_%25', { headers: dbHeaders() })
+                            .then(function(r){ return r.json(); })
+                            .then(function(rows){
+                                if (rows && rows.length > 0) {
+                                    var owner = rows[0].student_name.replace('QUIZ_DEF_', '');
+                                    selectedStudentForAdmin = owner;
+                                    document.getElementById('adminSelectedStudent').textContent = owner;
+                                    document.getElementById('addQuizBtn').style.display = 'block';
+                                    editQuiz(rows[0].id, rows[0].instance_number);
+                                }
+                            });
+                    }, 500);
+                }
             } else {
                 document.getElementById('studentView').style.display = 'block';
                 loadStudentQuizzes(currentUser);
