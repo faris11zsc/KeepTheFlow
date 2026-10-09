@@ -7156,9 +7156,10 @@ async function submitReport() {
     btn.disabled = true;
     
     const msg = document.getElementById('reportMessage').value.trim();
-    let baseUrl = window.location.origin + window.location.pathname;
-    if (baseUrl.endsWith('/index.html')) baseUrl = baseUrl.replace('/index.html', '/');
-    const instanceUrl = baseUrl + '?instance=' + currentReportInstance;
+    const url = new URL(window.location.href);
+    url.searchParams.set('scrollTo', currentReportInstance);
+    url.searchParams.set('admin', 'true');
+    const instanceUrl = url.toString();
     const studentName = window.localStorage.getItem('qrasm_student_name') || 'Anonymous';
     
     try {
