@@ -400,7 +400,6 @@
                 </div>
                 <div class="admin-bar-group">
                     <button type="button" class="admin-btn-tool" id="admin-reveal-btn" onclick="adminToggleRevealAnswer()">👁 Reveal Answer</button>
-                    <button type="button" class="admin-btn-tool" id="admin-shuffle-btn" onclick="adminToggleShuffle()">🔀 Shuffle</button>
                     <button type="button" class="admin-btn-tool" onclick="finishQuiz()">🏁 End Quiz</button>
                     <a id="admin-edit-btn" class="admin-btn-tool" href="/qm/?admin=true">✏ Edit in Dashboard</a>
                 </div>
@@ -463,7 +462,7 @@
         let quizDef = null, quizQuestions = [], currentQuestionIndex = 0, score = 0;
         let studentName = '', quizId = '', previousScoreRecord = null;
         let adminRevealAnswer = false;
-        let adminIsShuffled = false;
+        
         let correctStreak = 0, wrongStreak = 0;
         let currentAudio = null;
 
@@ -684,7 +683,7 @@
             } catch(e) { return null; }
         }
 
-        function startQuiz(isRetake) {
+        function startQuiz(isRetake = false) {
             // Check for saved progress if not a retake and not admin
             if (!isRetake && !isAdminPreview) {
                 const saved = loadSavedProgress();
@@ -692,67 +691,48 @@
                     const qDone = saved.currentQuestionIndex;
                     const qTotal = saved.questions.length;
                     const pct = Math.round((qDone / qTotal) * 100);
-                    if (confirm(`You left off at question ${qDone + 1} of ${qTotal} (${pct}% done).\n\nResume from where you stopped?`)) {
-                        // Restore state
+                    if (confirm(`You left off at question ${qDone + 1} of ${qTotal} (${pct}% done).
+
+Resume from where you stopped?`)) {
                         quizQuestions = saved.questions;
                         currentQuestionIndex = saved.currentQuestionIndex;
                         score = saved.score;
                         correctStreak = saved.correctStreak || 0;
                         wrongStreak = saved.wrongStreak || 0;
                         document.getElementById('quiz-title-display').innerText = quizDef.parsedGrade.title || 'Quiz';
-                        document.getElementById('streak-counter').style.display = 'none';
-                        document.getElementById('main-container').className = 'container';
+                        const sc = document.getElementById('streak-counter');
+                        if (sc) sc.style.display = 'none';
+                        const mc = document.getElementById('main-container');
+                        if (mc) mc.className = 'container';
                         showScreen('quiz');
                         renderQuestion();
                         return;
                     } else {
-                        clearProgress(); // user chose to start fresh
+                        clearProgress();
                     }
                 }
             } else {
-                clearProgress(); // retake always starts fresh
+                clearProgress();
             }
 
-            // Preserve original definition index (1-based for human display)
-            const rawQuestions = quizDef.parsedGrade.questions.map((q, idx) => ({
-                ...q,
-                originalIndex: idx,
-                originalNum: idx + 1
-            }));
-
-            if (isAdminPreview) {
-                // Admin mode: default to natural definition order (1, 2, 3...)
-                quizQuestions = adminIsShuffled ? [...rawQuestions] : [...rawQuestions];
-                if (adminIsShuffled) shuffleArray(quizQuestions);
-            } else {
-                // Student mode: always shuffled
-                quizQuestions = [...rawQuestions];
-                shuffleArray(quizQuestions);
-            }
-
-            quizQuestions.forEach(q => {
+            // Universal, fixed, permanent question order for ALL students and admin
+            quizQuestions = quizDef.parsedGrade.questions.map((q, idx) => {
                 const options = [...q.options];
                 const cIdx = (q.correctIndex !== undefined) ? q.correctIndex : (q.correctOptionIndex !== undefined ? q.correctOptionIndex : 0);
-                const correctAnswer = options[cIdx];
-                if (!isAdminPreview || adminIsShuffled) {
-                    shuffleArray(options);
-                }
-                q.shuffledOptions = options;
-                q.newCorrectIndex = options.indexOf(correctAnswer);
+                return {
+                    ...q,
+                    originalIndex: idx,
+                    originalNum: idx + 1,
+                    shuffledOptions: options,
+                    newCorrectIndex: cIdx
+                };
             });
 
-            // Target specific question if ?q=X or ?reportQ=X was provided (e.g. from report link)
+            // Target specific question if ?q=X or ?reportQ=X was provided
             const urlParams = new URLSearchParams(window.location.search);
             const targetQ = parseInt(urlParams.get('q') || urlParams.get('reportQ'));
-            if (targetQ && targetQ > 0) {
-                const foundIdx = quizQuestions.findIndex(q => q.originalNum === targetQ);
-                if (foundIdx !== -1) {
-                    currentQuestionIndex = foundIdx;
-                } else if (targetQ - 1 >= 0 && targetQ - 1 < quizQuestions.length) {
-                    currentQuestionIndex = targetQ - 1;
-                } else {
-                    currentQuestionIndex = 0;
-                }
+            if (targetQ && targetQ > 0 && targetQ <= quizQuestions.length) {
+                currentQuestionIndex = targetQ - 1;
             } else {
                 currentQuestionIndex = 0;
             }
@@ -779,9 +759,7 @@
             document.getElementById('progress-bar').style.width = (((currentQuestionIndex + 1) / quizQuestions.length) * 100) + '%';
             document.getElementById('question-tier').innerText = q.tier || 'General';
             
-            const displayNum = isAdminPreview 
-                ? ('Question ' + q.originalNum + ' of ' + quizQuestions.length + (adminIsShuffled ? ' [Shuffled #' + (currentQuestionIndex + 1) + ']' : ''))
-                : ('Question ' + (currentQuestionIndex + 1) + ' of ' + quizQuestions.length);
+            const displayNum = 'Question ' + (currentQuestionIndex + 1) + ' of ' + quizQuestions.length;
             document.getElementById('question-counter').innerText = displayNum;
 
             if (isAdminPreview) {
@@ -874,47 +852,7 @@
             renderQuestion();
         }
 
-        function adminToggleShuffle() {
-            adminIsShuffled = !adminIsShuffled;
-            const btn = document.getElementById('admin-shuffle-btn');
-            const currentQOriginalNum = quizQuestions[currentQuestionIndex] ? quizQuestions[currentQuestionIndex].originalNum : 1;
-            
-            const rawQuestions = quizDef.parsedGrade.questions.map((q, idx) => ({
-                ...q,
-                originalIndex: idx,
-                originalNum: idx + 1
-            }));
-            
-            if (adminIsShuffled) {
-                quizQuestions = [...rawQuestions];
-                shuffleArray(quizQuestions);
-                if (btn) {
-                    btn.textContent = '🔢 Natural Order';
-                    btn.classList.add('active-tool');
-                }
-            } else {
-                quizQuestions = [...rawQuestions];
-                if (btn) {
-                    btn.textContent = '🔀 Shuffle';
-                    btn.classList.remove('active-tool');
-                }
-            }
-            
-            quizQuestions.forEach(q => {
-                const options = [...q.options];
-                const cIdx = (q.correctIndex !== undefined) ? q.correctIndex : (q.correctOptionIndex !== undefined ? q.correctOptionIndex : 0);
-                const correctAnswer = options[cIdx];
-                if (adminIsShuffled) shuffleArray(options);
-                q.shuffledOptions = options;
-                q.newCorrectIndex = options.indexOf(correctAnswer);
-            });
-            
-            const newIdx = quizQuestions.findIndex(q => q.originalNum === currentQOriginalNum);
-            currentQuestionIndex = newIdx !== -1 ? newIdx : 0;
-            
-            populateAdminDropdown();
-            renderQuestion();
-        }
+        
 
         function handleAnswer(selectedIndex) {
             const q = quizQuestions[currentQuestionIndex];
@@ -1199,8 +1137,7 @@
 </div>
 <script>
 function openReportModal() {
-    const q = quizQuestions[currentQuestionIndex];
-    const qNum = q ? (q.originalNum || (currentQuestionIndex + 1)) : (currentQuestionIndex + 1);
+    const qNum = currentQuestionIndex + 1;
     const sub = document.getElementById('reportModalSubtitle');
     if (sub) sub.textContent = "What's wrong with Question #" + qNum + "?";
     
@@ -1215,7 +1152,7 @@ function closeReportModal() {
 }
 async function submitReport() {
     const q = quizQuestions[currentQuestionIndex];
-    const qNum = q ? (q.originalNum || (currentQuestionIndex + 1)) : (currentQuestionIndex + 1);
+    const qNum = currentQuestionIndex + 1;
     const qText = q ? (q.question || q.text || '').trim() : '';
     const qSnippet = qText.length > 80 ? qText.substring(0, 77) + '...' : qText;
 
@@ -1225,7 +1162,7 @@ async function submitReport() {
     
     const userMsg = document.getElementById('reportMessage').value.trim();
     
-    // Construct direct admin URL linking right to this question (q=qNum)
+    // Direct admin URL with fixed universal question number
     const url = new URL(window.location.href);
     url.searchParams.set('admin', 'true');
     url.searchParams.set('q', qNum);
@@ -1234,7 +1171,9 @@ async function submitReport() {
     
     let reportGrade = `[Question #${qNum}: "${qSnippet}"]`;
     if (userMsg) {
-        reportGrade = `${userMsg}\n\n${reportGrade}`;
+        reportGrade = `${userMsg}
+
+${reportGrade}`;
     }
     
     try {
@@ -1246,9 +1185,11 @@ async function submitReport() {
             grade: reportGrade
         };
         
-        const res = await fetch(SUPABASE_URL + '/rest/v1/qrasm_recordings', {
+        const endpoint = SUPABASE_URL + '/rest/v1/';
+        const sbKey = SUPABASE_KEY;
+        const res = await fetch(endpoint + 'qrasm_recordings', {
             method: 'POST',
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
+            headers: { 'apikey': sbKey, 'Authorization': 'Bearer ' + sbKey, 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
         if(!res.ok) throw new Error('Network error');
