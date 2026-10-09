@@ -471,7 +471,7 @@ main {
     background-clip: text;
 }
 .item {
-    background: color-mix(in srgb, var(--bg) 88%, var(--line) 12%);
+    position: relative; background: color-mix(in srgb, var(--bg) 88%, var(--line) 12%);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid color-mix(in srgb, var(--ref) 8%, transparent);
@@ -565,10 +565,10 @@ main {
 .reference { direction: ltr; color: var(--ref); font-weight: 700; font-size: 15px; }
 @media (max-width: 720px) {
     body { padding: 24px 8px 54px; }
-    .item { padding-inline: 6px; }
+    .item { position: relative; padding-inline: 6px; }
 }
 @media (max-width: 480px) {
-    .item { padding: 18px 8px 16px; margin-bottom: 10px; }
+    .item { position: relative; padding: 18px 8px 16px; margin-bottom: 10px; }
     .phrase { padding: 16px 0 12px; margin: 8px auto 12px; }
     .play-segment-btn, .record-btn { font-size: 13px; padding: 10px 14px; min-height: 44px; }
     .pause-btn, .stop-btn, .rerecord-btn { min-width: 44px; min-height: 44px; font-size: 16px; }
@@ -1024,6 +1024,7 @@ main {
 <header class="rule-header"><div class="rule-kicker">Target rule</div><h1>The Humming Y&amp;W (Broad)</h1></header>
 
             <article class="item" data-instance="1729070672">
+    <button class="student-report-btn" onclick="openReportModal('1729070672')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#1</div>
                 <div class="phrase" aria-label="وَجَآءُوٓ أَبَاهُمۡ عِشَآءًۭ يَبۡكُونَ">
                     <div class="qrow native-line" data-page="237" data-line="2"><span class="qword" title="word 1: وَجَآءُوٓ" data-surah="12" data-ayah="16" data-pos="1" data-target="w" data-uthmani="وَجَآءُوٓ" style="font-family: 'QCFV2P237';">ﱔ</span></div><div class="qrow native-line" data-page="237" data-line="3"><span class="qword" title="word 2: أَبَاهُمْ" data-surah="12" data-ayah="16" data-pos="2" data-target="" data-uthmani="أَبَاهُمْ" style="font-family: 'QCFV2P237';">ﱕ</span><span class="qword" title="word 3: عِشَآءًۭ" data-surah="12" data-ayah="16" data-pos="3" data-target="" data-uthmani="عِشَآءًۭ" style="font-family: 'QCFV2P237';">ﱖ</span><span class="qword target-highlight target-y-tanween" title="word 4: يَبْكُونَ" data-surah="12" data-ayah="16" data-pos="4" data-target="y-tanween" data-uthmani="يَبْكُونَ" data-hl-right="0" data-hl-width="25.3" style="font-family: 'QCFV2P237';">ﱗ</span></div>
@@ -1054,6 +1055,7 @@ main {
             </article>
             
             <article class="item" data-instance="2028894521">
+    <button class="student-report-btn" onclick="openReportModal('2028894521')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#2</div>
                 <div class="phrase" aria-label="إِلَّا تَذۡكِرَةًۭ لِّمَن يَخۡشَىٰ">
                     <div class="qrow native-line" data-page="312" data-line="7"><span class="qword" title="word 1: إِلَّا" data-surah="20" data-ayah="3" data-pos="1" data-target="" data-uthmani="إِلَّا" style="font-family: 'QCFV2P312';">ﱭ</span><span class="qword" title="word 2: تَذْكِرَةًۭ" data-surah="20" data-ayah="3" data-pos="2" data-target="" data-uthmani="تَذْكِرَةًۭ" style="font-family: 'QCFV2P312';">ﱮ</span></div><div class="qrow native-line" data-page="312" data-line="8"><span class="qword" title="word 3: لِّمَن" data-surah="20" data-ayah="3" data-pos="3" data-target="" data-uthmani="لِّمَن" style="font-family: 'QCFV2P312';">ﱯ</span><span class="qword target-highlight target-y" title="word 4: يَخْشَىٰ" data-surah="20" data-ayah="3" data-pos="4" data-target="y" data-uthmani="يَخْشَىٰ" data-hl-right="0" data-hl-width="18.9" style="font-family: 'QCFV2P312';">ﱰ</span></div>
@@ -1084,6 +1086,7 @@ main {
             </article>
             
             <article class="item" data-instance="123178433">
+    <button class="student-report-btn" onclick="openReportModal('123178433')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#3</div>
                 <div class="phrase" aria-label="وَأَعُوذُ بِكَ رَبِّ أَن يَحۡضُرُونِ">
                     <div class="qrow native-line" data-page="348" data-line="8"><span class="qword" title="word 1: وَأَعُوذُ" data-surah="23" data-ayah="98" data-pos="1" data-target="w" data-uthmani="وَأَعُوذُ" style="font-family: 'QCFV2P348';">ﲒ</span><span class="qword" title="word 2: بِكَ" data-surah="23" data-ayah="98" data-pos="2" data-target="" data-uthmani="بِكَ" style="font-family: 'QCFV2P348';">ﲓ</span><span class="qword" title="word 3: رَبِّ" data-surah="23" data-ayah="98" data-pos="3" data-target="" data-uthmani="رَبِّ" style="font-family: 'QCFV2P348';">ﲔ</span><span class="qword" title="word 4: أَن" data-surah="23" data-ayah="98" data-pos="4" data-target="" data-uthmani="أَن" style="font-family: 'QCFV2P348';">ﲕ</span></div><div class="qrow native-line" data-page="348" data-line="9"><span class="qword target-highlight target-y" title="word 5: يَحْضُرُونِ" data-surah="23" data-ayah="98" data-pos="5" data-target="y" data-uthmani="يَحْضُرُونِ" data-hl-right="0" data-hl-width="17.5" style="font-family: 'QCFV2P348';">ﲖ</span></div>
@@ -1114,6 +1117,7 @@ main {
             </article>
             
             <article class="item" data-instance="1584369013">
+    <button class="student-report-btn" onclick="openReportModal('1584369013')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#4</div>
                 <div class="phrase" aria-label="وَكُنُوزٍۢ وَمَقَامٍۢ كَرِيمٍۢ">
                     <div class="qrow native-line" data-page="369" data-line="14"><span class="qword" title="word 1: وَكُنُوزٍۢ" data-surah="26" data-ayah="58" data-pos="1" data-target="w" data-uthmani="وَكُنُوزٍۢ" style="font-family: 'QCFV2P369';">ﳔ</span><span class="qword target-highlight target-w-tanween" title="word 2: وَمَقَامٍۢ" data-surah="26" data-ayah="58" data-pos="2" data-target="w-tanween" data-uthmani="وَمَقَامٍۢ" data-hl-right="0" data-hl-width="22.3" style="font-family: 'QCFV2P369';">ﳕ</span><span class="qword" title="word 3: كَرِيمٍۢ" data-surah="26" data-ayah="58" data-pos="3" data-target="" data-uthmani="كَرِيمٍۢ" style="font-family: 'QCFV2P369';">ﳖ</span></div>
@@ -1144,6 +1148,7 @@ main {
             </article>
             
             <article class="item" data-instance="1059600732">
+    <button class="student-report-btn" onclick="openReportModal('1059600732')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#5</div>
                 <div class="phrase" aria-label="يَوۡمَ لَا يَنفَعُ مَالٌۭ وَلَا بَنُونَ">
                     <div class="qrow native-line" data-page="371" data-line="3"><span class="qword" title="word 1: يَوْمَ" data-surah="26" data-ayah="88" data-pos="1" data-target="y" data-uthmani="يَوْمَ" style="font-family: 'QCFV2P371';">ﱚ</span><span class="qword" title="word 2: لَا" data-surah="26" data-ayah="88" data-pos="2" data-target="" data-uthmani="لَا" style="font-family: 'QCFV2P371';">ﱛ</span><span class="qword" title="word 3: يَنفَعُ" data-surah="26" data-ayah="88" data-pos="3" data-target="y" data-uthmani="يَنفَعُ" style="font-family: 'QCFV2P371';">ﱜ</span><span class="qword" title="word 4: مَالٌۭ" data-surah="26" data-ayah="88" data-pos="4" data-target="" data-uthmani="مَالٌۭ" style="font-family: 'QCFV2P371';">ﱝ</span><span class="qword target-highlight target-w-tanween" title="word 5: وَلَا" data-surah="26" data-ayah="88" data-pos="5" data-target="w-tanween" data-uthmani="وَلَا" data-hl-right="0" data-hl-width="52.0" style="font-family: 'QCFV2P371';">ﱞ</span><span class="qword" title="word 6: بَنُونَ" data-surah="26" data-ayah="88" data-pos="6" data-target="" data-uthmani="بَنُونَ" style="font-family: 'QCFV2P371';">ﱟ</span></div>
@@ -1174,6 +1179,7 @@ main {
             </article>
             
             <article class="item" data-instance="862885432">
+    <button class="student-report-btn" onclick="openReportModal('862885432')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#6</div>
                 <div class="phrase" aria-label="أَمَدَّكُم بِأَنۡعَٰمٍۢ وَبَنِينَ">
                     <div class="qrow native-line" data-page="372" data-line="13"><span class="qword" title="word 1: أَمَدَّكُم" data-surah="26" data-ayah="133" data-pos="1" data-target="" data-uthmani="أَمَدَّكُم" style="font-family: 'QCFV2P372';">ﳍ</span><span class="qword" title="word 2: بِأَنْعَـٰمٍۢ" data-surah="26" data-ayah="133" data-pos="2" data-target="" data-uthmani="بِأَنْعَـٰمٍۢ" style="font-family: 'QCFV2P372';">ﳎ</span><span class="qword target-highlight target-w-tanween" title="word 3: وَبَنِينَ" data-surah="26" data-ayah="133" data-pos="3" data-target="w-tanween" data-uthmani="وَبَنِينَ" data-hl-right="0" data-hl-width="22.3" style="font-family: 'QCFV2P372';">ﳏ</span></div>
@@ -1204,6 +1210,7 @@ main {
             </article>
             
             <article class="item" data-instance="1888071094">
+    <button class="student-report-btn" onclick="openReportModal('1888071094')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#7</div>
                 <div class="phrase" aria-label="وَجَنَّٰتٍۢ وَعُيُونٍ">
                     <div class="qrow native-line" data-page="372" data-line="14"><span class="qword" title="word 1: وَجَنَّـٰتٍۢ" data-surah="26" data-ayah="134" data-pos="1" data-target="w" data-uthmani="وَجَنَّـٰتٍۢ" style="font-family: 'QCFV2P372';">ﳑ</span><span class="qword target-highlight target-w-tanween" title="word 2: وَعُيُونٍ" data-surah="26" data-ayah="134" data-pos="2" data-target="w-tanween" data-uthmani="وَعُيُونٍ" data-hl-right="0" data-hl-width="22.9" style="font-family: 'QCFV2P372';">ﳒ</span></div>
@@ -1234,6 +1241,7 @@ main {
             </article>
             
             <article class="item" data-instance="617628268">
+    <button class="student-report-btn" onclick="openReportModal('617628268')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#8</div>
                 <div class="phrase" aria-label="فِى جَنَّٰتٍۢ وَعُيُونٍۢ">
                     <div class="qrow native-line" data-page="373" data-line="7"><span class="qword" title="word 1: فِى" data-surah="26" data-ayah="147" data-pos="1" data-target="" data-uthmani="فِى" style="font-family: 'QCFV2P373';">ﲆ</span><span class="qword" title="word 2: جَنَّـٰتٍۢ" data-surah="26" data-ayah="147" data-pos="2" data-target="" data-uthmani="جَنَّـٰتٍۢ" style="font-family: 'QCFV2P373';">ﲇ</span><span class="qword target-highlight target-w-tanween" title="word 3: وَعُيُونٍۢ" data-surah="26" data-ayah="147" data-pos="3" data-target="w-tanween" data-uthmani="وَعُيُونٍۢ" data-hl-right="0" data-hl-width="22.9" style="font-family: 'QCFV2P373';">ﲈ</span></div>
@@ -1264,6 +1272,7 @@ main {
             </article>
             
             <article class="item" data-instance="2146730954">
+    <button class="student-report-btn" onclick="openReportModal('2146730954')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#9</div>
                 <div class="phrase" aria-label="وَسَبِّحُوهُ بُكۡرَةًۭ وَأَصِيلًا">
                     <div class="qrow native-line" data-page="423" data-line="13"><span class="qword" title="word 1: وَسَبِّحُوهُ" data-surah="33" data-ayah="42" data-pos="1" data-target="w" data-uthmani="وَسَبِّحُوهُ" style="font-family: 'QCFV2P423';">ﳑ</span></div><div class="qrow native-line" data-page="423" data-line="14"><span class="qword" title="word 2: بُكْرَةًۭ" data-surah="33" data-ayah="42" data-pos="2" data-target="" data-uthmani="بُكْرَةًۭ" style="font-family: 'QCFV2P423';">ﳒ</span><span class="qword target-highlight target-w-tanween" title="word 3: وَأَصِيلًا" data-surah="33" data-ayah="42" data-pos="3" data-target="w-tanween" data-uthmani="وَأَصِيلًا" data-hl-right="0" data-hl-width="22.3" style="font-family: 'QCFV2P423';">ﳓ</span></div>
@@ -1294,6 +1303,7 @@ main {
             </article>
             
             <article class="item" data-instance="1632036866">
+    <button class="student-report-btn" onclick="openReportModal('1632036866')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#10</div>
                 <div class="phrase" aria-label="دُحُورًۭا ۖ وَلَهُمۡ عَذَابٌۭ وَاصِبٌ">
                     <div class="qrow native-line" data-page="446" data-line="6"><span class="qword" title="word 1: دُحُورًۭا ۖ" data-surah="37" data-ayah="9" data-pos="1" data-target="" data-uthmani="دُحُورًۭا ۖ" style="font-family: 'QCFV2P446';">ﱭﱮ</span><span class="qword target-highlight target-w-tanween" title="word 2: وَلَهُمْ" data-surah="37" data-ayah="9" data-pos="2" data-target="w-tanween" data-uthmani="وَلَهُمْ" data-hl-right="0" data-hl-width="30.0" style="font-family: 'QCFV2P446';">ﱯ</span><span class="qword" title="word 3: عَذَابٌۭ" data-surah="37" data-ayah="9" data-pos="3" data-target="" data-uthmani="عَذَابٌۭ" style="font-family: 'QCFV2P446';">ﱰ</span><span class="qword target-highlight target-w-tanween" title="word 4: وَاصِبٌ" data-surah="37" data-ayah="9" data-pos="4" data-target="w-tanween" data-uthmani="وَاصِبٌ" data-hl-right="0" data-hl-width="28.9" style="font-family: 'QCFV2P446';">ﱱ</span></div>
@@ -1324,6 +1334,7 @@ main {
             </article>
             
             <article class="item" data-instance="249675179">
+    <button class="student-report-btn" onclick="openReportModal('249675179')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#11</div>
                 <div class="phrase" aria-label="وَإِذَا رَأَوۡا۟ ءَايَةًۭ يَسۡتَسۡخِرُونَ">
                     <div class="qrow native-line" data-page="446" data-line="9"><span class="qword" title="word 1: وَإِذَا" data-surah="37" data-ayah="14" data-pos="1" data-target="w" data-uthmani="وَإِذَا" style="font-family: 'QCFV2P446';">ﲒ</span><span class="qword" title="word 2: رَأَوْا۟" data-surah="37" data-ayah="14" data-pos="2" data-target="" data-uthmani="رَأَوْا۟" style="font-family: 'QCFV2P446';">ﲓ</span><span class="qword" title="word 3: ءَايَةًۭ" data-surah="37" data-ayah="14" data-pos="3" data-target="" data-uthmani="ءَايَةًۭ" style="font-family: 'QCFV2P446';">ﲔ</span><span class="qword target-highlight target-y-tanween" title="word 4: يَسْتَسْخِرُونَ" data-surah="37" data-ayah="14" data-pos="4" data-target="y-tanween" data-uthmani="يَسْتَسْخِرُونَ" data-hl-right="0" data-hl-width="16.0" style="font-family: 'QCFV2P446';">ﲕ</span></div>
@@ -1354,6 +1365,7 @@ main {
             </article>
             
             <article class="item" data-instance="1142782663">
+    <button class="student-report-btn" onclick="openReportModal('1142782663')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#12</div>
                 <div class="phrase" aria-label="بَلۡ هُمۡ فِى شَكٍّۢ يَلۡعَبُونَ">
                     <div class="qrow native-line" data-page="496" data-line="8"><span class="qword" title="word 1: بَلْ" data-surah="44" data-ayah="9" data-pos="1" data-target="" data-uthmani="بَلْ" style="font-family: 'QCFV2P496';">ﱽ</span><span class="qword" title="word 2: هُمْ" data-surah="44" data-ayah="9" data-pos="2" data-target="" data-uthmani="هُمْ" style="font-family: 'QCFV2P496';">ﱾ</span><span class="qword" title="word 3: فِى" data-surah="44" data-ayah="9" data-pos="3" data-target="" data-uthmani="فِى" style="font-family: 'QCFV2P496';">ﱿ</span><span class="qword" title="word 4: شَكٍّۢ" data-surah="44" data-ayah="9" data-pos="4" data-target="" data-uthmani="شَكٍّۢ" style="font-family: 'QCFV2P496';">ﲀ</span><span class="qword target-highlight target-y-tanween" title="word 5: يَلْعَبُونَ" data-surah="44" data-ayah="9" data-pos="5" data-target="y-tanween" data-uthmani="يَلْعَبُونَ" data-hl-right="0" data-hl-width="22.2" style="font-family: 'QCFV2P496';">ﲁ</span></div>
@@ -1384,6 +1396,7 @@ main {
             </article>
             
             <article class="item" data-instance="1127863320">
+    <button class="student-report-btn" onclick="openReportModal('1127863320')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#13</div>
                 <div class="phrase" aria-label="وَزُرُوعٍۢ وَمَقَامٍۢ كَرِيمٍۢ">
                     <div class="qrow native-line" data-page="497" data-line="5"><span class="qword" title="word 1: وَزُرُوعٍۢ" data-surah="44" data-ayah="26" data-pos="1" data-target="w" data-uthmani="وَزُرُوعٍۢ" style="font-family: 'QCFV2P497';">ﱴ</span><span class="qword target-highlight target-w-tanween" title="word 2: وَمَقَامٍۢ" data-surah="44" data-ayah="26" data-pos="2" data-target="w-tanween" data-uthmani="وَمَقَامٍۢ" data-hl-right="0" data-hl-width="22.3" style="font-family: 'QCFV2P497';">ﱵ</span><span class="qword" title="word 3: كَرِيمٍۢ" data-surah="44" data-ayah="26" data-pos="3" data-target="" data-uthmani="كَرِيمٍۢ" style="font-family: 'QCFV2P497';">ﱶ</span></div>
@@ -1414,6 +1427,7 @@ main {
             </article>
             
             <article class="item" data-instance="501582164">
+    <button class="student-report-btn" onclick="openReportModal('501582164')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#15</div>
                 <div class="phrase" aria-label="فَوَيۡلٌۭ يَوۡمَئِذٍۢ لِّلۡمُكَذِّبِينَ">
                     <div class="qrow native-line" data-page="523" data-line="13"><span class="qword" title="word 1: فَوَيْلٌۭ" data-surah="52" data-ayah="11" data-pos="1" data-target="" data-uthmani="فَوَيْلٌۭ" style="font-family: 'QCFV2P523';">ﲳ</span><span class="qword target-highlight target-y-tanween" title="word 2: يَوْمَئِذٍۢ" data-surah="52" data-ayah="11" data-pos="2" data-target="y-tanween" data-uthmani="يَوْمَئِذٍۢ" data-hl-right="0" data-hl-width="27.6" style="font-family: 'QCFV2P523';">ﲴ</span><span class="qword" title="word 3: لِّلْمُكَذِّبِينَ" data-surah="52" data-ayah="11" data-pos="3" data-target="" data-uthmani="لِّلْمُكَذِّبِينَ" style="font-family: 'QCFV2P523';">ﲵ</span></div>
@@ -1444,6 +1458,7 @@ main {
             </article>
             
             <article class="item" data-instance="2135861359">
+    <button class="student-report-btn" onclick="openReportModal('2135861359')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#16</div>
                 <div class="phrase" aria-label="ٱلَّذِينَ هُمۡ فِى خَوۡضٍۢ يَلۡعَبُونَ">
                     <div class="qrow native-line" data-page="523" data-line="14"><span class="qword" title="word 1: ٱلَّذِينَ" data-surah="52" data-ayah="12" data-pos="1" data-target="" data-uthmani="ٱلَّذِينَ" style="font-family: 'QCFV2P523';">ﲷ</span><span class="qword" title="word 2: هُمْ" data-surah="52" data-ayah="12" data-pos="2" data-target="" data-uthmani="هُمْ" style="font-family: 'QCFV2P523';">ﲸ</span><span class="qword" title="word 3: فِى" data-surah="52" data-ayah="12" data-pos="3" data-target="" data-uthmani="فِى" style="font-family: 'QCFV2P523';">ﲹ</span><span class="qword" title="word 4: خَوْضٍۢ" data-surah="52" data-ayah="12" data-pos="4" data-target="" data-uthmani="خَوْضٍۢ" style="font-family: 'QCFV2P523';">ﲺ</span><span class="qword target-highlight target-y-tanween" title="word 5: يَلْعَبُونَ" data-surah="52" data-ayah="12" data-pos="5" data-target="y-tanween" data-uthmani="يَلْعَبُونَ" data-hl-right="0" data-hl-width="22.2" style="font-family: 'QCFV2P523';">ﲻ</span></div>
@@ -1474,6 +1489,7 @@ main {
             </article>
             
             <article class="item" data-instance="1058073806">
+    <button class="student-report-btn" onclick="openReportModal('1058073806')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#17</div>
                 <div class="phrase" aria-label="إِنۡ هُوَ إِلَّا وَحۡىٌۭ يُوحَىٰ">
                     <div class="qrow native-line" data-page="526" data-line="3"><span class="qword" title="word 1: إِنْ" data-surah="53" data-ayah="4" data-pos="1" data-target="" data-uthmani="إِنْ" style="font-family: 'QCFV2P526';">ﱐ</span><span class="qword" title="word 2: هُوَ" data-surah="53" data-ayah="4" data-pos="2" data-target="" data-uthmani="هُوَ" style="font-family: 'QCFV2P526';">ﱑ</span><span class="qword" title="word 3: إِلَّا" data-surah="53" data-ayah="4" data-pos="3" data-target="" data-uthmani="إِلَّا" style="font-family: 'QCFV2P526';">ﱒ</span><span class="qword" title="word 4: وَحْىٌۭ" data-surah="53" data-ayah="4" data-pos="4" data-target="w" data-uthmani="وَحْىٌۭ" style="font-family: 'QCFV2P526';">ﱓ</span><span class="qword target-highlight target-y-tanween" title="word 5: يُوحَىٰ" data-surah="53" data-ayah="4" data-pos="5" data-target="y-tanween" data-uthmani="يُوحَىٰ" data-hl-right="0" data-hl-width="26.8" style="font-family: 'QCFV2P526';">ﱔ</span></div>
@@ -1504,6 +1520,7 @@ main {
             </article>
             
             <article class="item" data-instance="177240588">
+    <button class="student-report-btn" onclick="openReportModal('177240588')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#18</div>
                 <div class="phrase" aria-label="لَّا مَقۡطُوعَةٍۢ وَلَا مَمۡنُوعَةٍۢ">
                     <div class="qrow native-line" data-page="535" data-line="7"><span class="qword" title="word 1: لَّا" data-surah="56" data-ayah="33" data-pos="1" data-target="" data-uthmani="لَّا" style="font-family: 'QCFV2P535';">ﲉ</span><span class="qword" title="word 2: مَقْطُوعَةٍۢ" data-surah="56" data-ayah="33" data-pos="2" data-target="" data-uthmani="مَقْطُوعَةٍۢ" style="font-family: 'QCFV2P535';">ﲊ</span><span class="qword target-highlight target-w-tanween" title="word 3: وَلَا" data-surah="56" data-ayah="33" data-pos="3" data-target="w-tanween" data-uthmani="وَلَا" data-hl-right="0" data-hl-width="52.0" style="font-family: 'QCFV2P535';">ﲋ</span><span class="qword" title="word 4: مَمْنُوعَةٍۢ" data-surah="56" data-ayah="33" data-pos="4" data-target="" data-uthmani="مَمْنُوعَةٍۢ" style="font-family: 'QCFV2P535';">ﲌ</span></div>
@@ -1534,6 +1551,7 @@ main {
             </article>
             
             <article class="item" data-instance="1069133631">
+    <button class="student-report-btn" onclick="openReportModal('1069133631')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#19</div>
                 <div class="phrase" aria-label="فِى سَمُومٍۢ وَحَمِيمٍۢ">
                     <div class="qrow native-line" data-page="535" data-line="11"><span class="qword" title="word 1: فِى" data-surah="56" data-ayah="42" data-pos="1" data-target="" data-uthmani="فِى" style="font-family: 'QCFV2P535';">ﲬ</span><span class="qword" title="word 2: سَمُومٍۢ" data-surah="56" data-ayah="42" data-pos="2" data-target="" data-uthmani="سَمُومٍۢ" style="font-family: 'QCFV2P535';">ﲭ</span><span class="qword target-highlight target-w-tanween" title="word 3: وَحَمِيمٍۢ" data-surah="56" data-ayah="42" data-pos="3" data-target="w-tanween" data-uthmani="وَحَمِيمٍۢ" data-hl-right="0" data-hl-width="20.5" style="font-family: 'QCFV2P535';">ﲮ</span></div>
@@ -1564,6 +1582,7 @@ main {
             </article>
             
             <article class="item" data-instance="1054529426">
+    <button class="student-report-btn" onclick="openReportModal('1054529426')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#20</div>
                 <div class="phrase" aria-label="وَظِلٍّۢ مِّن يَحۡمُومٍۢ">
                     <div class="qrow native-line" data-page="535" data-line="11"><span class="qword" title="word 1: وَظِلٍّۢ" data-surah="56" data-ayah="43" data-pos="1" data-target="w" data-uthmani="وَظِلٍّۢ" style="font-family: 'QCFV2P535';">ﲰ</span><span class="qword" title="word 2: مِّن" data-surah="56" data-ayah="43" data-pos="2" data-target="" data-uthmani="مِّن" style="font-family: 'QCFV2P535';">ﲱ</span><span class="qword target-highlight target-y" title="word 3: يَحْمُومٍۢ" data-surah="56" data-ayah="43" data-pos="3" data-target="y" data-uthmani="يَحْمُومٍۢ" data-hl-right="0" data-hl-width="18.4" style="font-family: 'QCFV2P535';">ﲲ</span></div>
@@ -1594,6 +1613,7 @@ main {
             </article>
             
             <article class="item" data-instance="1955439498">
+    <button class="student-report-btn" onclick="openReportModal('1955439498')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#21</div>
                 <div class="phrase" aria-label="لَّا بَارِدٍۢ وَلَا كَرِيمٍ">
                     <div class="qrow native-line" data-page="535" data-line="11"><span class="qword" title="word 1: لَّا" data-surah="56" data-ayah="44" data-pos="1" data-target="" data-uthmani="لَّا" style="font-family: 'QCFV2P535';">ﲴ</span><span class="qword" title="word 2: بَارِدٍۢ" data-surah="56" data-ayah="44" data-pos="2" data-target="" data-uthmani="بَارِدٍۢ" style="font-family: 'QCFV2P535';">ﲵ</span></div><div class="qrow native-line" data-page="535" data-line="12"><span class="qword target-highlight target-w-tanween" title="word 3: وَلَا" data-surah="56" data-ayah="44" data-pos="3" data-target="w-tanween" data-uthmani="وَلَا" data-hl-right="0" data-hl-width="52.0" style="font-family: 'QCFV2P535';">ﲶ</span><span class="qword" title="word 4: كَرِيمٍ" data-surah="56" data-ayah="44" data-pos="4" data-target="" data-uthmani="كَرِيمٍ" style="font-family: 'QCFV2P535';">ﲷ</span></div>
@@ -1624,6 +1644,7 @@ main {
             </article>
             
             <article class="item" data-instance="894775349">
+    <button class="student-report-btn" onclick="openReportModal('894775349')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#22</div>
                 <div class="phrase" aria-label="أَن كَانَ ذَا مَالٍۢ وَبَنِينَ">
                     <div class="qrow native-line" data-page="564" data-line="14"><span class="qword" title="word 1: أَن" data-surah="68" data-ayah="14" data-pos="1" data-target="" data-uthmani="أَن" style="font-family: 'QCFV2P564';">ﲿ</span><span class="qword" title="word 2: كَانَ" data-surah="68" data-ayah="14" data-pos="2" data-target="" data-uthmani="كَانَ" style="font-family: 'QCFV2P564';">ﳀ</span><span class="qword" title="word 3: ذَا" data-surah="68" data-ayah="14" data-pos="3" data-target="" data-uthmani="ذَا" style="font-family: 'QCFV2P564';">ﳁ</span><span class="qword" title="word 4: مَالٍۢ" data-surah="68" data-ayah="14" data-pos="4" data-target="" data-uthmani="مَالٍۢ" style="font-family: 'QCFV2P564';">ﳂ</span><span class="qword target-highlight target-w-tanween" title="word 5: وَبَنِينَ" data-surah="68" data-ayah="14" data-pos="5" data-target="w-tanween" data-uthmani="وَبَنِينَ" data-hl-right="0" data-hl-width="22.3" style="font-family: 'QCFV2P564';">ﳃ</span></div>
@@ -1654,6 +1675,7 @@ main {
             </article>
             
             <article class="item" data-instance="926209816">
+    <button class="student-report-btn" onclick="openReportModal('926209816')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#23</div>
                 <div class="phrase" aria-label="فَيَوۡمَئِذٍۢ وَقَعَتِ ٱلۡوَاقِعَةُ">
                     <div class="qrow native-line" data-page="567" data-line="5"><span class="qword" title="word 1: فَيَوْمَئِذٍۢ" data-surah="69" data-ayah="15" data-pos="1" data-target="" data-uthmani="فَيَوْمَئِذٍۢ" style="font-family: 'QCFV2P567';">ﱬ</span><span class="qword target-highlight target-w-tanween" title="word 2: وَقَعَتِ" data-surah="69" data-ayah="15" data-pos="2" data-target="w-tanween" data-uthmani="وَقَعَتِ" data-hl-right="0" data-hl-width="26.9" style="font-family: 'QCFV2P567';">ﱭ</span><span class="qword" title="word 3: ٱلْوَاقِعَةُ" data-surah="69" data-ayah="15" data-pos="3" data-target="" data-uthmani="ٱلْوَاقِعَةُ" style="font-family: 'QCFV2P567';">ﱮ</span></div>
@@ -1684,6 +1706,7 @@ main {
             </article>
             
             <article class="item" data-instance="107391974">
+    <button class="student-report-btn" onclick="openReportModal('107391974')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#24</div>
                 <div class="phrase" aria-label="فِى جَنَّٰتٍۢ يَتَسَآءَلُونَ">
                     <div class="qrow native-line" data-page="576" data-line="12"><span class="qword" title="word 1: فِى" data-surah="74" data-ayah="40" data-pos="1" data-target="" data-uthmani="فِى" style="font-family: 'QCFV2P576';">ﳘ</span><span class="qword" title="word 2: جَنَّـٰتٍۢ" data-surah="74" data-ayah="40" data-pos="2" data-target="" data-uthmani="جَنَّـٰتٍۢ" style="font-family: 'QCFV2P576';">ﳙ</span></div><div class="qrow native-line" data-page="576" data-line="13"><span class="qword target-highlight target-y-tanween" title="word 3: يَتَسَآءَلُونَ" data-surah="74" data-ayah="40" data-pos="3" data-target="y-tanween" data-uthmani="يَتَسَآءَلُونَ" data-hl-right="0" data-hl-width="18.6" style="font-family: 'QCFV2P576';">ﳚ</span></div>
@@ -1714,6 +1737,7 @@ main {
             </article>
             
             <article class="item" data-instance="1106879524">
+    <button class="student-report-btn" onclick="openReportModal('1106879524')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#25</div>
                 <div class="phrase" aria-label="وُجُوهٌۭ يَوۡمَئِذٍۢ نَّاضِرَةٌ">
                     <div class="qrow native-line" data-page="578" data-line="1"><span class="qword" title="word 1: وُجُوهٌۭ" data-surah="75" data-ayah="22" data-pos="1" data-target="w" data-uthmani="وُجُوهٌۭ" style="font-family: 'QCFV2P578';">ﱉ</span><span class="qword target-highlight target-y-tanween" title="word 2: يَوْمَئِذٍۢ" data-surah="75" data-ayah="22" data-pos="2" data-target="y-tanween" data-uthmani="يَوْمَئِذٍۢ" data-hl-right="0" data-hl-width="27.6" style="font-family: 'QCFV2P578';">ﱊ</span><span class="qword" title="word 3: نَّاضِرَةٌ" data-surah="75" data-ayah="22" data-pos="3" data-target="" data-uthmani="نَّاضِرَةٌ" style="font-family: 'QCFV2P578';">ﱋ</span></div>
@@ -1744,6 +1768,7 @@ main {
             </article>
             
             <article class="item" data-instance="1911408088">
+    <button class="student-report-btn" onclick="openReportModal('1911408088')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#26</div>
                 <div class="phrase" aria-label="وَوُجُوهٌۭ يَوۡمَئِذٍۭ بَاسِرَةٌۭ">
                     <div class="qrow native-line" data-page="578" data-line="2"><span class="qword" title="word 1: وَوُجُوهٌۭ" data-surah="75" data-ayah="24" data-pos="1" data-target="w" data-uthmani="وَوُجُوهٌۭ" style="font-family: 'QCFV2P578';">ﱑ</span><span class="qword target-highlight target-y-tanween" title="word 2: يَوْمَئِذٍۭ" data-surah="75" data-ayah="24" data-pos="2" data-target="y-tanween" data-uthmani="يَوْمَئِذٍۭ" data-hl-right="0" data-hl-width="27.6" style="font-family: 'QCFV2P578';">ﱒ</span><span class="qword" title="word 3: بَاسِرَةٌۭ" data-surah="75" data-ayah="24" data-pos="3" data-target="" data-uthmani="بَاسِرَةٌۭ" style="font-family: 'QCFV2P578';">ﱓ</span></div>
@@ -1774,6 +1799,7 @@ main {
             </article>
             
             <article class="item" data-instance="1887269340">
+    <button class="student-report-btn" onclick="openReportModal('1887269340')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#27</div>
                 <div class="phrase" aria-label="وَيۡلٌۭ يَوۡمَئِذٍۢ لِّلۡمُكَذِّبِينَ">
                     <div class="qrow native-line" data-page="580" data-line="13"><span class="qword" title="word 1: وَيْلٌۭ" data-surah="77" data-ayah="15" data-pos="1" data-target="w" data-uthmani="وَيْلٌۭ" style="font-family: 'QCFV2P580';">ﲵ</span><span class="qword target-highlight target-y-tanween" title="word 2: يَوْمَئِذٍۢ" data-surah="77" data-ayah="15" data-pos="2" data-target="y-tanween" data-uthmani="يَوْمَئِذٍۢ" data-hl-right="0" data-hl-width="27.6" style="font-family: 'QCFV2P580';">ﲶ</span></div><div class="qrow native-line" data-page="580" data-line="14"><span class="qword" title="word 3: لِّلْمُكَذِّبِينَ" data-surah="77" data-ayah="15" data-pos="3" data-target="" data-uthmani="لِّلْمُكَذِّبِينَ" style="font-family: 'QCFV2P580';">ﲷ</span></div>
@@ -1804,6 +1830,7 @@ main {
             </article>
             
             <article class="item" data-instance="2057620967">
+    <button class="student-report-btn" onclick="openReportModal('2057620967')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#30</div>
                 <div class="phrase" aria-label="أَحۡيَآءًۭ وَأَمۡوَٰتًۭا">
                     <div class="qrow native-line" data-page="581" data-line="3"><span class="qword" title="word 1: أَحْيَآءًۭ" data-surah="77" data-ayah="26" data-pos="1" data-target="" data-uthmani="أَحْيَآءًۭ" style="font-family: 'QCFV2P581';">ﱝ</span><span class="qword target-highlight target-w-tanween" title="word 2: وَأَمْوَٰتًۭا" data-surah="77" data-ayah="26" data-pos="2" data-target="w-tanween" data-uthmani="وَأَمْوَٰتًۭا" data-hl-right="0" data-hl-width="17.7" style="font-family: 'QCFV2P581';">ﱞ</span></div>
@@ -1834,6 +1861,7 @@ main {
             </article>
             
             <article class="item" data-instance="25663332">
+    <button class="student-report-btn" onclick="openReportModal('25663332')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#38</div>
                 <div class="phrase" aria-label="قُلُوبٌۭ يَوۡمَئِذٍۢ وَاجِفَةٌ">
                     <div class="qrow native-line" data-page="583" data-line="12"><span class="qword" title="word 1: قُلُوبٌۭ" data-surah="79" data-ayah="8" data-pos="1" data-target="" data-uthmani="قُلُوبٌۭ" style="font-family: 'QCFV2P583';">ﲨ</span><span class="qword target-highlight target-y-tanween" title="word 2: يَوْمَئِذٍۢ" data-surah="79" data-ayah="8" data-pos="2" data-target="y-tanween" data-uthmani="يَوْمَئِذٍۢ" data-hl-right="0" data-hl-width="27.6" style="font-family: 'QCFV2P583';">ﲩ</span><span class="qword target-highlight target-w-tanween" title="word 3: وَاجِفَةٌ" data-surah="79" data-ayah="8" data-pos="3" data-target="w-tanween" data-uthmani="وَاجِفَةٌ" data-hl-right="0" data-hl-width="26.0" style="font-family: 'QCFV2P583';">ﲪ</span></div>
@@ -1864,6 +1892,7 @@ main {
             </article>
             
             <article class="item" data-instance="343581087">
+    <button class="student-report-btn" onclick="openReportModal('343581087')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#39</div>
                 <div class="phrase" aria-label="وَفَٰكِهَةًۭ وَأَبًّۭا">
                     <div class="qrow native-line" data-page="585" data-line="11"><span class="qword" title="word 1: وَفَـٰكِهَةًۭ" data-surah="80" data-ayah="31" data-pos="1" data-target="w" data-uthmani="وَفَـٰكِهَةًۭ" style="font-family: 'QCFV2P585';">ﲾ</span></div><div class="qrow native-line" data-page="585" data-line="12"><span class="qword target-highlight target-w-tanween" title="word 2: وَأَبًّۭا" data-surah="80" data-ayah="31" data-pos="2" data-target="w-tanween" data-uthmani="وَأَبًّۭا" data-hl-right="0" data-hl-width="35.5" style="font-family: 'QCFV2P585';">ﲿ</span></div>
@@ -1894,6 +1923,7 @@ main {
             </article>
             
             <article class="item" data-instance="326296590">
+    <button class="student-report-btn" onclick="openReportModal('326296590')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#40</div>
                 <div class="phrase" aria-label="وُجُوهٌۭ يَوۡمَئِذٍۢ مُّسۡفِرَةٌۭ">
                     <div class="qrow native-line" data-page="585" data-line="14"><span class="qword" title="word 1: وُجُوهٌۭ" data-surah="80" data-ayah="38" data-pos="1" data-target="w" data-uthmani="وُجُوهٌۭ" style="font-family: 'QCFV2P585';">ﳜ</span><span class="qword target-highlight target-y-tanween" title="word 2: يَوْمَئِذٍۢ" data-surah="80" data-ayah="38" data-pos="2" data-target="y-tanween" data-uthmani="يَوْمَئِذٍۢ" data-hl-right="0" data-hl-width="27.6" style="font-family: 'QCFV2P585';">ﳝ</span><span class="qword" title="word 3: مُّسْفِرَةٌۭ" data-surah="80" data-ayah="38" data-pos="3" data-target="" data-uthmani="مُّسْفِرَةٌۭ" style="font-family: 'QCFV2P585';">ﳞ</span></div>
@@ -1924,6 +1954,7 @@ main {
             </article>
             
             <article class="item" data-instance="1489130866">
+    <button class="student-report-btn" onclick="openReportModal('1489130866')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#41</div>
                 <div class="phrase" aria-label="لِمَن شَآءَ مِنكُمۡ أَن يَسۡتَقِيمَ">
                     <div class="qrow native-line" data-page="586" data-line="14"><span class="qword" title="word 1: لِمَن" data-surah="81" data-ayah="28" data-pos="1" data-target="" data-uthmani="لِمَن" style="font-family: 'QCFV2P586';">ﲿ</span><span class="qword" title="word 2: شَآءَ" data-surah="81" data-ayah="28" data-pos="2" data-target="" data-uthmani="شَآءَ" style="font-family: 'QCFV2P586';">ﳀ</span><span class="qword" title="word 3: مِنكُمْ" data-surah="81" data-ayah="28" data-pos="3" data-target="" data-uthmani="مِنكُمْ" style="font-family: 'QCFV2P586';">ﳁ</span><span class="qword" title="word 4: أَن" data-surah="81" data-ayah="28" data-pos="4" data-target="" data-uthmani="أَن" style="font-family: 'QCFV2P586';">ﳂ</span></div><div class="qrow native-line" data-page="586" data-line="15"><span class="qword target-highlight target-y" title="word 5: يَسْتَقِيمَ" data-surah="81" data-ayah="28" data-pos="5" data-target="y" data-uthmani="يَسْتَقِيمَ" data-hl-right="0" data-hl-width="14.9" style="font-family: 'QCFV2P586';">ﳃ</span></div>
@@ -1954,6 +1985,7 @@ main {
             </article>
             
             <article class="item" data-instance="102481019">
+    <button class="student-report-btn" onclick="openReportModal('102481019')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#43</div>
                 <div class="phrase" aria-label="إِنَّهُۥ ظَنَّ أَن لَّن يَحُورَ">
                     <div class="qrow native-line" data-page="589" data-line="11"><span class="qword" title="word 1: إِنَّهُۥ" data-surah="84" data-ayah="14" data-pos="1" data-target="" data-uthmani="إِنَّهُۥ" style="font-family: 'QCFV2P589';">ﲕ</span><span class="qword" title="word 2: ظَنَّ" data-surah="84" data-ayah="14" data-pos="2" data-target="" data-uthmani="ظَنَّ" style="font-family: 'QCFV2P589';">ﲖ</span><span class="qword" title="word 3: أَن" data-surah="84" data-ayah="14" data-pos="3" data-target="" data-uthmani="أَن" style="font-family: 'QCFV2P589';">ﲗ</span><span class="qword" title="word 4: لَّن" data-surah="84" data-ayah="14" data-pos="4" data-target="" data-uthmani="لَّن" style="font-family: 'QCFV2P589';">ﲘ</span><span class="qword target-highlight target-y" title="word 5: يَحُورَ" data-surah="84" data-ayah="14" data-pos="5" data-target="y" data-uthmani="يَحُورَ" data-hl-right="0" data-hl-width="29.2" style="font-family: 'QCFV2P589';">ﲙ</span></div>
@@ -1984,6 +2016,7 @@ main {
             </article>
             
             <article class="item" data-instance="864967465">
+    <button class="student-report-btn" onclick="openReportModal('864967465')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#44</div>
                 <div class="phrase" aria-label="وَشَاهِدٍۢ وَمَشۡهُودٍۢ">
                     <div class="qrow native-line" data-page="590" data-line="4"><span class="qword" title="word 1: وَشَاهِدٍۢ" data-surah="85" data-ayah="3" data-pos="1" data-target="w" data-uthmani="وَشَاهِدٍۢ" style="font-family: 'QCFV2P590';">ﱒ</span><span class="qword target-highlight target-w-tanween" title="word 2: وَمَشْهُودٍۢ" data-surah="85" data-ayah="3" data-pos="2" data-target="w-tanween" data-uthmani="وَمَشْهُودٍۢ" data-hl-right="0" data-hl-width="19.0" style="font-family: 'QCFV2P590';">ﱓ</span></div>
@@ -2014,6 +2047,7 @@ main {
             </article>
             
             <article class="item" data-instance="86377821">
+    <button class="student-report-btn" onclick="openReportModal('86377821')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#45</div>
                 <div class="phrase" aria-label="وَٱللَّهُ مِن وَرَآئِهِم مُّحِيطٌۢ">
                     <div class="qrow native-line" data-page="590" data-line="14"><span class="qword" title="word 1: وَٱللَّهُ" data-surah="85" data-ayah="20" data-pos="1" data-target="w" data-uthmani="وَٱللَّهُ" style="font-family: 'QCFV2P590';">ﳂ</span><span class="qword" title="word 2: مِن" data-surah="85" data-ayah="20" data-pos="2" data-target="" data-uthmani="مِن" style="font-family: 'QCFV2P590';">ﳃ</span></div><div class="qrow native-line" data-page="590" data-line="15"><span class="qword target-highlight target-w" title="word 3: وَرَآئِهِم" data-surah="85" data-ayah="20" data-pos="3" data-target="w" data-uthmani="وَرَآئِهِم" data-hl-right="0" data-hl-width="17.1" style="font-family: 'QCFV2P590';">ﳄ</span><span class="qword" title="word 4: مُّحِيطٌۢ" data-surah="85" data-ayah="20" data-pos="4" data-target="" data-uthmani="مُّحِيطٌۢ" style="font-family: 'QCFV2P590';">ﳅ</span></div>
@@ -2044,6 +2078,7 @@ main {
             </article>
             
             <article class="item" data-instance="1532719494">
+    <button class="student-report-btn" onclick="openReportModal('1532719494')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#46</div>
                 <div class="phrase" aria-label="سَيَذَّكَّرُ مَن يَخۡشَىٰ">
                     <div class="qrow native-line" data-page="591" data-line="15"><span class="qword" title="word 1: سَيَذَّكَّرُ" data-surah="87" data-ayah="10" data-pos="1" data-target="" data-uthmani="سَيَذَّكَّرُ" style="font-family: 'QCFV2P591';">ﲻ</span><span class="qword" title="word 2: مَن" data-surah="87" data-ayah="10" data-pos="2" data-target="" data-uthmani="مَن" style="font-family: 'QCFV2P591';">ﲼ</span><span class="qword target-highlight target-y" title="word 3: يَخْشَىٰ" data-surah="87" data-ayah="10" data-pos="3" data-target="y" data-uthmani="يَخْشَىٰ" data-hl-right="0" data-hl-width="18.9" style="font-family: 'QCFV2P591';">ﲽ</span></div>
@@ -2074,6 +2109,7 @@ main {
             </article>
             
             <article class="item" data-instance="402888198">
+    <button class="student-report-btn" onclick="openReportModal('402888198')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#47</div>
                 <div class="phrase" aria-label="وَٱلۡءَاخِرَةُ خَيۡرٌۭ وَأَبۡقَىٰٓ">
                     <div class="qrow native-line" data-page="592" data-line="3"><span class="qword" title="word 1: وَٱلْـَٔاخِرَةُ" data-surah="87" data-ayah="17" data-pos="1" data-target="w" data-uthmani="وَٱلْـَٔاخِرَةُ" style="font-family: 'QCFV2P592';">ﱟ</span><span class="qword" title="word 2: خَيْرٌۭ" data-surah="87" data-ayah="17" data-pos="2" data-target="" data-uthmani="خَيْرٌۭ" style="font-family: 'QCFV2P592';">ﱠ</span><span class="qword target-highlight target-w-tanween" title="word 3: وَأَبْقَىٰٓ" data-surah="87" data-ayah="17" data-pos="3" data-target="w-tanween" data-uthmani="وَأَبْقَىٰٓ" data-hl-right="0" data-hl-width="20.0" style="font-family: 'QCFV2P592';">ﱡ</span></div>
@@ -2104,6 +2140,7 @@ main {
             </article>
             
             <article class="item" data-instance="1776202155">
+    <button class="student-report-btn" onclick="openReportModal('1776202155')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#48</div>
                 <div class="phrase" aria-label="وُجُوهٌۭ يَوۡمَئِذٍ خَٰشِعَةٌ">
                     <div class="qrow native-line" data-page="592" data-line="7"><span class="qword" title="word 1: وُجُوهٌۭ" data-surah="88" data-ayah="2" data-pos="1" data-target="w" data-uthmani="وُجُوهٌۭ" style="font-family: 'QCFV2P592';">ﱲ</span><span class="qword target-highlight target-y-tanween" title="word 2: يَوْمَئِذٍ" data-surah="88" data-ayah="2" data-pos="2" data-target="y-tanween" data-uthmani="يَوْمَئِذٍ" data-hl-right="0" data-hl-width="27.6" style="font-family: 'QCFV2P592';">ﱳ</span><span class="qword" title="word 3: خَـٰشِعَةٌ" data-surah="88" data-ayah="2" data-pos="3" data-target="" data-uthmani="خَـٰشِعَةٌ" style="font-family: 'QCFV2P592';">ﱴ</span></div>
@@ -2134,6 +2171,7 @@ main {
             </article>
             
             <article class="item" data-instance="1929995216">
+    <button class="student-report-btn" onclick="openReportModal('1929995216')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#49</div>
                 <div class="phrase" aria-label="وُجُوهٌۭ يَوۡمَئِذٍۢ نَّاعِمَةٌۭ">
                     <div class="qrow native-line" data-page="592" data-line="9"><span class="qword" title="word 1: وُجُوهٌۭ" data-surah="88" data-ayah="8" data-pos="1" data-target="w" data-uthmani="وُجُوهٌۭ" style="font-family: 'QCFV2P592';">ﲐ</span></div><div class="qrow native-line" data-page="592" data-line="10"><span class="qword target-highlight target-y-tanween" title="word 2: يَوْمَئِذٍۢ" data-surah="88" data-ayah="8" data-pos="2" data-target="y-tanween" data-uthmani="يَوْمَئِذٍۢ" data-hl-right="0" data-hl-width="27.6" style="font-family: 'QCFV2P592';">ﲑ</span><span class="qword" title="word 3: نَّاعِمَةٌۭ" data-surah="88" data-ayah="8" data-pos="3" data-target="" data-uthmani="نَّاعِمَةٌۭ" style="font-family: 'QCFV2P592';">ﲒ</span></div>
@@ -2164,6 +2202,7 @@ main {
             </article>
             
             <article class="item" data-instance="494683327">
+    <button class="student-report-btn" onclick="openReportModal('494683327')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#50</div>
                 <div class="phrase" aria-label="وَوَالِدٍۢ وَمَا وَلَدَ">
                     <div class="qrow native-line" data-page="594" data-line="8"><span class="qword" title="word 1: وَوَالِدٍۢ" data-surah="90" data-ayah="3" data-pos="1" data-target="w" data-uthmani="وَوَالِدٍۢ" style="font-family: 'QCFV2P594';">ﱷ</span><span class="qword target-highlight target-w-tanween" title="word 2: وَمَا" data-surah="90" data-ayah="3" data-pos="2" data-target="w-tanween" data-uthmani="وَمَا" data-hl-right="0" data-hl-width="41.1" style="font-family: 'QCFV2P594';">ﱸ</span><span class="qword" title="word 3: وَلَدَ" data-surah="90" data-ayah="3" data-pos="3" data-target="w" data-uthmani="وَلَدَ" style="font-family: 'QCFV2P594';">ﱹ</span></div>
@@ -2194,6 +2233,7 @@ main {
             </article>
             
             <article class="item" data-instance="910734001">
+    <button class="student-report-btn" onclick="openReportModal('910734001')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#51</div>
                 <div class="phrase" aria-label="وَنَفۡسٍۢ وَمَا سَوَّىٰهَا">
                     <div class="qrow native-line" data-page="595" data-line="6"><span class="qword" title="word 1: وَنَفْسٍۢ" data-surah="91" data-ayah="7" data-pos="1" data-target="w" data-uthmani="وَنَفْسٍۢ" style="font-family: 'QCFV2P595';">ﱣ</span><span class="qword target-highlight target-w-tanween" title="word 2: وَمَا" data-surah="91" data-ayah="7" data-pos="2" data-target="w-tanween" data-uthmani="وَمَا" data-hl-right="0" data-hl-width="41.1" style="font-family: 'QCFV2P595';">ﱤ</span><span class="qword" title="word 3: سَوَّىٰهَا" data-surah="91" data-ayah="7" data-pos="3" data-target="" data-uthmani="سَوَّىٰهَا" style="font-family: 'QCFV2P595';">ﱥ</span></div>
@@ -2224,6 +2264,7 @@ main {
             </article>
             
             <article class="item" data-instance="1400728911">
+    <button class="student-report-btn" onclick="openReportModal('1400728911')" title="Report an issue" style="position:absolute; bottom:12px; left:12px; background:transparent; color:#94a3b8; border:none; padding:4px; cursor:pointer; font-size:16px; opacity:0.4; transition:0.2s; z-index:10;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.4';">🚩</button>
                 <div class="item-number">#52</div>
                 <div class="phrase" aria-label="تَبَّتۡ يَدَآ أَبِى لَهَبٍۢ وَتَبَّ">
                     <div class="qrow native-line" data-page="603" data-line="13"><span class="qword" title="word 1: تَبَّتْ" data-surah="111" data-ayah="1" data-pos="1" data-target="" data-uthmani="تَبَّتْ" style="font-family: 'QCFV2P603';">ﱸ</span><span class="qword" title="word 2: يَدَآ" data-surah="111" data-ayah="1" data-pos="2" data-target="y" data-uthmani="يَدَآ" style="font-family: 'QCFV2P603';">ﱹ</span><span class="qword" title="word 3: أَبِى" data-surah="111" data-ayah="1" data-pos="3" data-target="" data-uthmani="أَبِى" style="font-family: 'QCFV2P603';">ﱺ</span><span class="qword" title="word 4: لَهَبٍۢ" data-surah="111" data-ayah="1" data-pos="4" data-target="" data-uthmani="لَهَبٍۢ" style="font-family: 'QCFV2P603';">ﱻ</span><span class="qword target-highlight target-w-tanween" title="word 5: وَتَبَّ" data-surah="111" data-ayah="1" data-pos="5" data-target="w-tanween" data-uthmani="وَتَبَّ" data-hl-right="0" data-hl-width="35.5" style="font-family: 'QCFV2P603';">ﱼ</span></div>
@@ -2654,7 +2695,8 @@ document.addEventListener('DOMContentLoaded', () => {
                           ).then(() => {}).catch(() => {});
                       }
                   }
-                  currentUser = name;
+                  currentUser = name;
+
                   // Show "add to contacts" prompt for email deliverability
                   if (email.trim()) {
                       const tip = document.createElement('div');
@@ -3345,5 +3387,81 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 })();
 </script>
+
+<!-- REPORT MODAL START -->
+<style>
+.report-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.8); z-index:9999; justify-content:center; align-items:center; }
+.report-modal.active { display:flex; }
+.report-modal-content { background:#1e293b; padding:20px; border-radius:12px; width:90%; max-width:400px; border:1px solid #334155; box-shadow:0 10px 25px rgba(0,0,0,0.5); }
+.report-modal-content h3 { color:#c5a44e; margin:0 0 10px 0; font-size:18px; }
+.report-modal-content textarea { width:100%; height:80px; background:#0f172a; border:1px solid #334155; border-radius:6px; color:#e2e8f0; padding:10px; font-family:inherit; resize:vertical; margin-bottom:15px; }
+.report-cancel-btn { background:transparent; border:1px solid #475569; color:#94a3b8; padding:8px 16px; border-radius:6px; cursor:pointer; }
+.report-submit-btn { background:#c5a44e; border:none; color:#0f172a; padding:8px 16px; border-radius:6px; font-weight:600; cursor:pointer; }
+</style>
+<div class="report-modal" id="reportModal">
+    <div class="report-modal-content">
+        <h3>🚩 Report Issue</h3>
+        <p style="font-size:14px; color:#94a3b8; margin-bottom:12px;">What's wrong with this instance?</p>
+        <textarea id="reportMessage" placeholder="(Optional) Tell us what's wrong..."></textarea>
+        <div style="display:flex; justify-content:flex-end; gap:8px;">
+            <button class="report-cancel-btn" onclick="closeReportModal()">Cancel</button>
+            <button class="report-submit-btn" onclick="submitReport()">Send Report</button>
+        </div>
+    </div>
+</div>
+<script>
+let currentReportInstance = null;
+function openReportModal(instanceId) {
+    currentReportInstance = instanceId;
+    document.getElementById('reportMessage').value = '';
+    const btn = document.querySelector('.report-submit-btn');
+    btn.textContent = 'Send Report';
+    btn.disabled = false;
+    document.getElementById('reportModal').classList.add('active');
+}
+function closeReportModal() {
+    document.getElementById('reportModal').classList.remove('active');
+    currentReportInstance = null;
+}
+async function submitReport() {
+    if (!currentReportInstance) return;
+    const btn = document.querySelector('.report-submit-btn');
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+    
+    const msg = document.getElementById('reportMessage').value.trim();
+    let baseUrl = window.location.origin + window.location.pathname;
+    if (baseUrl.endsWith('/index.html')) baseUrl = baseUrl.replace('/index.html', '/');
+    const instanceUrl = baseUrl + '?instance=' + currentReportInstance;
+    const studentName = window.localStorage.getItem('qrasm_student_name') || 'Anonymous';
+    
+    try {
+        const payload = {
+            student_name: studentName,
+            assignment_id: 'report',
+            instance_number: parseInt(currentReportInstance) || 0,
+            audio_url: instanceUrl,
+            grade: msg
+        };
+        const SB_URL = 'https://lhebavvnrwqojbhyodwc.supabase.co/rest/v1/';
+        const SB_KEY = 'sb_publishable_JW75ayCf5SbvyT-02GmjNQ_vFpivPTU';
+        const res = await fetch(SB_URL + 'qrasm_recordings', {
+            method: 'POST',
+            headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if(!res.ok) throw new Error('Network error');
+        
+        btn.textContent = 'Sent!';
+        setTimeout(closeReportModal, 1000);
+    } catch (e) {
+        alert('Failed to send report: ' + e.message);
+        btn.textContent = 'Send Report';
+        btn.disabled = false;
+    }
+}
+</script>
+<!-- REPORT MODAL END -->
 </body>
+
 </html>
