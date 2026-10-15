@@ -1,5 +1,5 @@
 # AGENT OPERATIONS MANUAL — Keep The Flow
-## Version 1.0 · October 2026
+## Version 2.0 · October 2026
 
 > **What is this?** This document is the single source of truth for the **Keep The Flow** Quranic Tajweed practice platform. Any AI agent — regardless of model, provider, or system — should be able to read this file and fully operate, maintain, and extend the project.
 
@@ -13,16 +13,17 @@
 4. [Complete File Map](#-complete-file-map)
 5. [Supabase Database Schema](#-supabase-database-schema)
 6. [Email Notification System](#-email-notification-system-6-triggers)
-7. [How To: Add a New Lesson](#-how-to-add-a-new-lesson)
-8. [How To: Add a New Quiz](#-how-to-add-a-new-quiz)
-9. [How To: Add Learn Section Content](#-how-to-add-learn-section-content)
-10. [Quiz System](#-quiz-system)
-11. [Report Feature](#-report-feature)
-12. [Admin Capabilities Without Any Agent](#-admin-capabilities-without-any-agent)
-13. [Credentials & Secrets](#-credentials--secrets)
-14. [Critical Rules](#-critical-rules)
-15. [Feature List](#-feature-list)
-16. [Git Checkpoint History](#-git-checkpoint-history)
+7. [**Lesson Production Pipeline (Branding Skill)**](#-lesson-production-pipeline-branding-skill) ← **THE MOST IMPORTANT SECTION**
+8. [How To: Add a New Lesson (Deployment Steps)](#-how-to-add-a-new-lesson-deployment-steps)
+9. [How To: Add a New Quiz](#-how-to-add-a-new-quiz)
+10. [How To: Add Learn Section Content](#-how-to-add-learn-section-content)
+11. [Quiz System](#-quiz-system)
+12. [Report Feature](#-report-feature)
+13. [Admin Capabilities Without Any Agent](#-admin-capabilities-without-any-agent)
+14. [Credentials & Secrets](#-credentials--secrets)
+15. [Critical Rules](#-critical-rules)
+16. [Feature List](#-feature-list)
+17. [Git Checkpoint History](#-git-checkpoint-history)
 
 ---
 
@@ -174,6 +175,25 @@ Each lesson lives in `lessons/{slug}/index.html`. Current lessons (9):
 | `D:\push_to_web.py` | Lesson upload pipeline. Strips Mode 1 splash, wraps in Mode 2 branding via `wrap_html.py`, updates `lessons.json`. |
 | `C:\Users\sdd\.gemini\.gemini\skills\preface\scripts\wrap_html.py` | HTML branding wrapper. Mode 1 = splash page, Mode 2 = top banner. Auto-injects report buttons on new lessons. |
 | `D:\lighknight\skills\branding\SKILL.md` | Branding pipeline skill documentation (PDF branding, lesson registration, notifier safety rules). |
+| `D:\lighknight\skills\branding\scripts\brand_pdf.py` | PDF branding engine. Wraps raw qrasm-pdf output with logo cover, contact page, contents page, watermark. Deps: PyMuPDF, reportlab, Pillow. |
+
+### Scounter (Syllable Research Engine)
+
+| File | Purpose |
+|:---|:---|
+| `D:\lighknight\skills\scounter\SKILL.md` | Scounter skill documentation. Phonological rules, ordering rules, CSV metadata format. |
+| `D:\lighknight\skills\scounter\scripts\scount.py` | Core engine. Counts Quranic syllables, filters by rule/syllables/red-lines, outputs CSV with `# META:` headers. |
+| `D:\lighknight\skills\scounter\scripts\audit_corpus.py` | Corpus auditor. Validates and normalizes Quran CSV source files before research. |
+| `D:\lighknight\skills\scounter\references\rules.md` | Detailed phonological rules reference (syllable types, waqf handling, cluster counting). |
+| `D:\lighknight\quran_uthmani_indopak_waqf_expanded.csv` | **THE QURAN CORPUS** (~2.8 MB). Uthmani Indopak script with waqf symbols. This is the source data for ALL lesson research. |
+
+### qRasm-PDF (Quranic Visualization Engine)
+
+| File | Purpose |
+|:---|:---|
+| `D:\lighknight\skills\qrasm-pdf\SKILL.md` | qRasm-PDF skill documentation. Rendering modes, style presets, critical rules. |
+| `D:\lighknight\skills\qrasm-pdf\scripts\generate_qrasm_pdf.py` | Core engine. Fetches Quran.com QCF V2 fonts, renders Quranic phrases as vector PDF. |
+| `D:\lighknight\skills\qrasm-pdf\scripts\cache_word_cdn\` | Cache directory for downloaded Quran.com word data (JSON files). Do NOT delete. |
 
 ### Session Skills (Quiz & Lesson Generation from Transcripts)
 
@@ -182,12 +202,14 @@ Each lesson lives in `lessons/{slug}/index.html`. Current lessons (9):
 | `D:\lighknight\faris-session-quiz-SKILL.md` | Skill for generating MCQ quizzes from tutoring session transcripts. Verifies content against traditional Islamic sources. |
 | `D:\lighknight\faris-session-lesson-SKILL.md` | Skill for generating interactive HTML study-revision lessons from transcripts. Includes TTS audio, images, glassmorphism UI. |
 
-### Branding Assets
+### Branding Assets (Fixed Paths — Never Move)
 
 | Asset | Path |
 |:---|:---|
 | Logo | `D:\lighknight\logo.png` |
+| Contact PDF | `D:\lighknight\contact_us_page.pdf` |
 | Watermark | `D:\lighknight\myWaterMark.jpg` |
+| Output Directory | `D:\lighknight\outputs\` |
 
 ---
 
@@ -260,13 +282,277 @@ Report emails include the full URL the student was viewing when they submitted t
 
 ---
 
-## 📝 How To: Add a New Lesson
+## 🎯 Lesson Production Pipeline (Branding Skill)
 
-### End-to-End Pipeline
+> [!IMPORTANT]
+> **This is the most critical section of this manual.** The branding pipeline is HOW every lesson on Keep The Flow is built. Without it, the website cannot grow. The pipeline has 4 phases, each using a different skill/script. A future agent MUST understand all 4 phases to produce a new lesson.
 
-1. **Generate the content**: Use the branding skill or scounter + qrasm-pdf to produce a raw HTML file with Quranic instances.
+### Pipeline Overview
 
-2. **Prepare the entry in `D:\push_to_web.py`**: Add a new entry to the `files` list:
+```
+ PHASE 1: CSV Research          PHASE 2: PDF Visualization      PHASE 3: PDF Branding           PHASE 4: HTML & Deploy
+ ─────────────────────          ──────────────────────────       ─────────────────────           ───────────────────────
+ ┌─────────────────┐           ┌─────────────────┐              ┌─────────────────┐             ┌─────────────────┐
+ │   scount.py     │           │generate_qrasm_  │              │  brand_pdf.py   │             │  wrap_html.py   │
+ │   (scounter)    │ ──CSV──→  │   pdf.py         │ ──raw PDF→  │  (branding)     │ ──branded   │  push_to_web.py │
+ │                 │           │   (qrasm-pdf)    │              │                 │   PDF──→    │  → KeepTheFlow  │
+ └─────────────────┘           └─────────────────┘              └─────────────────┘             └─────────────────┘
+  Input: Quran CSV              Input: CSV/text                  Input: raw PDF                  Input: branded PDF/HTML
+  Output: filtered CSV          Output: raw Quran PDF            Output: branded PDF             Output: live website lesson
+  with Tajweed matches          with QCF vector text             with logo+contacts+contents     with recording UI
+```
+
+### Phase 1: CSV Research (scounter skill)
+
+**Purpose:** Search the entire Quran corpus for Quranic instances that match a specific Tajweed rule, filtered by syllable count and red lines.
+
+**Skill Location:** `D:\lighknight\skills\scounter\SKILL.md`
+**Script:** `D:\lighknight\skills\scounter\scripts\scount.py`
+**Quran Corpus:** `D:\lighknight\quran_uthmani_indopak_waqf_expanded.csv` (~2.8 MB)
+
+#### What The Agent Must Gather From The User
+
+1. **Tajweed Rule** (Arabic name + which `--target-rule` to use)
+2. **Red Lines** (exclusions: `madd-lazim`, `elteqa-sakenayn`, `wasl-no-lam`, `idgham-naqis-waw-yaa`, `disjointed-letters`)
+3. **Syllable Range** (e.g., `5-12`, `7-12`, `5-20`)
+4. **Target Mode** (`verse`, `phrase`, or `both` — usually `both`)
+
+#### Available Target Rules
+
+| `--target-rule` value | Arabic Name | What It Matches |
+|:---|:---|:---|
+| `ghunnah-mushaddadah-2plus` | غنة مشددة | Shaddah on Noon or Meem |
+| `madd-hamzah-2plus` | مد | Madd with Hamza |
+| `iqlab-ikhfa-shafawi` | الإقلاب والإخفاء الشفوي | Iqlab + Ikhfa Shafawi |
+| `madd-lazim` | المد اللازم | Madd Lazim |
+| `madd-lazim-kalimi` | المد اللازم الكلمي | Madd Lazim Kalimi |
+| `idgham-naqis-waw-yaa` | إدغام النون والتنوين في الياء أو الواو | Idgham of Noon/Tanween in Yaa/Waw |
+
+#### Example Command (Real Production Run)
+
+```powershell
+python D:\lighknight\skills\scounter\scripts\scount.py `
+    D:\lighknight\quran_uthmani_indopak_waqf_expanded.csv `
+    7-12 `
+    --mode both `
+    --target-rule idgham-naqis-waw-yaa `
+    --red-lines "madd-lazim,elteqa-sakenayn,wasl-no-lam" `
+    --output "D:\Idgham YW 7-12.csv"
+```
+
+**Output:** A CSV file with `# META:` header lines + columns: `surah`, `ayah`, `syllables`, `pattern`, `type`, `ref`, `text`
+
+#### CSV Metadata (Auto-Generated)
+
+The output CSV includes `# META:` comment lines that the branding script reads automatically:
+```
+# META: rule_name=Idgham Naqis (إدغام النون والتنوين في الياء أو الواو)
+# META: syllable_range=7-12
+# META: target_mode=both
+# META: red_lines=madd-lazim,elteqa-sakenayn,wasl-no-lam
+# META: instance_count=166
+# META: created=2026-10-03
+# META: source=quran_uthmani_indopak_waqf_expanded.csv
+```
+
+#### Validation
+
+After generating, always run `--self-test` to verify the engine is sound:
+```powershell
+python D:\lighknight\skills\scounter\scripts\scount.py --self-test
+```
+
+---
+
+### Phase 2: PDF Visualization (qrasm-pdf skill)
+
+**Purpose:** Take the CSV output from Phase 1 and render each Quranic phrase using authentic Quran.com QCF V2 page fonts — crisp vector text, not pixelated images.
+
+**Skill Location:** `D:\lighknight\skills\qrasm-pdf\SKILL.md`
+**Script:** `D:\lighknight\skills\qrasm-pdf\scripts\generate_qrasm_pdf.py`
+
+#### How It Works
+
+1. Reads phrases with `(surah:ayah)` references from the CSV or a text file
+2. Fetches Quran.com API word data for each ayah
+3. Matches each phrase to exact word positions
+4. Downloads Quran.com QCF V2 page fonts
+5. Renders QCF glyphs as vector text in a PDF (zoom-safe, no pixelation)
+
+#### Style Presets
+
+| Style | Description |
+|:---|:---|
+| `classic` | Default cream/gold — matches LightKnight branding perfectly |
+| `navy` | Calm navy teaching style |
+| `emerald` | Green Islamic theme |
+| `burgundy` | Warm red-wine theme |
+| `children` | Child-friendly warm colors |
+| `night` | Dark mode |
+| `custom` | User specifies exact colors |
+
+#### Example Command
+
+```powershell
+$env:PYTHONIOENCODING='utf-8'
+python D:\lighknight\skills\qrasm-pdf\scripts\generate_qrasm_pdf.py `
+    --style classic `
+    --output "D:\lighknight\outputs\idgham_yw_raw.pdf" `
+    "D:\Idgham YW 7-12.csv"
+```
+
+**Output:** A raw PDF with Quranic phrases in authentic script + a `.manifest.json` audit file + `_images/` folder
+
+#### Critical Rules
+- Default `--render-mode qcf` = vector text (always use this for final output)
+- `--gap 3` keeps words close like Madani spacing
+- Do NOT remove QCF glyph reversal logic — it keeps waqf symbols correct
+- Do NOT trim individual word images — only trim final composed phrases
+- After editing the script, always validate: `python -m py_compile D:\lighknight\skills\qrasm-pdf\scripts\generate_qrasm_pdf.py`
+
+---
+
+### Phase 3: PDF Branding (branding skill)
+
+**Purpose:** Wrap the raw qrasm-pdf output with professional LightKnight branding layers.
+
+**Skill Location:** `D:\lighknight\skills\branding\SKILL.md`
+**Script:** `D:\lighknight\skills\branding\scripts\brand_pdf.py`
+
+#### What It Adds (In Order)
+
+| Page | Content |
+|:---|:---|
+| Page 1 | **Logo Cover** — Full-quality `D:\lighknight\logo.png` (632×633, contain mode, no cropping) |
+| Page 2 | **Contact Page** — `D:\lighknight\contact_us_page.pdf` with clickable WhatsApp (`https://wa.me/201554712241`) + Telegram (`https://t.me/FarisAuransa`) |
+| Page 3 | **Contents Page** — Describes the Tajweed rule, Quranic purity, graduated progression, authentic rasm, focused scope, footer hadith |
+| Pages 4+ | **Quranic Content** — All pages from qrasm-pdf, untouched |
+| Pages 2+ | **Watermark** — "byFarisAura" text in #B0B0B0, ~8pt, bottom-right corner |
+| Last Page | **Back Page** (optional) — Closing du'a + LightKnight identity |
+
+#### Two Ways to Run
+
+**With CSV auto-read (recommended — reads metadata from scounter CSV):**
+```powershell
+$env:PYTHONIOENCODING='utf-8'
+python D:\lighknight\skills\branding\scripts\brand_pdf.py `
+    --input "D:\lighknight\outputs\idgham_yw_raw.pdf" `
+    --csv "D:\Idgham YW 7-12.csv" `
+    --output "D:\lighknight\outputs\Idgham YW 7-12 Branded.pdf"
+```
+
+**With explicit parameters:**
+```powershell
+$env:PYTHONIOENCODING='utf-8'
+python D:\lighknight\skills\branding\scripts\brand_pdf.py `
+    --input "D:\lighknight\outputs\idgham_yw_raw.pdf" `
+    --output "D:\lighknight\outputs\Idgham YW 7-12 Branded.pdf" `
+    --rule-name "Idgham of Noon and Tanween in Yaa or Waw" `
+    --rule-name-ar "إدغام النون والتنوين في الياء أو الواو" `
+    --syllable-range "7-12" `
+    --instance-count 166 `
+    --target-mode "both" `
+    --red-lines "madd-lazim,elteqa-sakenayn,wasl-no-lam"
+```
+
+#### Contents Page Design Rules
+- First person plural ("We have compiled..."), never individual names
+- Arabic Tajweed terminology (not script variable names)
+- Bilingual: English primary with Arabic terms inline
+- Unicode-safe: Arial TTF fonts for full Arabic + Latin + symbol support
+
+#### Dependencies
+```powershell
+pip install PyMuPDF reportlab Pillow
+```
+
+#### Branding Assets (Fixed Paths — Never Move)
+
+| Asset | Path |
+|:---|:---|
+| Logo | `D:\lighknight\logo.png` |
+| Contact PDF | `D:\lighknight\contact_us_page.pdf` |
+| Watermark Reference | `D:\lighknight\myWaterMark.jpg` |
+| Output Directory | `D:\lighknight\outputs\` |
+
+---
+
+### Phase 4: HTML Conversion & Web Deployment
+
+**Purpose:** Convert the branded PDF content into an interactive HTML lesson page and deploy it to Keep The Flow.
+
+This phase uses **TWO parallel paths** depending on what was produced:
+
+#### Path A: If You Have a Raw HTML File (Most Common)
+
+The `push_to_web.py` script handles everything:
+
+**Script:** `D:\push_to_web.py`
+**HTML Wrapper:** `C:\Users\sdd\.gemini\.gemini\skills\preface\scripts\wrap_html.py`
+
+**What `wrap_html.py` Does (Mode 2 — Web Deployment Mode):**
+- Injects the LightKnight branded top banner (navy/gold theme, logo, contact links)
+- Injects a "Lesson Overview / Instructions" card with metadata (rule name, syllable range)
+- Injects the **report button (🚩)** in the bottom-left corner for every instance
+- Injects the report modal that saves to Supabase
+- Injects admin copy-link and hide buttons for each instance
+- Injects the exit-to-dashboard button
+
+**What `push_to_web.py` Does:**
+1. Reads the raw HTML lesson file
+2. Strips any Mode 1 splash overlay (if present from PDF viewer)
+3. Calls `wrap_html.py --mode 2` to inject all branding + interactive features
+4. Saves to `D:\KeepTheFlow\lessons\{slug}\index.html`
+5. Updates `D:\KeepTheFlow\lessons.json` with the lesson entry
+
+#### Path B: Direct Vercel Deployment
+
+Use the `vercel-deploy-prepper` skill (`D:\lighknight\skills\vercel-deploy-prepper\SKILL.md`) to push files to the GitHub repo which auto-deploys to Vercel.
+
+---
+
+### Complete Production Example (End-to-End)
+
+Here is a real-world example of how the lesson `idgham-yw-7-12` (163 instances) was produced:
+
+```powershell
+# ── PHASE 1: Research (find Quranic instances) ────────────────────────
+python D:\lighknight\skills\scounter\scripts\scount.py `
+    D:\lighknight\quran_uthmani_indopak_waqf_expanded.csv `
+    7-12 --mode both `
+    --target-rule idgham-naqis-waw-yaa `
+    --red-lines "madd-lazim,elteqa-sakenayn,wasl-no-lam" `
+    --output "D:\Idgham YW 7-12.csv"
+# Output: 166 matches saved to D:\Idgham YW 7-12.csv
+
+# ── PHASE 2: Visualize (render Quranic text as PDF) ──────────────────
+$env:PYTHONIOENCODING='utf-8'
+python D:\lighknight\skills\qrasm-pdf\scripts\generate_qrasm_pdf.py `
+    --style classic `
+    --output "D:\lighknight\outputs\idgham_yw_raw.pdf" `
+    "D:\Idgham YW 7-12.csv"
+
+# ── PHASE 3: Brand (wrap with logo, contacts, contents page) ─────────
+$env:PYTHONIOENCODING='utf-8'
+python D:\lighknight\skills\branding\scripts\brand_pdf.py `
+    --input "D:\lighknight\outputs\idgham_yw_raw.pdf" `
+    --csv "D:\Idgham YW 7-12.csv" `
+    --output "D:\lighknight\outputs\Idgham YW 7-12 Branded.pdf"
+
+# ── PHASE 4: Deploy (convert to web lesson + upload) ─────────────────
+# (See "How To: Add a New Lesson" section below for deployment steps)
+```
+
+---
+
+## 📝 How To: Add a New Lesson (Deployment Steps)
+
+> [!NOTE]
+> These are the DEPLOYMENT steps only. The lesson content must first be produced using the [Lesson Production Pipeline](#-lesson-production-pipeline-branding-skill) above.
+
+### End-to-End Deployment
+
+1. **Prepare the entry in `D:\push_to_web.py`**: Add a new entry to the `files` list:
    ```python
    {
        "src": r"D:\Your Lesson Name.html",
@@ -280,7 +566,7 @@ Report emails include the full URL the student was viewing when they submitted t
    }
    ```
 
-3. **Run the upload pipeline**:
+2. **Run the upload pipeline**:
    ```powershell
    python D:\push_to_web.py
    ```
@@ -290,18 +576,18 @@ Report emails include the full URL the student was viewing when they submitted t
    - Creates `D:\KeepTheFlow\lessons\{slug}\index.html`
    - Updates `D:\KeepTheFlow\lessons.json`
 
-4. **Regenerate the portal** (optional — only if portal needs updating):
+3. **Regenerate the portal** (optional — only if portal needs updating):
    ```powershell
    python D:\KeepTheFlow\generate_portal.py
    ```
 
-5. **Validate lesson integrity**:
+4. **Validate lesson integrity**:
    ```powershell
    node D:\KeepTheFlow\validate-lessons.js
    ```
    Must exit code 0 (all passed).
 
-6. **Register in the notifier** — edit `D:\lighknight\automation\keeptheflow_notifier.py`:
+5. **Register in the notifier** — edit `D:\lighknight\automation\keeptheflow_notifier.py`:
    - Find the `LESSON_PATHS` dict (look for `# ── ADD NEW LESSONS HERE`)
    - Add one line at the end: `"your_lesson_assignment_id": "lessons/your-lesson-slug",`
    - **NEVER touch the `SB_HEADERS` PROTECTED ZONE**
@@ -310,7 +596,7 @@ Report emails include the full URL the student was viewing when they submitted t
      python -m py_compile D:\lighknight\automation\keeptheflow_notifier.py
      ```
 
-7. **Commit and push both repos**:
+6. **Commit and push both repos**:
    ```powershell
    # KeepTheFlow repo
    cd D:\KeepTheFlow
