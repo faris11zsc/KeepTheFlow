@@ -630,7 +630,12 @@ If creating a lesson manually (not from the branding pipeline), ensure the HTML 
 1. Go to `https://keep-the-flow.vercel.app/qm/` (or `/quizme/`)
 2. Log in as admin
 3. Click "Create Quiz"
-4. Paste your questions in the text parser (supports multiple formats: `1. Question`, `**1.** Question`, numbered with A/B/C/D options)
+4. Paste your questions in the text parser. The parser is completely bulletproof and auto-detects correct answers from:
+   - **Answer Key Headings**: `## Answer Key`, `**Answer Key**`, `### **Answer Key:**`, `Answers:`, `## Answers`, `Solutions:`, `Key:`, `الإجابات:`, etc.
+   - **Answer Key Line Formats**: `1. B — rationale`, `1. B`, `Q1: B`, `1) B`, `1 - B`, `1: B`, `1. Answer: B`, `1. (B)`, `- 1. B`, and multi-answer lines (`1. B, 2. D, 3. A`).
+   - **Per-Question In-Line Answers**: `> *Correct: B, explanation...*`, `Answer: B`, `Correct Answer: B`, `Correct: B`.
+   - **Option-Level Markings**: `B) Text (Correct)`, `[x] B) Text`, `*B) Text*`, `✔`.
+   - **Option Formatting**: `A)`, `A.`, `(A)`, `**A)**`, `**A.**`, `- A)`, `* A)`, or Arabic letters (`أ)`, `ب)`, `ج)`, `د)`).
 5. Set the quiz title, assign to a student
 6. Save — the quiz is stored in Supabase and the student gets an email notification
 
@@ -849,6 +854,9 @@ All features confirmed live on the platform:
 ### KeepTheFlow Repo (`D:\KeepTheFlow`)
 
 ```
+db8448f fix(quiz): bulletproof answer key parser for all markdown formats, inline answers, and options
+4c817ee docs: AGENT OPERATIONS MANUAL v2.0 - add comprehensive Lesson Production Pipeline (branding skill) with 4-phase documentation (scounter → qrasm-pdf → brand_pdf → deploy)
+79c961f docs: add AGENT OPERATIONS MANUAL v1.0 - comprehensive guide for future agents
 58f9b00 fix(quiz): enforce fixed universal order for all quizzes, remove random shuffling and shuffle button
 33888d5 feat(quiz): Admin Super-Bar navigation, non-destructive shuffling, and precise question-targeted reporting
 5110e78 feat: inject report modal and button to quiz player for all current and future quizzes
