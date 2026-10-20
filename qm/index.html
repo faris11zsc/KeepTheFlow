@@ -655,84 +655,278 @@
         }
         function closeQuizModal() { document.getElementById('quizModal').style.display = 'none'; }
 
-        // ===== SMART PARSER =====
+        // ===== BULLETPROOF QUIZ PARSER =====
         function parseRawQuestions() {
             var raw = document.getElementById('rawQuestionsText').value;
-            // Normalize line endings
+            if (!raw || !raw.trim()) return alert('Please paste some question text first.');
             raw = raw.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 
-            // Find answer key — must be at the START of a line (heading), not inside body text
-            var answerKeyMatch = raw.match(/\n\s*(?:#{1,4}\s*)?answer\s*key\b/i);
-            var answerKeyIdx = answerKeyMatch ? answerKeyMatch.index : -1;
-            var questionsRaw = answerKeyIdx > -1 ? raw.substring(0, answerKeyIdx) : raw;
-            var answerKeyRaw = answerKeyIdx > -1 ? raw.substring(answerKeyIdx) : '';
-
-             var answerKeys = [];
-            if (answerKeyRaw) {
-                var akLines = answerKeyRaw.split('\n');
-                for (var i = 0; i < akLines.length; i++) {
-                    // Strip ALL markdown formatting: **, *, #, etc.
-                    var line = akLines[i].replace(/\*+/g, '').replace(/^#+\s*/, '').trim();
-                    if (!line) continue;
-                    // Now match clean text: "1. C — rationale" or "C — rationale" or "C - rationale"
-                    var akMatch = line.match(/^(?:\d+[\.\)\]]\s*)?([A-Da-d])\b\s*[\u2014\u2013\u2012\u2015\u00AD\u2010\u2011\-:;\.]*\s*(.*)$/);
-                    if (akMatch && akMatch[1]) {
-                        var letter = akMatch[1].toUpperCase();
-                        var rationale = (akMatch[2] || '').replace(/^\s*[\u2014\u2013\-]\s*/, '').trim();
-                        answerKeys.push({ letter: letter, rationale: rationale, index: 'ABCD'.indexOf(letter) });
-                    }
-                }
-                console.log('[QM] Answer key: found', answerKeys.length, 'answers:', answerKeys.map(function(a){ return a.letter; }).join(','));
+            // Helper to map letter/character to 0-based option index
+            function letterToIdx(l) {
+                if (!l) return -1;
+                var ch = l.toUpperCase();
+                if (ch === 'A' || ch === 'أ' || ch === 'ا') return 0;
+                if (ch === 'B' || ch === 'ب') return 1;
+                if (ch === 'C' || ch === 'ج') return 2;
+                if (ch === 'D' || ch === 'د') return 3;
+                if (ch === 'E' || ch === 'ه') return 4;
+                return 'ABCDE'.indexOf(ch);
             }
 
-            var currentTier = 'Standard';
-            // Split on question numbers: handles **1.** and 1. and 1) formats
-            var qBlocks = questionsRaw.split(/(?:^|\n)\s*\*{0,2}(\d+)[\.\)\]]+\*{0,2}\s+/);
+            // STEP 1: Find Answer Key section at the bottom (if present)
+            // Matches any variation:
+            // ## Answer Key, **Answer Key**, ### **Answer Key:**, Answer Key: 1. B...,
+            // Answers:, ## Answers, Solutions:, Solution Key:, Key:, الإجابات:, etc.
+            var akHeadingRegex = /(?:^|\n)\s*(?:[-*_]{3,}\s*)?(?:#{1,6}\s*)?[\*_]*\s*(?:answer\s*key\b|answers\b|solution\s*key\b|solutions\b|key\s*:|الإجابات|الاجابات|حل\s*الأسئلة)(?:\s*(?:&|and|\/)\s*(?:rationales?|explanations?|sources?))?[\*_]*\s*(?:[:\-\u2014\u2013]\s*|[\*_]*\s*(?:\n|$))/i;
+
+            var akMatch = raw.match(akHeadingRegex);
+            var akIndex = akMatch ? akMatch.index : -1;
+            var questionsRaw = akIndex > -1 ? raw.substring(0, akIndex) : raw;
+            var answerKeyRaw = akIndex > -1 ? raw.substring(akIndex + akMatch[0].length) : '';
+
+            var akMapByNum = {};
+            var akList = [];
+
+            if (answerKeyRaw.trim()) {
+                // Check if the answer key has multiple answers per line or comma/space separated
+                // e.g. "1. B, 2. D, 3. A" or "1:B 2:D 3:A"
+                var multiPattern = /(?:Q(?:uestion)?\s*)?(\d+)\s*[\.\)\]:\-]+\s*(?:(?:answer|correct(?:\s*answer)?|option)\s*[:\-]?\s*)?[\(\[]?([A-Ea-e\u0623\u0627\u0628\u062c\u062f\u0647])[\)\]]?(?:\s*[\u2014\u2013\u2012\u2015\u00AD\u2010\u2011\-:;\.,]\s*([^\d\n]+?)(?=(?:Q(?:uestion)?\s*)?\d+\s*[\.\)\]:\-]|\n|$))?/gi;
+                var mm;
+                var foundMulti = 0;
+                while ((mm = multiPattern.exec(answerKeyRaw)) !== null) {
+                    var qNum = parseInt(mm[1], 10);
+                    var letter = mm[2].toUpperCase();
+                    var rationale = (mm[3] || '').trim();
+                    rationale = rationale.replace(/^[\u2014\u2013\u2012\u2015\u00AD\u2010\u2011\-:;\.,\s]+/, '').trim();
+                    rationale = rationale.replace(/^(?:explanation|rationale|source|because)\s*[:\-]\s*/i, '').trim();
+                    var idx = letterToIdx(letter);
+                    if (idx >= 0) {
+                        var item = { qNum: qNum, letter: letter, index: idx, rationale: rationale };
+                        akMapByNum[qNum] = item;
+                        akList.push(item);
+                        foundMulti++;
+                    }
+                }
+
+                // If multi-pattern didn't capture, process line-by-line
+                if (foundMulti === 0) {
+                    var akLines = answerKeyRaw.split('\n');
+                    for (var i = 0; i < akLines.length; i++) {
+                        var line = akLines[i].trim();
+                        if (!line) continue;
+                        var clean = line.replace(/[*_#]+/g, '').replace(/^[-+•]\s+/, '').trim();
+                        if (!clean) continue;
+
+                        // Pattern A: Numbered line: "1. B — rationale", "Q1: B", "1: B", "1) B", "1. Answer: B"
+                        var numMatch = clean.match(/^(?:Q(?:uestion)?\s*)?(\d+)\s*[\.\)\]:\-]*\s*(?:(?:answer|correct(?:\s*answer)?|option)\s*[:\-]?\s*)?[\(\[]?([A-Ea-e\u0623\u0627\u0628\u062c\u062f\u0647])[\)\]]?\s*[\u2014\u2013\u2012\u2015\u00AD\u2010\u2011\-:;\.,]*\s*(.*)$/i);
+                        if (numMatch) {
+                            var qNum = parseInt(numMatch[1], 10);
+                            var letter = numMatch[2].toUpperCase();
+                            var rationale = (numMatch[3] || '').replace(/^[\u2014\u2013\u2012\u2015\u00AD\u2010\u2011\-:;\.,\s]+/, '').trim();
+                            rationale = rationale.replace(/^(?:explanation|rationale|source|because)\s*[:\-]\s*/i, '').trim();
+                            var idx = letterToIdx(letter);
+                            if (idx >= 0) {
+                                var item = { qNum: qNum, letter: letter, index: idx, rationale: rationale };
+                                akMapByNum[qNum] = item;
+                                akList.push(item);
+                                continue;
+                            }
+                        }
+
+                        // Pattern B: Unnumbered line: "B — rationale", "(B) rationale", "Answer: B", "B"
+                        var letterMatch = clean.match(/^(?:(?:answer|correct(?:\s*answer)?|option)\s*[:\-]?\s*)?[\(\[]?([A-Ea-e\u0623\u0627\u0628\u062c\u062f\u0647])[\)\]]?\s*[\u2014\u2013\u2012\u2015\u00AD\u2010\u2011\-:;\.,]*\s*(.*)$/i);
+                        if (letterMatch && letterMatch[1]) {
+                            var letter = letterMatch[1].toUpperCase();
+                            var rationale = (letterMatch[2] || '').replace(/^[\u2014\u2013\u2012\u2015\u00AD\u2010\u2011\-:;\.,\s]+/, '').trim();
+                            rationale = rationale.replace(/^(?:explanation|rationale|source|because)\s*[:\-]\s*/i, '').trim();
+                            if (!rationale && clean.length > 3) continue;
+                            var idx = letterToIdx(letter);
+                            if (idx >= 0) {
+                                var item = { qNum: null, letter: letter, index: idx, rationale: rationale };
+                                akList.push(item);
+                            }
+                        }
+                    }
+                }
+                console.log('[QM] Answer key parsed: ' + akList.length + ' answers detected');
+            }
+
+            // STEP 2: Split questionsRaw into question blocks
+            var qSplitRegex = /(?:^|\n)\s*(?:#{1,6}\s*)?(?:\*{1,2}\s*)?(?:Question\s+|Q\s*)?(\d+)\s*(?:[\.\)\]:\-]+\s*(?:\*{1,2})?|(?:\*{1,2})?\s*(?:\n|$|\s+(?=[A-Z\u0600-\u06FF])))\s*/i;
+            var qBlocks = questionsRaw.split(qSplitRegex);
+
+            // Fallback for unnumbered questions separated by double newlines
+            if (qBlocks.length <= 1) {
+                var rawChunks = questionsRaw.split(/\n\s*\n+/).filter(function(c) { return c.trim().length > 0; });
+                qBlocks = [''];
+                var cNum = 1;
+                for (var ci = 0; ci < rawChunks.length; ci++) {
+                    var c = rawChunks[ci];
+                    if (/(?:^|\n)\s*(?:[-*•]\s*)?\(?[A-Ea-e\u0623\u0627\u0628\u062c\u062f\u0647][\.\)\]]/.test(c)) {
+                        qBlocks.push(cNum.toString(), c);
+                        cNum++;
+                    }
+                }
+            }
+
             draftQuestions = [];
-            var qNum = 0;
+            var currentTier = 'Standard';
+            var qCounter = 0;
+            var autoDetectedCount = 0;
+
             for (var b = 1; b < qBlocks.length; b += 2) {
-                var block = (qBlocks[b + 1] || '').trim().replace(/\*\*/g, '');
+                var parsedQNum = parseInt(qBlocks[b], 10);
+                var block = (qBlocks[b + 1] || '').trim();
+
+                // Check if next tier header is trailing at the end of this block
+                var trailingTierMatch = block.match(/(?:\n|^)\s*(?:#{1,6}\s*)?[\*_]*\s*(?:Tier\s*\d+|Part\s*\d+|Section\s*\d+)\s*[—\-–:]?\s*(.*?)(?:[\*_]*\s*(?:\n|$))/i);
+                var nextTier = null;
+                if (trailingTierMatch) {
+                    nextTier = trailingTierMatch[0].trim().replace(/^#+\s*/, '').replace(/[*_]+/g, '');
+                    block = block.substring(0, trailingTierMatch.index).trim();
+                }
+
                 if (b >= 3) {
                     var prevText = qBlocks[b - 1] || '';
-                    var tierMatch = prevText.match(/(?:Tier\s*\d+|Tier\s+\d+\s*[—\-–]\s*)(.*?)(?:\n|$)/i);
-                    if (tierMatch) currentTier = tierMatch[0].trim().replace(/^#+\s*/, '').replace(/\*\*/g, '');
+                    var tm = prevText.match(/(?:^|\n)\s*(?:#{1,6}\s*)?[\*_]*\s*(?:Tier\s*\d+|Tier\s+\d+\s*[—\-–]|Part\s*\d+|Section\s*\d+)\s*[—\-–:]?\s*(.*?)(?:[\*_]*\s*(?:\n|$))/i);
+                    if (tm) currentTier = tm[0].trim().replace(/^#+\s*/, '').replace(/[*_]+/g, '');
                 }
-                var qText = block, opts = [];
-                // Try "- A) text" format first (markdown list options)
-                var dashOptRegex = /(?:^|\n)\s*[-*]\s*([A-D])\)\s*/g;
-                var dashPositions = [], dm;
-                while ((dm = dashOptRegex.exec(block)) !== null) dashPositions.push({ pos: dm.index, endPos: dm.index + dm[0].length, letter: dm[1] });
 
-                if (dashPositions.length >= 2) {
-                    qText = block.substring(0, dashPositions[0].pos).trim();
-                    for (var op = 0; op < dashPositions.length; op++) {
-                        var optEnd = (op + 1 < dashPositions.length) ? dashPositions[op + 1].pos : block.length;
-                        opts.push(block.substring(dashPositions[op].endPos, optEnd).replace(/\n/g, ' ').trim());
+                var inlineCorrectIdx = -1;
+                var inlineRationale = '';
+
+                // Check for inline trailing answer under question / after options:
+                // e.g. "> *Correct: B, rationale...*", "Answer: B", "Correct: B"
+                var inlineAnsRegex = /(?:\n|^)\s*(?:>\s*)?[\*_]*\s*(?:correct(?:\s*answer)?|answer|ans|الإجابة|الاجابة)\s*[:\-]?\s*[\*_]*\s*[\(\[]?([A-Ea-e\u0623\u0627\u0628\u062c\u062f\u0647])[\)\]]?[\*_]*\s*[\u2014\u2013\u2012\u2015\u00AD\u2010\u2011\-:;\.,]*\s*(.*?)(?:\n|$)/i;
+                var inlineMatch = block.match(inlineAnsRegex);
+                if (inlineMatch) {
+                    inlineCorrectIdx = letterToIdx(inlineMatch[1]);
+                    inlineRationale = (inlineMatch[2] || '').replace(/[\*_>]+/g, '').trim();
+                    inlineRationale = inlineRationale.replace(/^(?:explanation|rationale|source|because)\s*[:\-]\s*/i, '').trim();
+                    block = block.substring(0, inlineMatch.index).trim();
+                }
+
+                // Check for separate Explanation / Rationale line
+                var explRegex = /(?:\n|^)\s*(?:>\s*)?[\*_]*\s*(?:explanation|rationale|source|توضيح|الشرح)\s*[:\-]?\s*[\*_]*\s*(.*?)(?:\n|$)/i;
+                var explMatch = block.match(explRegex);
+                if (explMatch) {
+                    if (!inlineRationale) {
+                        inlineRationale = (explMatch[1] || '').replace(/[\*_>]+/g, '').trim();
+                    }
+                    block = block.substring(0, explMatch.index).trim();
+                }
+
+                // Clean bold wrappers around option letters like **A)** or **A.**
+                var cleanBlock = block.replace(/\*\*([A-Ea-e\u0623\u0627\u0628\u062c\u062f\u0647])([\.\)\]])\*\*/g, '$1$2')
+                                      .replace(/\*\*([A-Ea-e\u0623\u0627\u0628\u062c\u062f\u0647])\*\*/g, '$1)')
+                                      .replace(/\*([A-Ea-e\u0623\u0627\u0628\u062c\u062f\u0647])([\.\)\]])\*/g, '$1$2');
+
+                // Extract options: line-based first
+                var optRegex = /(?:^|\n)\s*(?:[-*•]\s*)?(?:\[\s*([xX\s]?)\s*\]\s*)?\(?([A-Ea-e\u0623\u0627\u0628\u062c\u062f\u0647])[\.\)\]]\s*/g;
+                var optPositions = [];
+                var om;
+                while ((om = optRegex.exec(cleanBlock)) !== null) {
+                    optPositions.push({
+                        letter: om[2].toUpperCase(),
+                        checked: (om[1] || '').toLowerCase() === 'x',
+                        pos: om.index,
+                        endPos: om.index + om[0].length
+                    });
+                }
+
+                // Fallback: horizontal inline options A) ... B) ...
+                if (optPositions.length < 2) {
+                    optRegex = /(?:^|\s+)\(?([A-Ea-e\u0623\u0627\u0628\u062c\u062f\u0647])[\.\)\]]\s+/g;
+                    optPositions = [];
+                    while ((om = optRegex.exec(cleanBlock)) !== null) {
+                        optPositions.push({
+                            letter: om[1].toUpperCase(),
+                            checked: false,
+                            pos: om.index,
+                            endPos: om.index + om[0].length
+                        });
+                    }
+                }
+
+                var qText = cleanBlock;
+                var opts = [];
+
+                if (optPositions.length >= 2) {
+                    qText = cleanBlock.substring(0, optPositions[0].pos).trim();
+                    for (var op = 0; op < optPositions.length; op++) {
+                        var optEnd = (op + 1 < optPositions.length) ? optPositions[op + 1].pos : cleanBlock.length;
+                        var optText = cleanBlock.substring(optPositions[op].endPos, optEnd).replace(/\n/g, ' ').trim();
+
+                        if (optPositions[op].checked) {
+                            inlineCorrectIdx = op;
+                        }
+                        if (/\((?:correct|answer|true|right|صح|صحيح)\)|\[(?:correct|answer|true|right|صح|صحيح)\]|[\*✔✓]\s*$/i.test(optText)) {
+                            inlineCorrectIdx = op;
+                            optText = optText.replace(/\s*(?:\((?:correct|answer|true|right|صح|صحيح)\)|\[(?:correct|answer|true|right|صح|صحيح)\]|[\*✔✓])\s*$/i, '').trim();
+                        }
+
+                        opts.push(optText);
                     }
                 } else {
-                    // Fallback: "A) text" format without dash
-                    var optRegex = /([A-D])\)\s*/g, optPositions = [], m;
-                    while ((m = optRegex.exec(block)) !== null) optPositions.push({ pos: m.index, endPos: m.index + m[0].length });
-                    if (optPositions.length >= 2) {
-                        qText = block.substring(0, optPositions[0].pos).trim();
-                        for (var op = 0; op < optPositions.length; op++) {
-                            var optEnd = (op + 1 < optPositions.length) ? optPositions[op + 1].pos : block.length;
-                            opts.push(block.substring(optPositions[op].endPos, optEnd).replace(/\n/g, ' ').trim());
-                        }
-                    } else { opts = ['Option A', 'Option B', 'Option C', 'Option D']; }
+                    opts = ['Option A', 'Option B', 'Option C', 'Option D'];
                 }
-                var correctIdx = 0, rationale = '';
-                if (qNum < answerKeys.length) { correctIdx = answerKeys[qNum].index; rationale = answerKeys[qNum].rationale; }
-                draftQuestions.push({ id: Date.now() + qNum, text: qText, options: opts, correctIndex: correctIdx, rationale: rationale, tier: currentTier, question: qText });
-                qNum++;
+
+                var finalCorrectIdx = 0;
+                var finalRationale = inlineRationale;
+                var detected = false;
+
+                if (akMapByNum[parsedQNum] !== undefined) {
+                    finalCorrectIdx = akMapByNum[parsedQNum].index;
+                    if (akMapByNum[parsedQNum].rationale) finalRationale = akMapByNum[parsedQNum].rationale;
+                    detected = true;
+                } else if (inlineCorrectIdx >= 0) {
+                    finalCorrectIdx = inlineCorrectIdx;
+                    detected = true;
+                } else if (qCounter < akList.length && akList[qCounter] !== undefined) {
+                    finalCorrectIdx = akList[qCounter].index;
+                    if (akList[qCounter].rationale) finalRationale = akList[qCounter].rationale;
+                    detected = true;
+                }
+
+                if (detected) autoDetectedCount++;
+
+                draftQuestions.push({
+                    id: Date.now() + qCounter,
+                    text: qText,
+                    options: opts,
+                    correctIndex: finalCorrectIdx,
+                    rationale: finalRationale,
+                    tier: currentTier,
+                    question: qText,
+                    detected: detected
+                });
+
+                if (nextTier) {
+                    currentTier = nextTier;
+                }
+
+                qCounter++;
             }
+
             var titleInput = document.getElementById('newQuizTitle');
             if (!titleInput.value.trim()) {
                 var firstLine = raw.split('\n')[0].replace(/^#+\s*/, '').replace(/\*\*/g, '').trim();
                 if (firstLine && firstLine.length < 100) titleInput.value = firstLine;
             }
+
             renderDraftQuestions();
-            alert('Parsed ' + draftQuestions.length + ' questions' + (answerKeys.length > 0 ? ' with ' + answerKeys.length + ' auto-mapped answers' : ''));
+
+            var alertMsg = 'Parsed ' + draftQuestions.length + ' questions.';
+            if (draftQuestions.length > 0) {
+                if (autoDetectedCount === draftQuestions.length) {
+                    alertMsg += ' All ' + autoDetectedCount + ' correct answers were successfully auto-mapped!';
+                } else if (autoDetectedCount > 0) {
+                    alertMsg += ' Auto-mapped ' + autoDetectedCount + ' of ' + draftQuestions.length + ' answers. (Please check the remaining ' + (draftQuestions.length - autoDetectedCount) + ' questions marked with default option).';
+                } else {
+                    alertMsg += ' Notice: No answer key or inline answers were detected. The first option was selected by default — please review and click the correct options.';
+                }
+            }
+            alert(alertMsg);
         }
 
         // ===== RENDER DRAFT QUESTIONS =====
