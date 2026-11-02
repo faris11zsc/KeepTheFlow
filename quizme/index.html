@@ -857,6 +857,9 @@
             var akIndex = akMatch ? akMatch.index : -1;
             var questionsRaw = akIndex > -1 ? raw.substring(0, akIndex) : raw;
             var answerKeyRaw = akIndex > -1 ? raw.substring(akIndex + akMatch[0].length) : '';
+            // Strip bold/italic markdown markers around answer letters BEFORE parsing
+            // e.g. "1. **C**: rationale" → "1. C: rationale"
+            answerKeyRaw = answerKeyRaw.replace(/\*\*?([A-Ea-e])\*\*?/g, '$1').replace(/_{1,2}([A-Ea-e])_{1,2}/g, '$1');
 
             var akMapByNum = {};
             var akList = [];
