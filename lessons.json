@@ -101,5 +101,17 @@
     "assignmentId": "idgham_yw_7_12_lesson",
     "dateAdded": "2026-10-03",
     "color": "#c5a44e"
+  },
+  {
+    "id": "disjointed-letters-openers",
+    "title": "Disjointed Letters (Fawatih as-Suwar)",
+    "titleAr": "الحروف المقطعة (فواتح السور)",
+    "rule": "Disjointed Letters",
+    "syllables": "Openers",
+    "instances": 29,
+    "path": "lessons/disjointed-letters-openers/",
+    "assignmentId": "disjointed_letters_lesson",
+    "dateAdded": "2026-11-07",
+    "color": "#c5a44e"
   }
 ]
